@@ -149,7 +149,7 @@
             // -1.0 (Up) to 1.0 (Down)
             // We want Up = 100%, Mid = 50%, Down = 0%
             let rawY = gp.axes[1];
-            throttleValue = (rawY * -1 - 1) / -  2;
+            throttleValue = (rawY * +1 + 1) / +  2;
 
             // Xbox sticks are sensitive. Add a tiny deadzone at bottom.
             if (throttleValue < 0.05) {
