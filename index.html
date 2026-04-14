@@ -10,31 +10,39 @@
             --neon-red: #ff4757;
             --bg-dark: #0a0a0a;
         }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             background: var(--bg-dark);
-            font-family: 'Courier New', Courier, monospace;
+            font-family: "Courier New", Courier, monospace;
             color: var(--neon-blue);
             overflow: hidden;
         }
+
         .game-container {
             display: flex;
             gap: 20px;
             align-items: flex-start;
             position: relative;
         }
+
         canvas {
             background: #121225;
             border: 2px solid var(--neon-blue);
             border-radius: 8px;
             box-shadow: 0 0 25px rgba(0, 210, 255, 0.15);
         }
+
         .side-panel {
-            width: 180px;
+            width: 200px;
             background: rgba(255, 255, 255, 0.03);
             padding: 20px;
             border: 1px solid rgba(0, 210, 255, 0.3);
@@ -43,25 +51,30 @@
             flex-direction: column;
             gap: 15px;
         }
+
         .side-panel h3 {
             margin: 0;
             font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
+
         .slider-wrap {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
-        input[type=range] {
+
+        input[type="range"] {
             pointer-events: none;
             accent-color: var(--neon-blue);
             background: #333;
             height: 4px;
             border-radius: 2px;
             appearance: none;
+            width: 100%;
         }
+
         .ui {
             position: absolute;
             top: 40px;
@@ -69,21 +82,24 @@
             width: 800px;
             text-align: center;
         }
+
         #score {
             font-size: 28px;
             font-weight: bold;
             text-shadow: 0 0 10px var(--neon-blue);
         }
+
         .debug {
             position: absolute;
             bottom: 20px;
             left: 20px;
             font-size: 11px;
-            color: rgba(255,255,255,0.3);
-            background: rgba(0,0,0,0.5);
-            padding: 5px 10px;
+            color: rgba(255, 255, 255, 0.35);
+            background: rgba(0, 0, 0, 0.55);
+            padding: 6px 10px;
             border-radius: 4px;
         }
+
         .control-wrap {
             display: flex;
             flex-direction: column;
@@ -91,11 +107,13 @@
             font-size: 11px;
             color: #cfefff;
         }
+
         .control-wrap label {
             display: flex;
             flex-direction: column;
             gap: 4px;
         }
+
         .control-wrap select {
             background: #0f1322;
             color: var(--neon-blue);
@@ -106,19 +124,23 @@
             font-size: 11px;
             outline: none;
         }
+
         .check-row {
             display: flex;
             align-items: center;
             gap: 8px;
             flex-direction: row !important;
         }
+
         .check-row input[type="checkbox"] {
             accent-color: var(--neon-blue);
         }
+
         .scoreboard {
             font-size: 11px;
             color: #dff8ff;
         }
+
         .scoreboard-list {
             margin: 0;
             padding-left: 18px;
@@ -126,17 +148,37 @@
             flex-direction: column;
             gap: 4px;
         }
+
         .scoreboard-list li {
             color: #dff8ff;
         }
+
         .scoreboard-empty {
             color: #666;
             font-size: 10px;
         }
+
+        .mini-text {
+            font-size: 9px;
+            color: #666;
+            text-align: center;
+        }
+
+        .panel-copy {
+            font-size: 10px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #333;
+            width: 100%;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
-
     <div class="game-container">
         <div class="ui">
             <div id="score">CONNECT XBOX CONTROLLER</div>
@@ -149,17 +191,19 @@
             <div class="slider-wrap">
                 <label>Flow Speed: <span id="speedVal">1.0</span>x</label>
                 <input type="range" id="speedSlider" min="0.5" max="3" step="0.1" value="1" />
-                <div style="font-size: 9px; color: #666; text-align: center;">RIGHT STICK CONTROL</div>
+                <div class="mini-text">RIGHT STICK CONTROL</div>
             </div>
 
-            <hr style="border:0; border-top:1px solid #333; width:100%" />
+            <hr />
 
-            <div style="font-size: 10px; color: #555; line-height: 1.4;">
-                Left Stick: Throttle (Center = 50%)<br /><br />
-                Right Stick: Warp Speed
+            <div class="panel-copy">
+                Left Stick: Throttle<br /><br />
+                Right Stick X: Warp Speed<br /><br />
+                Right Trigger: Double Drone Size<br />
+                Left Trigger: Half Drone Size
             </div>
 
-            <hr style="border:0; border-top:1px solid #333; width:100%" />
+            <hr />
 
             <h3>Control Mapping</h3>
             <div class="control-wrap">
@@ -176,7 +220,7 @@
                 </label>
             </div>
 
-            <hr style="border:0; border-top:1px solid #333; width:100%" />
+            <hr />
 
             <h3>Top 3 Scores</h3>
             <div class="scoreboard">
@@ -188,142 +232,205 @@
 
     <div class="debug" id="debugInfo">Awaiting Xbox Input...</div>
 
-<script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    const scoreElement = document.getElementById("score");
-    const debugElement = document.getElementById("debugInfo");
-    const speedSlider = document.getElementById("speedSlider");
-    const speedValText = document.getElementById("speedVal");
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
 
-    const movementAxisSelect = document.getElementById("movementAxisSelect");
-    const invertMovementToggle = document.getElementById("invertMovementToggle");
+        const scoreElement = document.getElementById("score");
+        const debugElement = document.getElementById("debugInfo");
+        const speedSlider = document.getElementById("speedSlider");
+        const speedValText = document.getElementById("speedVal");
+        const movementAxisSelect = document.getElementById("movementAxisSelect");
+        const invertMovementToggle = document.getElementById("invertMovementToggle");
+        const scoreboardList = document.getElementById("scoreboardList");
+        const scoreboardEmpty = document.getElementById("scoreboardEmpty");
 
-    const scoreboardList = document.getElementById("scoreboardList");
-    const scoreboardEmpty = document.getElementById("scoreboardEmpty");
+        const HIGH_SCORE_KEY = "dronePilotProHighScores";
 
-    const HIGH_SCORE_KEY = "dronePilotProHighScores";
+        const svgTilt = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100">
+                <g transform="rotate(18 100 50)" fill="#175B7B" stroke="#000" stroke-width="1.5">
+                    <polygon points="25,43 175,43 175,49 125,49 125,65 75,65 75,49 25,49" />
+                    <rect x="33" y="39" width="4" height="4" />
+                    <rect x="163" y="39" width="4" height="4" />
+                    <ellipse cx="21" cy="38" rx="18" ry="3" />
+                    <ellipse cx="49" cy="38" rx="18" ry="3" />
+                    <ellipse cx="151" cy="38" rx="18" ry="3" />
+                    <ellipse cx="179" cy="38" rx="18" ry="3" />
+                </g>
+            </svg>
+        `;
 
-    const svgTilt = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100"><g transform="rotate(18 100 50)" fill="#175B7B" stroke="#000" stroke-width="1.5"><polygon points="25,43 175,43 175,49 125,49 125,65 75,65 75,49 25,49" /><rect x="33" y="39" width="4" height="4" /><rect x="163" y="39" width="4" height="4" /><ellipse cx="21" cy="38" rx="18" ry="3" /><ellipse cx="49" cy="38" rx="18" ry="3" /><ellipse cx="151" cy="38" rx="18" ry="3" /><ellipse cx="179" cy="38" rx="18" ry="3" /></g></svg>`;
-    const svgHoriz = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100"><g fill="#175B7B" stroke="#000" stroke-width="1.5"><polygon points="25,43 175,43 175,49 125,49 125,65 75,65 75,49 25,49" /><rect x="33" y="39" width="4" height="4" /><rect x="163" y="39" width="4" height="4" /><ellipse cx="21" cy="38" rx="18" ry="3" /><ellipse cx="49" cy="38" rx="18" ry="3" /><ellipse cx="151" cy="38" rx="18" ry="3" /><ellipse cx="179" cy="38" rx="18" ry="3" /></g></svg>`;
+        const svgHoriz = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100">
+                <g fill="#175B7B" stroke="#000" stroke-width="1.5">
+                    <polygon points="25,43 175,43 175,49 125,49 125,65 75,65 75,49 25,49" />
+                    <rect x="33" y="39" width="4" height="4" />
+                    <rect x="163" y="39" width="4" height="4" />
+                    <ellipse cx="21" cy="38" rx="18" ry="3" />
+                    <ellipse cx="49" cy="38" rx="18" ry="3" />
+                    <ellipse cx="151" cy="38" rx="18" ry="3" />
+                    <ellipse cx="179" cy="38" rx="18" ry="3" />
+                </g>
+            </svg>
+        `;
 
-    const droneTiltImg = new Image();
-    const droneHorizImg = new Image();
-    droneTiltImg.src = 'data:image/svg+xml;base64,' + btoa(svgTilt);
-    droneHorizImg.src = 'data:image/svg+xml;base64,' + btoa(svgHoriz);
+        const droneTiltImg = new Image();
+        const droneHorizImg = new Image();
+        droneTiltImg.src = "data:image/svg+xml;base64," + btoa(svgTilt);
+        droneHorizImg.src = "data:image/svg+xml;base64," + btoa(svgHoriz);
 
-    let score = 0;
-    let gameActive = false;
-    let gameStarted = false;
-    let readyToRestart = false;
-    let frames = 0;
-    let throttleValue = 0;
-    let gameSpeedMultiplier = 1.0;
-    let scoreRecordedForThisCrash = false;
+        let score = 0;
+        let gameActive = false;
+        let gameStarted = false;
+        let readyToRestart = false;
+        let frames = 0;
+        let throttleValue = 0;
+        let gameSpeedMultiplier = 1.0;
+        let scoreRecordedForThisCrash = false;
 
-    const player = {
-        x: 120,
-        y: 250,
-        width: 80,
-        height: 40,
-        dy: 0,
-        gravity: 0.20,
-        thrustPower: -0.45,
-        rotation: 0
-    };
+        const player = {
+            x: 120,
+            y: 250,
+            baseWidth: 80,
+            baseHeight: 40,
+            dy: 0,
+            gravity: 0.20,
+            thrustPower: -0.45,
+            rotation: 0,
+            scale: 1
+        };
 
-    const obstacles = [];
-    const obstacleGap = 180;
+        const obstacles = [];
+        const obstacleGap = 180;
 
-    function getHighScores() {
-        try {
-            const parsed = JSON.parse(localStorage.getItem(HIGH_SCORE_KEY) || "[]");
-            if (!Array.isArray(parsed)) return [];
-            return parsed
-                .map(v => Number(v))
-                .filter(v => Number.isFinite(v))
-                .sort((a, b) => b - a)
-                .slice(0, 3);
-        } catch (e) {
-            return [];
-        }
-    }
-
-    function saveHighScores(scores) {
-        localStorage.setItem(HIGH_SCORE_KEY, JSON.stringify(
-            scores
-                .map(v => Number(v))
-                .filter(v => Number.isFinite(v))
-                .sort((a, b) => b - a)
-                .slice(0, 3)
-        ));
-    }
-
-    function renderHighScores() {
-        const scores = getHighScores();
-        scoreboardList.innerHTML = "";
-
-        if (scores.length === 0) {
-            scoreboardEmpty.style.display = "block";
-            return;
+        function getScaledWidth() {
+            return player.baseWidth * player.scale;
         }
 
-        scoreboardEmpty.style.display = "none";
-
-        scores.forEach(value => {
-            const li = document.createElement("li");
-            li.textContent = value;
-            scoreboardList.appendChild(li);
-        });
-    }
-
-    function recordScoreIfNeeded() {
-        if (scoreRecordedForThisCrash || score <= 0) return;
-        const scores = getHighScores();
-        scores.push(score);
-        saveHighScores(scores);
-        scoreRecordedForThisCrash = true;
-        renderHighScores();
-    }
-
-    function resetGame() {
-        score = 0;
-        player.y = 250;
-        player.dy = 0;
-        player.rotation = 0;
-        obstacles.length = 0;
-        gameActive = true;
-        gameStarted = true;
-        readyToRestart = false;
-        frames = 0;
-        scoreRecordedForThisCrash = false;
-        scoreElement.innerText = "SCORE: 0";
-    }
-
-    function getMovementAxisValue(gp) {
-        const selectedAxis = parseInt(movementAxisSelect.value, 10);
-        let rawY = gp.axes[selectedAxis] ?? 0;
-
-        if (invertMovementToggle.checked) {
-            rawY = -rawY;
+        function getScaledHeight() {
+            return player.baseHeight * player.scale;
         }
 
-        return rawY;
-    }
+        function getPlayerBounds() {
+            const width = getScaledWidth();
+            const height = getScaledHeight();
+            const x = player.x + (player.baseWidth - width) / 2;
+            const y = player.y + (player.baseHeight - height) / 2;
 
-    function updateInput() {
-        const gamepads = navigator.getGamepads();
-        let gp = null;
+            return { x, y, width, height };
+        }
 
-        for (let i = 0; i < gamepads.length; i++) {
-            if (gamepads[i]) {
-                gp = gamepads[i];
-                break;
+        function getHighScores() {
+            try {
+                const parsed = JSON.parse(localStorage.getItem(HIGH_SCORE_KEY) || "[]");
+                if (!Array.isArray(parsed)) return [];
+                return parsed
+                    .map(Number)
+                    .filter(Number.isFinite)
+                    .sort((a, b) => b - a)
+                    .slice(0, 3);
+            } catch {
+                return [];
             }
         }
 
-        if (gp) {
-            let rawY = getMovementAxisValue(gp);
+        function saveHighScores(scores) {
+            const cleaned = scores
+                .map(Number)
+                .filter(Number.isFinite)
+                .sort((a, b) => b - a)
+                .slice(0, 3);
+
+            localStorage.setItem(HIGH_SCORE_KEY, JSON.stringify(cleaned));
+        }
+
+        function renderHighScores() {
+            const scores = getHighScores();
+            scoreboardList.innerHTML = "";
+
+            if (scores.length === 0) {
+                scoreboardEmpty.style.display = "block";
+                return;
+            }
+
+            scoreboardEmpty.style.display = "none";
+
+            scores.forEach((value) => {
+                const li = document.createElement("li");
+                li.textContent = value;
+                scoreboardList.appendChild(li);
+            });
+        }
+
+        function recordScoreIfNeeded() {
+            if (scoreRecordedForThisCrash || score <= 0) return;
+
+            const scores = getHighScores();
+            scores.push(score);
+            saveHighScores(scores);
+            scoreRecordedForThisCrash = true;
+            renderHighScores();
+        }
+
+        function resetGame() {
+            score = 0;
+            player.y = 250;
+            player.dy = 0;
+            player.rotation = 0;
+            player.scale = 1;
+            obstacles.length = 0;
+            gameActive = true;
+            gameStarted = true;
+            readyToRestart = false;
+            frames = 0;
+            scoreRecordedForThisCrash = false;
+            scoreElement.innerText = "SCORE: 0";
+        }
+
+        function getMovementAxisValue(gp) {
+            const selectedAxis = parseInt(movementAxisSelect.value, 10);
+            let rawY = gp.axes[selectedAxis] ?? 0;
+
+            if (invertMovementToggle.checked) {
+                rawY = -rawY;
+            }
+
+            return rawY;
+        }
+
+        function getTriggerValue(gp, axisIndex, buttonIndex) {
+            let value = gp.axes[axisIndex];
+
+            if (typeof value === "number") {
+                return Math.max(0, Math.min(1, (value + 1) / 2));
+            }
+
+            const button = gp.buttons?.[buttonIndex];
+            if (button && typeof button.value === "number") {
+                return Math.max(0, Math.min(1, button.value));
+            }
+
+            return 0;
+        }
+
+        function updateInput() {
+            const gamepads = navigator.getGamepads();
+            let gp = null;
+
+            for (let i = 0; i < gamepads.length; i++) {
+                if (gamepads[i]) {
+                    gp = gamepads[i];
+                    break;
+                }
+            }
+
+            if (!gp) {
+                debugElement.innerText = "SEARCHING FOR XBOX CONTROLLER...";
+                return;
+            }
+
+            const rawY = getMovementAxisValue(gp);
             throttleValue = (rawY + 1) / 2;
 
             if (throttleValue < 0.05) {
@@ -331,133 +438,175 @@
                 readyToRestart = true;
             }
 
-            let rawRightX = gp.axes[2] ?? 0;
-            let mappedSpeed = ((rawRightX + 1) / 2) * (3.0 - 0.5) + 0.5;
+            const rawRightX = gp.axes[2] ?? 0;
+            const mappedSpeed = ((rawRightX + 1) / 2) * (3.0 - 0.5) + 0.5;
 
             gameSpeedMultiplier = mappedSpeed;
             speedSlider.value = mappedSpeed;
             speedValText.innerText = mappedSpeed.toFixed(1);
 
+            const leftTrigger = getTriggerValue(gp, 4, 6);
+            const rightTrigger = getTriggerValue(gp, 5, 7);
+
+            if (rightTrigger > 0.2) {
+                player.scale = 2.0;
+            } else if (leftTrigger > 0.2) {
+                player.scale = 0.5;
+            } else {
+                player.scale = 1.0;
+            }
+
             const movementStickName = movementAxisSelect.value === "1" ? "L-Y" : "R-Y";
             const invertText = invertMovementToggle.checked ? " | INV" : "";
 
             debugElement.innerText =
-                `Xbox ${movementStickName}: ${Math.round(throttleValue * 100)}% | R-X: ${Math.round(rawRightX * 100)}%${invertText}`;
+                `Xbox ${movementStickName}: ${Math.round(throttleValue * 100)}% | ` +
+                `R-X: ${Math.round(rawRightX * 100)}% | ` +
+                `LT: ${Math.round(leftTrigger * 100)}% | ` +
+                `RT: ${Math.round(rightTrigger * 100)}% | ` +
+                `Scale: ${player.scale.toFixed(1)}x${invertText}`;
 
             if (!gameActive && readyToRestart && throttleValue > 0.1) {
                 resetGame();
             }
-        } else {
-            debugElement.innerText = "SEARCHING FOR XBOX CONTROLLER...";
-        }
-    }
-
-    function drawPlayer() {
-        ctx.save();
-        ctx.translate(player.x + player.width / 2, player.y + player.height / 2);
-
-        let targetRot = (throttleValue > 0.5) ? -10 : 10;
-        player.rotation += (targetRot - player.rotation) * 0.1;
-        ctx.rotate(player.rotation * Math.PI / 180);
-
-        let img = (throttleValue > 0.5) ? droneHorizImg : droneTiltImg;
-        ctx.drawImage(img, -player.width / 2, -player.height / 2, player.width, player.height);
-
-        ctx.restore();
-    }
-
-    function createObstacle() {
-        let minH = 60;
-        let maxH = canvas.height - obstacleGap - 60;
-        let h = Math.random() * (maxH - minH) + minH;
-        obstacles.push({ x: canvas.width, y: 0, w: 50, h: h, passed: false });
-        obstacles.push({ x: canvas.width, y: h + obstacleGap, w: 50, h: canvas.height, passed: false });
-    }
-
-    function update() {
-        updateInput();
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        ctx.strokeStyle = "rgba(0, 210, 255, 0.08)";
-        let scrollOffset = (frames * 2 * gameSpeedMultiplier) % 40;
-        for (let i = 0; i <= canvas.width + 40; i += 40) {
-            ctx.beginPath();
-            ctx.moveTo(i - scrollOffset, 0);
-            ctx.lineTo(i - scrollOffset, canvas.height);
-            ctx.stroke();
         }
 
-        if (!gameActive) {
-            drawPlayer();
+        function drawPlayer() {
+            const scaledWidth = getScaledWidth();
+            const scaledHeight = getScaledHeight();
+
+            ctx.save();
+            ctx.translate(player.x + player.baseWidth / 2, player.y + player.baseHeight / 2);
+
+            const targetRot = throttleValue > 0.5 ? -10 : 10;
+            player.rotation += (targetRot - player.rotation) * 0.1;
+            ctx.rotate(player.rotation * Math.PI / 180);
+
+            const img = throttleValue > 0.5 ? droneHorizImg : droneTiltImg;
+            ctx.drawImage(img, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
+
+            ctx.restore();
+        }
+
+        function createObstacle() {
+            const minH = 60;
+            const maxH = canvas.height - obstacleGap - 60;
+            const h = Math.random() * (maxH - minH) + minH;
+
+            obstacles.push({ x: canvas.width, y: 0, w: 50, h: h, passed: false });
+            obstacles.push({ x: canvas.width, y: h + obstacleGap, w: 50, h: canvas.height, passed: false });
+        }
+
+        function drawBackgroundGrid() {
+            ctx.strokeStyle = "rgba(0, 210, 255, 0.08)";
+            const scrollOffset = (frames * 2 * gameSpeedMultiplier) % 40;
+
+            for (let i = 0; i <= canvas.width + 40; i += 40) {
+                ctx.beginPath();
+                ctx.moveTo(i - scrollOffset, 0);
+                ctx.lineTo(i - scrollOffset, canvas.height);
+                ctx.stroke();
+            }
+        }
+
+        function updatePlayerPhysics() {
+            player.dy += player.gravity;
+            player.dy += throttleValue * player.thrustPower;
+            player.dy *= 0.98;
+            player.y += player.dy;
+
+            const bounds = getPlayerBounds();
+
+            if (bounds.y < 0 || bounds.y + bounds.height > canvas.height) {
+                gameActive = false;
+            }
+        }
+
+        function updateObstacles() {
+            const bounds = getPlayerBounds();
+
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                const o = obstacles[i];
+                o.x -= 4 * gameSpeedMultiplier;
+
+                ctx.fillStyle = "#ff4757";
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = "#ff4757";
+                ctx.fillRect(o.x, o.y, o.w, o.h);
+                ctx.shadowBlur = 0;
+
+                if (
+                    bounds.x + 15 < o.x + o.w &&
+                    bounds.x + bounds.width - 15 > o.x &&
+                    bounds.y + 10 < o.y + o.h &&
+                    bounds.y + bounds.height - 10 > o.y
+                ) {
+                    gameActive = false;
+                }
+
+                if (!o.passed && o.x + o.w < player.x) {
+                    o.passed = true;
+                    if (o.y === 0) {
+                        score++;
+                        scoreElement.innerText = `SCORE: ${score}`;
+                    }
+                }
+
+                if (o.x + o.w < -100) {
+                    obstacles.splice(i, 1);
+                }
+            }
+        }
+
+        function drawGameStateText() {
             ctx.fillStyle = "white";
             ctx.textAlign = "center";
             ctx.font = "bold 16px Courier New";
 
             if (!gameStarted) {
                 ctx.fillText("PUSH LEFT STICK UP TO START", canvas.width / 2, canvas.height / 2);
-            } else {
-                recordScoreIfNeeded();
-
-                ctx.fillStyle = "#ff4757";
-                ctx.fillText("SYSTEM CRASH", canvas.width / 2, canvas.height / 2 - 20);
-                ctx.fillStyle = "white";
-                ctx.font = "12px Courier New";
-                ctx.fillText("PULL LEFT STICK DOWN TO REBOOT", canvas.width / 2, canvas.height / 2 + 20);
+                return;
             }
 
-            requestAnimationFrame(update);
-            return;
-        }
-
-        player.dy += player.gravity;
-        player.dy += (throttleValue * player.thrustPower);
-        player.dy *= 0.98;
-        player.y += player.dy;
-
-        if (player.y < 0 || player.y + player.height > canvas.height) {
-            gameActive = false;
-        }
-
-        let spawnRate = Math.max(30, Math.floor(100 / gameSpeedMultiplier));
-        if (frames % spawnRate === 0) createObstacle();
-
-        for (let i = obstacles.length - 1; i >= 0; i--) {
-            let o = obstacles[i];
-            o.x -= (4 * gameSpeedMultiplier);
+            recordScoreIfNeeded();
 
             ctx.fillStyle = "#ff4757";
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = "#ff4757";
-            ctx.fillRect(o.x, o.y, o.w, o.h);
-            ctx.shadowBlur = 0;
+            ctx.fillText("SYSTEM CRASH", canvas.width / 2, canvas.height / 2 - 20);
 
-            if (
-                player.x + 15 < o.x + o.w &&
-                player.x + player.width - 15 > o.x &&
-                player.y + 10 < o.y + o.h &&
-                player.y + player.height - 10 > o.y
-            ) {
-                gameActive = false;
-            }
-
-            if (!o.passed && o.x + o.w < player.x) {
-                o.passed = true;
-                if (o.y === 0) {
-                    score++;
-                    scoreElement.innerText = `SCORE: ${score}`;
-                }
-            }
-
-            if (o.x + o.w < -100) obstacles.splice(i, 1);
+            ctx.fillStyle = "white";
+            ctx.font = "12px Courier New";
+            ctx.fillText("PULL LEFT STICK DOWN TO REBOOT", canvas.width / 2, canvas.height / 2 + 20);
         }
 
-        drawPlayer();
-        frames++;
-        requestAnimationFrame(update);
-    }
+        function update() {
+            updateInput();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    renderHighScores();
-    update();
-</script>
+            drawBackgroundGrid();
+
+            if (!gameActive) {
+                drawPlayer();
+                drawGameStateText();
+                requestAnimationFrame(update);
+                return;
+            }
+
+            updatePlayerPhysics();
+
+            const spawnRate = Math.max(30, Math.floor(100 / gameSpeedMultiplier));
+            if (frames % spawnRate === 0) {
+                createObstacle();
+            }
+
+            updateObstacles();
+            drawPlayer();
+
+            frames++;
+            requestAnimationFrame(update);
+        }
+
+        renderHighScores();
+        update();
+    </script>
 </body>
 </html>
