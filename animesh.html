@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dr Animesh Sharma | Drones, Aerospace, Plasma and Engineering</title>
+  <meta name="description" content="Official website of Dr Animesh Sharma, PhD in Aeronautics and Astronautics from Purdue University. Explore work in drones, aerospace engineering, plasma physics, laser-plasma interaction, simulations, and drone games." />
+  <meta name="keywords" content="Dr Animesh Sharma, Animesh Sharma, aerospace, drones, drone engineering, plasma physics, laser plasma, Purdue, aeronautics, astronautics, UAV, drone game" />
+  <meta name="author" content="Dr Animesh Sharma" />
+  <meta name="robots" content="index, follow" />
+
+  <meta property="og:title" content="Dr Animesh Sharma | Drones, Aerospace, Plasma and Engineering" />
+  <meta property="og:description" content="A personal website featuring drones, aerospace engineering, plasma physics, laser-plasma research, and interactive drone pages." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://animeshsh.github.io/" />
+
+  <link rel="canonical" href="https://animeshsh.github.io/" />
+
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #121b2e;
+      --panel-2: #17233c;
+      --text: #eef4ff;
+      --muted: #b6c3dd;
+      --accent: #62b0ff;
+      --accent-2: #7ef0c7;
+      --border: rgba(255,255,255,0.08);
+      --shadow: 0 20px 50px rgba(0,0,0,0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(98,176,255,0.18), transparent 30%),
+        radial-gradient(circle at left center, rgba(126,240,199,0.12), transparent 25%),
+        linear-gradient(180deg, #08101d 0%, #0b1220 100%);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(1120px, calc(100% - 2rem));
+      margin: 0 auto;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(10px);
+      background: rgba(8, 16, 29, 0.82);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 0;
+      gap: 1rem;
+    }
+
+    .brand {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .brand span {
+      color: var(--accent);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .hero {
+      padding: 5rem 0 3rem;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 0.9fr;
+      gap: 1.5rem;
+      align-items: stretch;
+    }
+
+    .hero-card,
+    .panel,
+    .link-card,
+    .mini-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card {
+      padding: 2.25rem;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 1rem;
+      padding: 0.35rem 0.75rem;
+      border: 1px solid rgba(98,176,255,0.25);
+      border-radius: 999px;
+      color: var(--accent-2);
+      font-size: 0.9rem;
+      background: rgba(98,176,255,0.08);
+    }
+
+    h1, h2, h3 {
+      line-height: 1.15;
+      margin: 0 0 0.8rem;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 4vw, 4.3rem);
+      letter-spacing: -0.03em;
+    }
+
+    h2 {
+      font-size: clamp(1.5rem, 2vw, 2.2rem);
+    }
+
+    h3 {
+      font-size: 1.2rem;
+    }
+
+    .lead {
+      font-size: 1.08rem;
+      color: var(--muted);
+      max-width: 60ch;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 0.9rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.9rem 1.2rem;
+      border-radius: 14px;
+      font-weight: 700;
+      transition: transform 0.2s ease, opacity 0.2s ease, border-color 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #88c4ff);
+      color: #08101d;
+    }
+
+    .btn-secondary {
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .panel {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .stat-list {
+      display: grid;
+      gap: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    .mini-card {
+      padding: 1rem 1.1rem;
+      background: rgba(255,255,255,0.025);
+    }
+
+    .mini-card strong {
+      display: block;
+      font-size: 1.15rem;
+      margin-bottom: 0.2rem;
+      color: var(--accent-2);
+    }
+
+    section {
+      padding: 1.2rem 0 3rem;
+    }
+
+    .section-intro {
+      max-width: 70ch;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .about-grid,
+    .links-grid,
+    .focus-grid {
+      display: grid;
+      gap: 1.2rem;
+    }
+
+    .about-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .focus-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .panel ul {
+      margin: 0.8rem 0 0;
+      padding-left: 1.1rem;
+      color: var(--muted);
+    }
+
+    .links-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .link-card {
+      padding: 1.5rem;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .link-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(98,176,255,0.35);
+    }
+
+    .tag {
+      display: inline-block;
+      margin-bottom: 0.8rem;
+      font-size: 0.82rem;
+      color: var(--accent-2);
+      background: rgba(126,240,199,0.08);
+      border: 1px solid rgba(126,240,199,0.2);
+      padding: 0.28rem 0.65rem;
+      border-radius: 999px;
+    }
+
+    .link-card p,
+    .panel p {
+      color: var(--muted);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 0 3rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 0.6rem;
+    }
+
+    .footer-links a:hover {
+      color: var(--text);
+    }
+
+    @media (max-width: 900px) {
+      .hero-grid,
+      .about-grid,
+      .links-grid,
+      .focus-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding-top: 3.5rem;
+      }
+    }
+  </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Dr Animesh Sharma",
+    "url": "https://animeshsh.github.io/",
+    "jobTitle": "Aerospace Engineer and Plasma Scientist",
+    "alumniOf": {
+      "@type": "CollegeOrUniversity",
+      "name": "Purdue University"
+    },
+    "knowsAbout": [
+      "Drones",
+      "Aerospace Engineering",
+      "Plasma Physics",
+      "Laser Plasma Interaction",
+      "UAV Systems",
+      "Simulation",
+      "Engineering Education"
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="#top">Dr <span>Animesh Sharma</span></a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#about">About</a>
+        <a href="#focus">Work</a>
+        <a href="#drones">Drone Pages</a>
+        <a href="https://scholar.google.com/citations?user=AnCBeHgAAAAJ&hl=en" target="_blank" rel="noopener">Google Scholar</a>
+        <a href="https://orcid.org/0000-0003-4963-4648" target="_blank" rel="noopener">ORCID</a>
+        <a href="https://instagram.com/" target="_blank" rel="noopener">Instagram</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-card">
+          <div class="eyebrow">Aerospace • Drones • Plasma • Simulation • Droneing since 2009</div>
+          <h1>Building at the intersection of drones, aerospace engineering, and plasma science.</h1>
+          <p class="lead">
+            I am Dr Animesh Sharma, PhD in Aeronautics and Astronautics from Purdue University. This site is a simple home for my work across drones, aerospace systems, plasma physics, laser-plasma interaction, simulations, and engineering ideas.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#drones">Explore Drone Pages</a>
+            <a class="btn btn-secondary" href="#about">Read More</a>
+          </div>
+        </div>
+
+        <aside class="panel" aria-label="Quick profile summary">
+          <div>
+            <h2>Quick Snapshot</h2>
+            <p>
+              Researcher, engineer, builder, and technical communicator with work spanning UAVs, propulsion, plasma diagnostics, simulations, and training.
+            </p>
+            <div class="stat-list">
+              <div class="mini-card">
+                <strong>Purdue PhD</strong>
+                <span>Aeronautics and Astronautics</span>
+              </div>
+              <div class="mini-card">
+                <strong>Core Areas</strong>
+                <span>Drones, aerospace, plasma, laser-matter interaction</span>
+              </div>
+              <div class="mini-card">
+                <strong>Current Direction</strong>
+                <span>Engineering communication, drone systems, interactive web projects</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="container">
+        <h2>About Dr Animesh Sharma</h2>
+        <p class="section-intro">
+          My background combines aerospace engineering, plasma science, simulation, diagnostics, and product communication. I have worked across research, teaching, lab systems, propulsion, and drone-related technical content. This website also serves as a place to host small interactive web pages and drone-themed projects.
+        </p>
+
+        <div class="about-grid">
+          <article class="panel">
+            <h3>Background</h3>
+            <ul>
+              <li>PhD in Aeronautics and Astronautics, Purdue University</li>
+              <li>MS in Aeronautics and Astronautics, Purdue University</li>
+              <li>BTech in Aeronautical Engineering</li>
+              <li>Postdoctoral Research Associate, University of Illinois Urbana-Champaign</li>
+              <li>Postdoctoral Research Associate, IIT Delhi</li>
+              <li>Work spanning aerospace engineering and plasma physics</li>
+              <li>Experience in simulations, diagnostics, propulsion, and UAV-related systems</li>
+            </ul>
+          </article>
+
+          <article class="panel">
+            <h3>What You Will Find Here</h3>
+            <ul>
+              <li>Drone-related HTML pages and experiments</li>
+              <li>Engineering-focused web content</li>
+              <li>Material connected to drones, aerospace, lasers, and plasma</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="focus">
+      <div class="container">
+        <h2>Focus Areas</h2>
+        <p class="section-intro">
+          These are the main themes that define the work and identity of this site.
+        </p>
+
+        <div class="focus-grid">
+          <article class="panel">
+            <h3>Drones and UAV Systems</h3>
+            <p>Drone systems, components, flight concepts, training material, and interactive drone pages for the web.</p>
+          </article>
+
+          <article class="panel">
+            <h3>Aerospace Engineering</h3>
+            <p>Work shaped by aeronautics, astronautics, propulsion, control, testing, and engineering design.</p>
+          </article>
+
+          <article class="panel">
+            <h3>Plasma and Laser Science</h3>
+            <p>Research interests including plasma physics, laser-plasma interaction, diagnostics, and numerical simulation.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="drones">
+      <div class="container">
+        <h2>Drone Pages</h2>
+        <p class="section-intro">
+          These links go to two separate drone HTML pages. Replace the file names below with your exact file names if needed.
+        </p>
+
+        <div class="links-grid">
+          <a class="link-card" href="droneGameXBT.html">
+            <span class="tag">Drone Pilot Pro</span>
+            <h3>Drone Pilot Pro</h3>
+            <p>
+              Drone Game inspired by side scrollign arcade games.</p>
+          </a>
+
+          <a class="link-card" href="snake.html">
+            <span class="tag">Snake Wars</span>
+            <h3>Snake Wars</h3>
+            <p>
+		Browser version of C++ project done in 2011. This is a two player version of the classic "Snake" game. The player can play against another human on the same computer or against computer.
+              </p>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <strong>Dr Animesh Sharma</strong><br />
+      Personal website focused on drones, aerospace, plasma physics, laser-plasma interaction, and engineering projects.
+      <div class="footer-links">
+        <a href="#about">About</a>
+        <a href="#focus">Work</a>
+        <a href="#drones">Drone Pages</a>
+        <a href="https://scholar.google.com/citations?user=AnCBeHgAAAAJ&hl=en" target="_blank" rel="noopener">Google Scholar</a>
+        <a href="https://orcid.org/0000-0003-4963-4648" target="_blank" rel="noopener">ORCID</a>
+        <a href="https://instagram.com/" target="_blank" rel="noopener">Instagram</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
+
