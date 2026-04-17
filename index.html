@@ -170,6 +170,26 @@
             line-height: 1.5;
         }
 
+        .panel-link {
+            text-align: center;
+        }
+
+        .panel-link a {
+            color: var(--neon-blue);
+            text-decoration: none;
+            font-size: 11px;
+        }
+
+        .panel-link a:hover {
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .footer-copy {
+            font-size: 10px;
+            color: #777;
+            text-align: center;
+        }
+
         hr {
             border: 0;
             border-top: 1px solid #333;
@@ -227,6 +247,14 @@
                 <ol class="scoreboard-list" id="scoreboardList"></ol>
                 <div class="scoreboard-empty" id="scoreboardEmpty">NO SCORES YET</div>
             </div>
+
+            <hr />
+
+            <div class="panel-link">
+                <a href="animesh.html">About Animesh</a>
+            </div>
+
+            <div class="footer-copy">(c) Animesh Sharma 2026</div>
         </div>
     </div>
 
@@ -317,7 +345,6 @@
             const height = getScaledHeight();
             const x = player.x + (player.baseWidth - width) / 2;
             const y = player.y + (player.baseHeight - height) / 2;
-
             return { x, y, width, height };
         }
 
