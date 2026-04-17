@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Drone Pilot Pro | Xbox Edition</title>
+    <title>Drone Pilot Pro </title>
     <style>
         :root {
             --neon-blue: #00d2ff;
@@ -201,7 +201,7 @@
 <body>
     <div class="game-container">
         <div class="ui">
-            <div id="score">CONNECT XBOX CONTROLLER</div>
+            <div id="score">CONNECT GAMER CONTROLLER</div>
         </div>
 
         <canvas id="gameCanvas" width="800" height="500"></canvas>
@@ -258,7 +258,7 @@
         </div>
     </div>
 
-    <div class="debug" id="debugInfo">Awaiting Xbox Input...</div>
+    <div class="debug" id="debugInfo">Awaiting Controller Input...</div>
 
     <script>
         const canvas = document.getElementById("gameCanvas");
@@ -453,7 +453,7 @@
             }
 
             if (!gp) {
-                debugElement.innerText = "SEARCHING FOR XBOX CONTROLLER...";
+                debugElement.innerText = "SEARCHING FOR GAME CONTROLLER...";
                 return;
             }
 
