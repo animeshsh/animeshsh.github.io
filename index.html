@@ -2,11 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Drone Pilot Pro</title>
     <style>
         :root {
             --neon-blue: #00d2ff;
+            --neon-blue-soft: rgba(0, 210, 255, 0.25);
+            --neon-blue-strong: rgba(0, 210, 255, 0.7);
             --neon-red: #ff4757;
             --bg-dark: #0a0a0a;
             --panel-bg: rgba(255, 255, 255, 0.03);
@@ -15,6 +17,7 @@
 
         * {
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         html, body {
@@ -25,6 +28,7 @@
             background: var(--bg-dark);
             font-family: "Courier New", Courier, monospace;
             color: var(--neon-blue);
+            touch-action: manipulation;
         }
 
         body {
@@ -81,7 +85,7 @@
             width: calc(100% - 24px);
             max-width: 800px;
             text-align: center;
-            z-index: 2;
+            z-index: 3;
         }
 
         #score {
@@ -135,7 +139,7 @@
             background: rgba(0, 0, 0, 0.60);
             padding: 6px 10px;
             border-radius: 4px;
-            z-index: 5;
+            z-index: 8;
             max-width: calc(100vw - 32px);
             word-break: break-word;
         }
@@ -237,6 +241,70 @@
             margin: 0;
         }
 
+        .touch-controls {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 4;
+            display: none;
+        }
+
+        .touch-controls.active {
+            display: block;
+        }
+
+        .touch-joystick {
+            position: absolute;
+            bottom: 18px;
+            width: 120px;
+            height: 120px;
+            border: 2px solid rgba(0, 210, 255, 0.35);
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 210, 255, 0.08) 0%, rgba(0, 0, 0, 0.08) 70%);
+            box-shadow: 0 0 18px rgba(0, 210, 255, 0.12);
+            pointer-events: auto;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .touch-joystick.left {
+            left: 14px;
+        }
+
+        .touch-joystick.right {
+            right: 14px;
+        }
+
+        .touch-stick {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 2px solid rgba(127, 234, 255, 0.85);
+            background: radial-gradient(circle, rgba(0, 210, 255, 0.75) 0%, rgba(0, 210, 255, 0.35) 75%);
+            box-shadow: 0 0 16px rgba(0, 210, 255, 0.45);
+        }
+
+        .touch-label {
+            position: absolute;
+            bottom: -18px;
+            width: 100%;
+            text-align: center;
+            font-size: 9px;
+            color: rgba(223, 248, 255, 0.75);
+            letter-spacing: 1px;
+        }
+
+        .touch-hint {
+            display: none;
+            font-size: 10px;
+            color: #7fdcff;
+            text-align: center;
+        }
+
         @media (max-width: 980px) {
             .page-wrap {
                 padding: 14px;
@@ -277,7 +345,7 @@
             }
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 640px), (pointer: coarse) {
             .page-wrap {
                 padding: 10px;
             }
@@ -318,6 +386,21 @@
                 max-width: none;
                 font-size: 10px;
             }
+
+            .touch-hint {
+                display: block;
+            }
+
+            .touch-joystick {
+                width: 110px;
+                height: 110px;
+                bottom: 10px;
+            }
+
+            .touch-stick {
+                width: 40px;
+                height: 40px;
+            }
         }
     </style>
 </head>
@@ -327,9 +410,21 @@
             <div class="canvas-column">
                 <div class="canvas-shell">
                     <div class="ui">
-                        <div id="score">CONNECT GAME CONTROLLER</div>
+                        <div id="score">CONNECT GAME CONTROLLER OR USE TOUCH</div>
                     </div>
+
                     <canvas id="gameCanvas" width="800" height="500"></canvas>
+
+                    <div class="touch-controls" id="touchControls">
+                        <div class="touch-joystick left" id="leftJoystick">
+                            <div class="touch-stick" id="leftStick"></div>
+                            <div class="touch-label">THROTTLE</div>
+                        </div>
+                        <div class="touch-joystick right" id="rightJoystick">
+                            <div class="touch-stick" id="rightStick"></div>
+                            <div class="touch-label">SPEED</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -338,16 +433,24 @@
                 <div class="slider-wrap">
                     <label>Flow Speed: <span id="speedVal">1.0</span>x</label>
                     <input type="range" id="speedSlider" min="0.5" max="3" step="0.1" value="1" />
-                    <div class="mini-text">RIGHT STICK CONTROL</div>
+                    <div class="mini-text">RIGHT STICK OR TOUCH JOYSTICK</div>
                 </div>
 
                 <hr />
 
                 <div class="panel-copy">
-                    Left Stick: Throttle<br /><br />
-                    Right Stick X: Warp Speed<br /><br />
+                    Controller:<br /><br />
+                    Left Stick: Throttle<br />
+                    Right Stick X: Warp Speed<br />
                     Right Trigger: Double Drone Size<br />
-                    Left Trigger: Half Drone Size
+                    Left Trigger: Half Drone Size<br /><br />
+                    Mobile Touch:<br /><br />
+                    Left Virtual Stick: Throttle / Restart<br />
+                    Right Virtual Stick: Warp Speed
+                </div>
+
+                <div class="touch-hint">
+                    Mobile mode uses the two virtual joysticks over the canvas.
                 </div>
 
                 <hr />
@@ -386,7 +489,7 @@
         </div>
     </div>
 
-    <div class="debug" id="debugInfo">Awaiting Controller Input...</div>
+    <div class="debug" id="debugInfo">Awaiting Controller or Touch Input...</div>
 
     <script>
         const canvas = document.getElementById("gameCanvas");
@@ -400,6 +503,11 @@
         const invertMovementToggle = document.getElementById("invertMovementToggle");
         const scoreboardList = document.getElementById("scoreboardList");
         const scoreboardEmpty = document.getElementById("scoreboardEmpty");
+        const touchControls = document.getElementById("touchControls");
+        const leftJoystick = document.getElementById("leftJoystick");
+        const rightJoystick = document.getElementById("rightJoystick");
+        const leftStick = document.getElementById("leftStick");
+        const rightStick = document.getElementById("rightStick");
 
         const HIGH_SCORE_KEY = "dronePilotProHighScores";
 
@@ -460,6 +568,8 @@
         let throttleValue = 0;
         let gameSpeedMultiplier = 1.0;
         let scoreRecordedForThisCrash = false;
+        let usingTouchInput = false;
+        let usingGamepadInput = false;
 
         const player = {
             x: 120,
@@ -476,6 +586,31 @@
         const obstacles = [];
         const obstacleGap = 180;
 
+        const touchState = {
+            left: {
+                active: false,
+                pointerId: null,
+                x: 0,
+                y: 0,
+                maxRadius: 36,
+                axisX: 0,
+                axisY: 0
+            },
+            right: {
+                active: false,
+                pointerId: null,
+                x: 0,
+                y: 0,
+                maxRadius: 36,
+                axisX: 0,
+                axisY: 0
+            }
+        };
+
+        function isTouchDevice() {
+            return window.matchMedia("(pointer: coarse)").matches || window.innerWidth <= 640;
+        }
+
         function resizeCanvasForLayout() {
             const containerWidth = Math.min(canvas.parentElement.clientWidth, 800);
             canvas.style.width = containerWidth + "px";
@@ -486,6 +621,12 @@
                 canvas.style.height = Math.round(containerWidth * 0.66) + "px";
             } else {
                 canvas.style.height = "auto";
+            }
+
+            if (isTouchDevice()) {
+                touchControls.classList.add("active");
+            } else {
+                touchControls.classList.remove("active");
             }
         }
 
@@ -598,7 +739,55 @@
             return 0;
         }
 
-        function updateInput() {
+        function hasActiveTouchInput() {
+            return touchState.left.active || touchState.right.active;
+        }
+
+        function updateTouchInput() {
+            if (!isTouchDevice()) {
+                usingTouchInput = false;
+                return;
+            }
+
+            usingTouchInput = hasActiveTouchInput();
+
+            if (!usingTouchInput) {
+                return;
+            }
+
+            let rawY = touchState.left.axisY;
+            if (invertMovementToggle.checked) {
+                rawY = -rawY;
+            }
+
+            throttleValue = (rawY + 1) / 2;
+            throttleValue = Math.max(0, Math.min(1, throttleValue));
+
+            if (throttleValue < 0.05) {
+                throttleValue = 0;
+                readyToRestart = true;
+            }
+
+            const rawRightX = touchState.right.axisX;
+            const mappedSpeed = ((rawRightX + 1) / 2) * (3.0 - 0.5) + 0.5;
+
+            gameSpeedMultiplier = mappedSpeed;
+            speedSlider.value = mappedSpeed;
+            speedValText.innerText = mappedSpeed.toFixed(1);
+
+            player.scale = 1.0;
+
+            debugElement.innerText =
+                `TOUCH L-Y: ${Math.round(throttleValue * 100)}% | ` +
+                `TOUCH R-X: ${Math.round(rawRightX * 100)}% | ` +
+                `Scale: ${player.scale.toFixed(1)}x`;
+
+            if (!gameActive && readyToRestart && throttleValue > 0.1) {
+                resetGame();
+            }
+        }
+
+        function updateGamepadInput() {
             const gamepads = navigator.getGamepads();
             let gp = null;
 
@@ -610,9 +799,11 @@
             }
 
             if (!gp) {
-                debugElement.innerText = "SEARCHING FOR GAME CONTROLLER...";
-                return;
+                usingGamepadInput = false;
+                return false;
             }
+
+            usingGamepadInput = true;
 
             const rawY = getMovementAxisValue(gp);
             throttleValue = (rawY + 1) / 2;
@@ -652,6 +843,30 @@
 
             if (!gameActive && readyToRestart && throttleValue > 0.1) {
                 resetGame();
+            }
+
+            return true;
+        }
+
+        function updateInput() {
+            if (hasActiveTouchInput()) {
+                updateTouchInput();
+                return;
+            }
+
+            const gamepadFound = updateGamepadInput();
+
+            if (gamepadFound) {
+                return;
+            }
+
+            if (isTouchDevice()) {
+                gameSpeedMultiplier = 1.0;
+                speedSlider.value = 1.0;
+                speedValText.innerText = "1.0";
+                debugElement.innerText = "USE TOUCH JOYSTICKS ON MOBILE";
+            } else {
+                debugElement.innerText = "SEARCHING FOR GAME CONTROLLER...";
             }
         }
 
@@ -752,7 +967,7 @@
             ctx.font = "bold 16px Courier New";
 
             if (!gameStarted) {
-                ctx.fillText("PUSH LEFT STICK UP TO START", canvas.width / 2, canvas.height / 2);
+                ctx.fillText(isTouchDevice() ? "PUSH LEFT TOUCH STICK UP TO START" : "PUSH LEFT STICK UP TO START", canvas.width / 2, canvas.height / 2);
                 return;
             }
 
@@ -763,7 +978,7 @@
 
             ctx.fillStyle = "white";
             ctx.font = "12px Courier New";
-            ctx.fillText("PULL LEFT STICK DOWN TO REBOOT", canvas.width / 2, canvas.height / 2 + 20);
+            ctx.fillText(isTouchDevice() ? "PULL LEFT TOUCH STICK DOWN TO REBOOT" : "PULL LEFT STICK DOWN TO REBOOT", canvas.width / 2, canvas.height / 2 + 20);
         }
 
         function update() {
@@ -793,7 +1008,88 @@
             requestAnimationFrame(update);
         }
 
+        function setStickVisual(stickEl, axisX, axisY, maxRadius) {
+            const px = axisX * maxRadius;
+            const py = axisY * maxRadius;
+            stickEl.style.transform = `translate(calc(-50% + ${px}px), calc(-50% + ${py}px))`;
+        }
+
+        function resetTouchStick(side) {
+            touchState[side].active = false;
+            touchState[side].pointerId = null;
+            touchState[side].axisX = 0;
+            touchState[side].axisY = 0;
+
+            if (side === "left") {
+                setStickVisual(leftStick, 0, 0, touchState.left.maxRadius);
+            } else {
+                setStickVisual(rightStick, 0, 0, touchState.right.maxRadius);
+            }
+        }
+
+        function updateTouchStick(side, event, joystickEl, stickEl) {
+            const rect = joystickEl.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+
+            let dx = event.clientX - cx;
+            let dy = event.clientY - cy;
+
+            const maxRadius = touchState[side].maxRadius;
+            const distance = Math.hypot(dx, dy);
+
+            if (distance > maxRadius) {
+                const scale = maxRadius / distance;
+                dx *= scale;
+                dy *= scale;
+            }
+
+            const axisX = dx / maxRadius;
+            const axisY = dy / maxRadius;
+
+            touchState[side].axisX = Math.max(-1, Math.min(1, axisX));
+            touchState[side].axisY = Math.max(-1, Math.min(1, axisY));
+
+            setStickVisual(stickEl, touchState[side].axisX, touchState[side].axisY, maxRadius);
+        }
+
+        function attachJoystick(joystickEl, stickEl, side) {
+            joystickEl.addEventListener("pointerdown", (event) => {
+                if (!isTouchDevice()) return;
+
+                joystickEl.setPointerCapture(event.pointerId);
+                touchState[side].active = true;
+                touchState[side].pointerId = event.pointerId;
+                updateTouchStick(side, event, joystickEl, stickEl);
+                event.preventDefault();
+            });
+
+            joystickEl.addEventListener("pointermove", (event) => {
+                if (!touchState[side].active) return;
+                if (touchState[side].pointerId !== event.pointerId) return;
+
+                updateTouchStick(side, event, joystickEl, stickEl);
+                event.preventDefault();
+            });
+
+            const endHandler = (event) => {
+                if (touchState[side].pointerId !== event.pointerId) return;
+                resetTouchStick(side);
+                event.preventDefault();
+            };
+
+            joystickEl.addEventListener("pointerup", endHandler);
+            joystickEl.addEventListener("pointercancel", endHandler);
+            joystickEl.addEventListener("lostpointercapture", () => {
+                resetTouchStick(side);
+            });
+        }
+
         window.addEventListener("resize", resizeCanvasForLayout);
+        window.addEventListener("orientationchange", resizeCanvasForLayout);
+
+        attachJoystick(leftJoystick, leftStick, "left");
+        attachJoystick(rightJoystick, rightStick, "right");
 
         renderHighScores();
         resizeCanvasForLayout();
