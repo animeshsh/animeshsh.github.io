@@ -344,8 +344,8 @@
                 <hr />
 
                 <div class="panel-copy">
-                    Left Stick: Throttle<br /><br />
-                    Right Stick X: Warp Speed<br /><br />
+                    Left Stick Y: Throttle<br />
+                    Right Stick X: Warp Speed<br />
                     Right Trigger: Double Drone Size<br />
                     Left Trigger: Half Drone Size
                 </div>
@@ -358,7 +358,7 @@
                         Movement Stick
                         <select id="movementAxisSelect">
                             <option value="1" selected>Left Stick Y</option>
-                            <option value="3">Right Stick Y</option>
+                            <option value="3">Right Stick X</option>
                         </select>
                     </label>
                     <label class="check-row">
@@ -628,7 +628,7 @@
             const invertText = invertMovementToggle.checked ? " | INV" : "";
 
             debugElement.innerText =
-                `Xbox ${movementStickName}: ${Math.round(throttleValue * 100)}% | ` +
+                `Controller ${movementStickName}: ${Math.round(throttleValue * 100)}% | ` +
                 `R-X: ${Math.round(rawRightX * 100)}% | ` +
                 `LT: ${Math.round(leftTrigger * 100)}% | ` +
                 `RT: ${Math.round(rightTrigger * 100)}% | ` +
@@ -732,7 +732,7 @@
             ctx.font = "bold 16px Courier New";
 
             if (!gameStarted) {
-                ctx.fillText("PUSH LEFT STICK UP TO START", canvas.width / 2, canvas.height / 2);
+                ctx.fillText("MOVE LEFT STICK UP AND DOWN TO START", canvas.width / 2, canvas.height / 2);
                 return;
             }
 
