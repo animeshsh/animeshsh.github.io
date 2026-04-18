@@ -344,8 +344,8 @@
                 <hr />
 
                 <div class="panel-copy">
-                    Left Stick Y: Throttle<br />
-                    Right Stick X: Warp Speed<br />
+                    Left Stick: Throttle<br /><br />
+                    Right Stick X: Warp Speed<br /><br />
                     Right Trigger: Double Drone Size<br />
                     Left Trigger: Half Drone Size
                 </div>
@@ -358,7 +358,7 @@
                         Movement Stick
                         <select id="movementAxisSelect">
                             <option value="1" selected>Left Stick Y</option>
-                            <option value="3">Right Stick X</option>
+                            <option value="3">Right Stick Y</option>
                         </select>
                     </label>
                     <label class="check-row">
@@ -403,9 +403,24 @@
 
         const HIGH_SCORE_KEY = "dronePilotProHighScores";
 
+        const neonDefs = `
+            <defs>
+                <filter id="neonGlow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="2.8" result="blur1"/>
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="5.5" result="blur2"/>
+                    <feMerge>
+                        <feMergeNode in="blur2"/>
+                        <feMergeNode in="blur1"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            </defs>
+        `;
+
         const svgTilt = `
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100">
-                <g transform="rotate(18 100 50)" fill="#175B7B" stroke="#000" stroke-width="1.5">
+                ${neonDefs}
+                <g transform="rotate(18 100 50)" fill="#00d2ff" stroke="#7feaff" stroke-width="1.8" filter="url(#neonGlow)">
                     <polygon points="25,43 175,43 175,49 125,49 125,65 75,65 75,49 25,49" />
                     <rect x="33" y="39" width="4" height="4" />
                     <rect x="163" y="39" width="4" height="4" />
@@ -419,7 +434,8 @@
 
         const svgHoriz = `
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100">
-                <g fill="#175B7B" stroke="#000" stroke-width="1.5">
+                ${neonDefs}
+                <g fill="#00d2ff" stroke="#7feaff" stroke-width="1.8" filter="url(#neonGlow)">
                     <polygon points="25,43 175,43 175,49 125,49 125,65 75,65 75,49 25,49" />
                     <rect x="33" y="39" width="4" height="4" />
                     <rect x="163" y="39" width="4" height="4" />
@@ -628,7 +644,7 @@
             const invertText = invertMovementToggle.checked ? " | INV" : "";
 
             debugElement.innerText =
-                `Controller ${movementStickName}: ${Math.round(throttleValue * 100)}% | ` +
+                `Xbox ${movementStickName}: ${Math.round(throttleValue * 100)}% | ` +
                 `R-X: ${Math.round(rawRightX * 100)}% | ` +
                 `LT: ${Math.round(leftTrigger * 100)}% | ` +
                 `RT: ${Math.round(rightTrigger * 100)}% | ` +
@@ -650,9 +666,13 @@
             player.rotation += (targetRot - player.rotation) * 0.1;
             ctx.rotate(player.rotation * Math.PI / 180);
 
+            ctx.shadowColor = "#00d2ff";
+            ctx.shadowBlur = 18;
+
             const img = throttleValue > 0.5 ? droneHorizImg : droneTiltImg;
             ctx.drawImage(img, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
 
+            ctx.shadowBlur = 0;
             ctx.restore();
         }
 
@@ -732,7 +752,7 @@
             ctx.font = "bold 16px Courier New";
 
             if (!gameStarted) {
-                ctx.fillText("MOVE LEFT STICK UP AND DOWN TO START", canvas.width / 2, canvas.height / 2);
+                ctx.fillText("PUSH LEFT STICK UP TO START", canvas.width / 2, canvas.height / 2);
                 return;
             }
 
