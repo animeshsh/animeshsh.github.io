@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dr Animesh Sharma | Drones, Aerospace, Plasma and Engineering</title>
-  <meta name="description" content="Official website of Dr Animesh Sharma, PhD in Aeronautics and Astronautics from Purdue University. Explore work in drones, aerospace engineering, plasma physics, laser-plasma interaction, simulations, and drone games." />
-  <meta name="keywords" content="Dr Animesh Sharma, Animesh Sharma, aerospace, drones, drone engineering, plasma physics, laser plasma, Purdue, aeronautics, astronautics, UAV, drone game" />
+  <meta name="description" content="Official website of Dr Animesh Sharma, PhD in Aeronautics and Astronautics from Purdue University. Explore work in drones, aerospace engineering, plasma physics, laser-plasma interaction, simulations, propulsion, and interactive engineering projects." />
+  <meta name="keywords" content="Dr Animesh Sharma, Animesh Sharma, aerospace, drones, drone engineering, plasma physics, laser plasma, Purdue, aeronautics, astronautics, UAV, propulsion, simulation" />
   <meta name="author" content="Dr Animesh Sharma" />
   <meta name="robots" content="index, follow" />
 
   <meta property="og:title" content="Dr Animesh Sharma | Drones, Aerospace, Plasma and Engineering" />
-  <meta property="og:description" content="A personal website featuring drones, aerospace engineering, plasma physics, laser-plasma research, and interactive games." />
+  <meta property="og:description" content="A personal website featuring drones, aerospace engineering, plasma physics, propulsion, laser-plasma research, and interactive drone pages." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://animeshsh.github.io/" />
 
@@ -111,7 +111,8 @@
     .hero-card,
     .panel,
     .link-card,
-    .mini-card {
+    .mini-card,
+    .timeline-content {
       background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
       border: 1px solid var(--border);
       border-radius: 22px;
@@ -271,8 +272,76 @@
     }
 
     .link-card p,
-    .panel p {
+    .panel p,
+    .timeline-content p {
       color: var(--muted);
+    }
+
+    .timeline {
+      position: relative;
+      margin-top: 2rem;
+      padding-left: 34px;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 7px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(
+        180deg,
+        rgba(98,176,255,0.15) 0%,
+        rgba(98,176,255,0.45) 20%,
+        rgba(126,240,199,0.4) 80%,
+        rgba(126,240,199,0.15) 100%
+      );
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 1.35rem;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -34px;
+      top: 20px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(98,176,255,0.08), 0 0 16px rgba(98,176,255,0.6);
+    }
+
+    .timeline-dot.highlight {
+      background: var(--accent-2);
+      box-shadow: 0 0 0 6px rgba(126,240,199,0.08), 0 0 18px rgba(126,240,199,0.8);
+    }
+
+    .timeline-content {
+      padding: 1.3rem 1.4rem;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .timeline-content:hover {
+      transform: translateY(-3px);
+      border-color: rgba(98,176,255,0.35);
+    }
+
+    .timeline-year {
+      display: inline-block;
+      margin-bottom: 0.45rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent-2);
+      background: rgba(126,240,199,0.08);
+      border: 1px solid rgba(126,240,199,0.2);
+      border-radius: 999px;
+      padding: 0.28rem 0.62rem;
     }
 
     footer {
@@ -305,6 +374,16 @@
         padding-top: 3.5rem;
       }
     }
+
+    @media (max-width: 640px) {
+      .timeline {
+        padding-left: 28px;
+      }
+
+      .timeline-dot {
+        left: -28px;
+      }
+    }
   </style>
 
   <script type="application/ld+json">
@@ -325,7 +404,8 @@
       "Laser Plasma Interaction",
       "UAV Systems",
       "Simulation",
-      "Engineering Education"
+      "Propulsion",
+      "Diagnostics"
     ]
   }
   </script>
@@ -337,7 +417,8 @@
       <nav class="nav-links" aria-label="Primary navigation">
         <a href="#about">About</a>
         <a href="#focus">Work</a>
-        <a href="#drones">Interactive Pages</a>
+        <a href="#timeline">Timeline</a>
+        <a href="#drones">Drone Pages</a>
         <a href="https://scholar.google.com/citations?user=AnCBeHgAAAAJ&hl=en" target="_blank" rel="noopener">Google Scholar</a>
         <a href="https://orcid.org/0000-0003-4963-4648" target="_blank" rel="noopener">ORCID</a>
         <a href="https://instagram.com/" target="_blank" rel="noopener">Instagram</a>
@@ -352,11 +433,11 @@
           <div class="eyebrow">Aerospace • Drones • Plasma • Simulation • Droneing since 2009</div>
           <h1>Building at the intersection of drones, aerospace engineering, and plasma science.</h1>
           <p class="lead">
-            I am Dr Animesh Sharma, PhD in Aeronautics and Astronautics from Purdue University. This site is a simple home for my work across drones, aerospace systems, plasma physics, laser-plasma interaction, simulations, and engineering ideas.
+            I am Dr Animesh Sharma, PhD in Aeronautics and Astronautics from Purdue University. This site is a home for my work across drones, aerospace systems, propulsion, plasma physics, laser-plasma interaction, simulations, and engineering ideas.
           </p>
           <div class="hero-actions">
-            <a class="btn btn-primary" href="#drones">Explore Interactive Pages</a>
-            <a class="btn btn-secondary" href="#about">Read More</a>
+            <a class="btn btn-primary" href="#timeline">Explore Research Timeline</a>
+            <a class="btn btn-secondary" href="#drones">Explore Drone Pages</a>
           </div>
         </div>
 
@@ -368,19 +449,17 @@
             </p>
             <div class="stat-list">
               <div class="mini-card">
-                <strong>PhD, Purdue University</strong>
+                <strong>Purdue PhD</strong>
                 <span>Aeronautics and Astronautics</span>
               </div>
               <div class="mini-card">
                 <strong>Core Areas</strong>
                 <span>Drones, aerospace, plasma, laser-matter interaction</span>
               </div>
-				<!--
               <div class="mini-card">
                 <strong>Current Direction</strong>
                 <span>Engineering communication, drone systems, interactive web projects</span>
               </div>
-				-->
             </div>
           </div>
         </aside>
@@ -402,7 +481,7 @@
               <li>MS in Aeronautics and Astronautics, Purdue University</li>
               <li>BTech in Aeronautical Engineering</li>
               <li>Postdoctoral Research Associate, University of Illinois Urbana-Champaign</li>
-              <li>Postdoctoral Research Associate, IIT Delhi</li>
+              <li>Research Associate, IIT Delhi</li>
               <li>Work spanning aerospace engineering and plasma physics</li>
               <li>Experience in simulations, diagnostics, propulsion, and UAV-related systems</li>
             </ul>
@@ -414,6 +493,7 @@
               <li>Drone-related HTML pages and experiments</li>
               <li>Engineering-focused web content</li>
               <li>Material connected to drones, aerospace, lasers, and plasma</li>
+              <li>A visual timeline of how my research evolved across domains</li>
             </ul>
           </article>
         </div>
@@ -430,7 +510,7 @@
         <div class="focus-grid">
           <article class="panel">
             <h3>Drones and UAV Systems</h3>
-            <p>Drone systems, components, flight concepts, training material, and interactive pages.</p>
+            <p>Drone systems, components, flight concepts, training material, and interactive drone pages for the web.</p>
           </article>
 
           <article class="panel">
@@ -440,8 +520,118 @@
 
           <article class="panel">
             <h3>Plasma and Laser Science</h3>
-            <p>Research interests include plasma physics, laser-plasma interaction, diagnostics, and numerical simulation.</p>
+            <p>Research interests including plasma physics, laser-plasma interaction, diagnostics, and numerical simulation.</p>
           </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="timeline">
+      <div class="container">
+        <h2>Research Timeline</h2>
+        <p class="section-intro">
+          A journey across aerospace, plasma physics, diagnostics, propulsion, simulation, and systems thinking. Each phase builds on the last and expands the scope of the next.
+        </p>
+
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <span class="timeline-year">2011</span>
+              <h3>Early Systems Thinking</h3>
+              <p>
+                Built early intuition for logic, code, and systems through programming projects and game design. This was the start of thinking in terms of dynamics, rules, control, and interaction.
+              </p>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <span class="timeline-year">2015</span>
+              <h3>BTech in Aeronautical Engineering</h3>
+              <p>
+                Formal grounding in aerospace engineering with exposure to fluid mechanics, propulsion, structures, flight mechanics, and the physical thinking that underpins engineered systems.
+              </p>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <span class="timeline-year">2016–2017</span>
+              <h3>Purdue University | MS</h3>
+              <p>
+                Advanced training in aeronautics and astronautics. Built strong foundations in analysis, modeling, and interdisciplinary engineering research.
+              </p>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <span class="timeline-year">2016–2020</span>
+              <h3>Laser-Plasma Diagnostics and Experimental Research</h3>
+              <p>
+                Developed microwave scattering diagnostics for laser-induced plasmas and worked with ultrafast laser systems. Combined experiments, signal interpretation, and plasma physics into a coherent research framework.
+              </p>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <span class="timeline-year">2017–2020</span>
+              <h3>Purdue University | PhD</h3>
+              <p>
+                Completed a PhD in Aeronautics and Astronautics with deep engagement in plasma science, diagnostics, laser-matter interaction, and research problem solving across theory and experiment.
+              </p>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <span class="timeline-year">2020–2022</span>
+              <h3>Postdoc at UIUC | Propulsion and Thruster Systems</h3>
+              <p>
+                Worked on DARPA-funded monopropellant microthruster development. Integrated propulsion, plasma-adjacent physics, testing, design, and hardware realization into a highly applied research program.
+              </p>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <span class="timeline-year">2023–2025</span>
+              <h3>IIT Delhi | Plasma Simulation and Large-Scale Computation</h3>
+              <p>
+                Focused on PIC simulations, wave-plasma interactions, stochastic fields, and computational plasma physics using tools such as OSIRIS and EPOCH. Managed large datasets and simulation pipelines while extending analytical and numerical capability.
+              </p>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <span class="timeline-year">Along the way</span>
+              <h3>Teaching, Mentoring, and Technical Communication</h3>
+              <p>
+                Taught numerical methods, guided students, built documentation, and translated complex engineering ideas into usable material. This added a strong communication layer to a deeply technical career.
+              </p>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot highlight"></div>
+            <div class="timeline-content">
+              <span class="timeline-year">Now</span>
+              <h3>A Unified Engineering Vision</h3>
+              <p>
+                Bringing together drones, aerospace, propulsion, plasma science, simulation, diagnostics, and interactive systems into a single engineering narrative focused on building, explaining, and scaling meaningful technology.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -450,23 +640,24 @@
       <div class="container">
         <h2>Drone Pages</h2>
         <p class="section-intro">
-          These links to seperate interective web-pages.
+          These links go to separate interactive pages hosted on this website.
         </p>
 
         <div class="links-grid">
-          <a class="link-card" href="index.html">
+          <a class="link-card" href="droneGameXBT.html">
             <span class="tag">Drone Pilot Pro</span>
             <h3>Drone Pilot Pro</h3>
             <p>
-              Drone Game is inspired by side-scrolling arcade games.</p>
+              A drone game inspired by side-scrolling arcade games, designed as an interactive web experiment.
+            </p>
           </a>
 
           <a class="link-card" href="snake.html">
             <span class="tag">Snake Wars</span>
             <h3>Snake Wars</h3>
             <p>
-		Browser version of the C++ project done in 2011. This is a two-player version of the classic "Snake" game. The player can play against another human on the same computer or against computer.
-              </p>
+              A browser version of a C++ project first built in 2011. This is a two-player version of the classic Snake game with human and computer play modes.
+            </p>
           </a>
         </div>
       </div>
@@ -476,10 +667,11 @@
   <footer>
     <div class="container">
       <strong>Dr Animesh Sharma</strong><br />
-      Personal website focused on drones, aerospace, plasma physics, laser-plasma interaction, and engineering projects.
+      Personal website focused on drones, aerospace, plasma physics, laser-plasma interaction, propulsion, and engineering projects.
       <div class="footer-links">
         <a href="#about">About</a>
         <a href="#focus">Work</a>
+        <a href="#timeline">Timeline</a>
         <a href="#drones">Drone Pages</a>
         <a href="https://scholar.google.com/citations?user=AnCBeHgAAAAJ&hl=en" target="_blank" rel="noopener">Google Scholar</a>
         <a href="https://orcid.org/0000-0003-4963-4648" target="_blank" rel="noopener">ORCID</a>
@@ -489,4 +681,3 @@
   </footer>
 </body>
 </html>
-
