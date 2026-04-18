@@ -7,8 +7,6 @@
     <style>
         :root {
             --neon-blue: #00d2ff;
-            --neon-blue-soft: rgba(0, 210, 255, 0.25);
-            --neon-blue-strong: rgba(0, 210, 255, 0.7);
             --neon-red: #ff4757;
             --bg-dark: #0a0a0a;
             --panel-bg: rgba(255, 255, 255, 0.03);
@@ -46,7 +44,7 @@
 
         .game-container {
             width: 100%;
-            max-width: 1220px;
+            max-width: 1320px;
             display: flex;
             flex-direction: row;
             align-items: flex-start;
@@ -74,6 +72,7 @@
             border: 2px solid var(--neon-blue);
             border-radius: 8px;
             box-shadow: 0 0 25px rgba(0, 210, 255, 0.15);
+            margin: 0 auto;
         }
 
         .ui {
@@ -107,7 +106,8 @@
             gap: 15px;
         }
 
-        .side-panel h3 {
+        .side-panel h3,
+        .mobile-side-panel h3 {
             margin: 0;
             font-size: 13px;
             text-transform: uppercase;
@@ -139,7 +139,7 @@
             background: rgba(0, 0, 0, 0.60);
             padding: 6px 10px;
             border-radius: 4px;
-            z-index: 8;
+            z-index: 10;
             max-width: calc(100vw - 32px);
             word-break: break-word;
         }
@@ -253,6 +253,15 @@
             display: block;
         }
 
+        .touch-controls.portrait-below {
+            position: static;
+            inset: auto;
+            width: 100%;
+            pointer-events: auto;
+            margin-top: 16px;
+            height: 150px;
+        }
+
         .touch-joystick {
             position: absolute;
             bottom: 18px;
@@ -273,6 +282,18 @@
 
         .touch-joystick.right {
             right: 14px;
+        }
+
+        .touch-controls.portrait-below .touch-joystick {
+            bottom: 10px;
+        }
+
+        .touch-joystick.left.portrait-pos {
+            left: 8px;
+        }
+
+        .touch-joystick.right.portrait-pos {
+            right: 8px;
         }
 
         .touch-stick {
@@ -305,6 +326,66 @@
             text-align: center;
         }
 
+        .mobile-landscape-layout {
+            display: none;
+            width: 100%;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .mobile-side-panel {
+            width: 150px;
+            flex: 0 0 150px;
+            background: var(--panel-bg);
+            padding: 10px 8px;
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 100%;
+        }
+
+        .mobile-side-panel .panel-copy,
+        .mobile-side-panel .scoreboard,
+        .mobile-side-panel .control-wrap,
+        .mobile-side-panel .panel-link a,
+        .mobile-side-panel .footer-copy,
+        .mobile-side-panel .mini-text {
+            font-size: 9px;
+        }
+
+        .mobile-side-panel .touch-joystick {
+            position: relative;
+            left: auto !important;
+            right: auto !important;
+            bottom: auto !important;
+            width: 92px;
+            height: 92px;
+            margin: 6px auto 18px auto;
+        }
+
+        .mobile-side-panel .touch-stick {
+            width: 34px;
+            height: 34px;
+        }
+
+        .mobile-side-panel .touch-label {
+            font-size: 8px;
+        }
+
+        .mobile-side-panel .scoreboard-list {
+            padding-left: 14px;
+        }
+
+        .mobile-canvas-center {
+            flex: 1 1 auto;
+            min-width: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
         @media (max-width: 980px) {
             .page-wrap {
                 padding: 14px;
@@ -323,6 +404,7 @@
             .canvas-shell {
                 width: 100%;
                 display: flex;
+                flex-direction: column;
                 justify-content: center;
             }
 
@@ -402,6 +484,54 @@
                 height: 40px;
             }
         }
+
+        @media (max-width: 640px) and (orientation: portrait) {
+            .touch-controls.default-overlay {
+                display: none !important;
+            }
+
+            .touch-controls.portrait-below {
+                display: none;
+            }
+
+            .touch-controls.portrait-below.active {
+                display: block;
+            }
+
+            .mobile-landscape-layout {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 980px) and (orientation: landscape) and (pointer: coarse) {
+            .game-container > .canvas-column,
+            .game-container > .side-panel {
+                display: none !important;
+            }
+
+            .game-container {
+                flex-direction: row;
+                align-items: stretch;
+                justify-content: center;
+            }
+
+            .mobile-landscape-layout {
+                display: flex;
+            }
+
+            .mobile-canvas-center .canvas-shell {
+                width: 100%;
+            }
+
+            .mobile-canvas-center canvas {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .mobile-canvas-center .ui {
+                max-width: calc(100% - 24px);
+            }
+        }
     </style>
 </head>
 <body>
@@ -415,7 +545,7 @@
 
                     <canvas id="gameCanvas" width="800" height="500"></canvas>
 
-                    <div class="touch-controls" id="touchControls">
+                    <div class="touch-controls default-overlay" id="touchControls">
                         <div class="touch-joystick left" id="leftJoystick">
                             <div class="touch-stick" id="leftStick"></div>
                             <div class="touch-label">THROTTLE</div>
@@ -425,10 +555,21 @@
                             <div class="touch-label">SPEED</div>
                         </div>
                     </div>
+
+                    <div class="touch-controls portrait-below" id="portraitTouchControls">
+                        <div class="touch-joystick left portrait-pos" id="leftJoystickPortrait">
+                            <div class="touch-stick" id="leftStickPortrait"></div>
+                            <div class="touch-label">THROTTLE</div>
+                        </div>
+                        <div class="touch-joystick right portrait-pos" id="rightJoystickPortrait">
+                            <div class="touch-stick" id="rightStickPortrait"></div>
+                            <div class="touch-label">SPEED</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="side-panel">
+            <div class="side-panel" id="desktopSidePanel">
                 <h3>System Status</h3>
                 <div class="slider-wrap">
                     <label>Flow Speed: <span id="speedVal">1.0</span>x</label>
@@ -450,7 +591,7 @@
                 </div>
 
                 <div class="touch-hint">
-                    Mobile mode uses the two virtual joysticks over the canvas.
+                    In portrait mode, the virtual joysticks move below the canvas.
                 </div>
 
                 <hr />
@@ -486,6 +627,94 @@
 
                 <div class="footer-copy">(c) Animesh Sharma 2026</div>
             </div>
+
+            <div class="mobile-landscape-layout" id="mobileLandscapeLayout">
+                <div class="mobile-side-panel">
+                    <h3>Touch Left</h3>
+
+                    <div class="touch-joystick left" id="leftJoystickLandscape">
+                        <div class="touch-stick" id="leftStickLandscape"></div>
+                        <div class="touch-label">THROTTLE</div>
+                    </div>
+
+                    <div class="panel-copy">
+                        Lift up to fly.<br />
+                        Pull down to reset.
+                    </div>
+
+                    <hr />
+
+                    <h3>Status</h3>
+                    <div class="slider-wrap">
+                        <label>Speed: <span id="speedValLandscapeLeft">1.0</span>x</label>
+                        <input type="range" id="speedSliderLandscapeLeft" min="0.5" max="3" step="0.1" value="1" />
+                    </div>
+
+                    <hr />
+
+                    <div class="panel-copy">
+                        Mobile landscape mode keeps the canvas in the center.
+                    </div>
+                </div>
+
+                <div class="mobile-canvas-center">
+                    <div class="canvas-column">
+                        <div class="canvas-shell">
+                            <div class="ui">
+                                <div id="scoreLandscape">CONNECT GAME CONTROLLER OR USE TOUCH</div>
+                            </div>
+                            <canvas id="gameCanvasLandscape" width="800" height="500"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mobile-side-panel">
+                    <h3>Touch Right</h3>
+
+                    <div class="touch-joystick right" id="rightJoystickLandscape">
+                        <div class="touch-stick" id="rightStickLandscape"></div>
+                        <div class="touch-label">SPEED</div>
+                    </div>
+
+                    <div class="panel-copy">
+                        Move right to increase flow speed.<br />
+                        Move left to slow it down.
+                    </div>
+
+                    <hr />
+
+                    <h3>Controls</h3>
+                    <div class="control-wrap">
+                        <label>
+                            Movement Stick
+                            <select id="movementAxisSelectLandscape">
+                                <option value="1" selected>Left Stick Y</option>
+                                <option value="3">Right Stick Y</option>
+                            </select>
+                        </label>
+                        <label class="check-row">
+                            <input type="checkbox" id="invertMovementToggleLandscape" />
+                            Invert
+                        </label>
+                    </div>
+
+                    <hr />
+
+                    <h3>Top Scores</h3>
+                    <div class="scoreboard">
+                        <ol class="scoreboard-list" id="scoreboardListLandscape"></ol>
+                        <div class="scoreboard-empty" id="scoreboardEmptyLandscape">NO SCORES YET</div>
+                    </div>
+
+                    <hr />
+
+                    <div class="panel-link">
+                        <a href="animesh.html">About Animesh</a>
+                    </div>
+
+                    <div class="footer-copy">(c) Animesh Sharma 2026</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -493,21 +722,50 @@
 
     <script>
         const canvas = document.getElementById("gameCanvas");
+        const landscapeCanvas = document.getElementById("gameCanvasLandscape");
         const ctx = canvas.getContext("2d");
+        const landscapeCtx = landscapeCanvas.getContext("2d");
 
         const scoreElement = document.getElementById("score");
+        const scoreLandscapeElement = document.getElementById("scoreLandscape");
+
         const debugElement = document.getElementById("debugInfo");
+
         const speedSlider = document.getElementById("speedSlider");
         const speedValText = document.getElementById("speedVal");
+
+        const speedSliderLandscapeLeft = document.getElementById("speedSliderLandscapeLeft");
+        const speedValLandscapeLeft = document.getElementById("speedValLandscapeLeft");
+
         const movementAxisSelect = document.getElementById("movementAxisSelect");
         const invertMovementToggle = document.getElementById("invertMovementToggle");
+
+        const movementAxisSelectLandscape = document.getElementById("movementAxisSelectLandscape");
+        const invertMovementToggleLandscape = document.getElementById("invertMovementToggleLandscape");
+
         const scoreboardList = document.getElementById("scoreboardList");
         const scoreboardEmpty = document.getElementById("scoreboardEmpty");
+        const scoreboardListLandscape = document.getElementById("scoreboardListLandscape");
+        const scoreboardEmptyLandscape = document.getElementById("scoreboardEmptyLandscape");
+
         const touchControls = document.getElementById("touchControls");
+        const portraitTouchControls = document.getElementById("portraitTouchControls");
+        const mobileLandscapeLayout = document.getElementById("mobileLandscapeLayout");
+
         const leftJoystick = document.getElementById("leftJoystick");
         const rightJoystick = document.getElementById("rightJoystick");
         const leftStick = document.getElementById("leftStick");
         const rightStick = document.getElementById("rightStick");
+
+        const leftJoystickPortrait = document.getElementById("leftJoystickPortrait");
+        const rightJoystickPortrait = document.getElementById("rightJoystickPortrait");
+        const leftStickPortrait = document.getElementById("leftStickPortrait");
+        const rightStickPortrait = document.getElementById("rightStickPortrait");
+
+        const leftJoystickLandscape = document.getElementById("leftJoystickLandscape");
+        const rightJoystickLandscape = document.getElementById("rightJoystickLandscape");
+        const leftStickLandscape = document.getElementById("leftStickLandscape");
+        const rightStickLandscape = document.getElementById("rightStickLandscape");
 
         const HIGH_SCORE_KEY = "dronePilotProHighScores";
 
@@ -568,8 +826,6 @@
         let throttleValue = 0;
         let gameSpeedMultiplier = 1.0;
         let scoreRecordedForThisCrash = false;
-        let usingTouchInput = false;
-        let usingGamepadInput = false;
 
         const player = {
             x: 120,
@@ -590,18 +846,14 @@
             left: {
                 active: false,
                 pointerId: null,
-                x: 0,
-                y: 0,
-                maxRadius: 36,
+                maxRadius: 28,
                 axisX: 0,
                 axisY: 0
             },
             right: {
                 active: false,
                 pointerId: null,
-                x: 0,
-                y: 0,
-                maxRadius: 36,
+                maxRadius: 28,
                 axisX: 0,
                 axisY: 0
             }
@@ -611,23 +863,145 @@
             return window.matchMedia("(pointer: coarse)").matches || window.innerWidth <= 640;
         }
 
+        function isPortraitPhoneMode() {
+            return isTouchDevice() && window.innerWidth <= 640 && window.innerHeight > window.innerWidth;
+        }
+
+        function isMobileLandscapeMode() {
+            return isTouchDevice() && window.innerWidth <= 980 && window.innerWidth > window.innerHeight;
+        }
+
+        function getActiveCanvas() {
+            return isMobileLandscapeMode() ? landscapeCanvas : canvas;
+        }
+
+        function getActiveCtx() {
+            return isMobileLandscapeMode() ? landscapeCtx : ctx;
+        }
+
+        function getActiveScoreElement() {
+            return isMobileLandscapeMode() ? scoreLandscapeElement : scoreElement;
+        }
+
+        function syncMirroredControls() {
+            movementAxisSelectLandscape.value = movementAxisSelect.value;
+            invertMovementToggleLandscape.checked = invertMovementToggle.checked;
+        }
+
+        movementAxisSelect.addEventListener("change", () => {
+            movementAxisSelectLandscape.value = movementAxisSelect.value;
+        });
+
+        movementAxisSelectLandscape.addEventListener("change", () => {
+            movementAxisSelect.value = movementAxisSelectLandscape.value;
+        });
+
+        invertMovementToggle.addEventListener("change", () => {
+            invertMovementToggleLandscape.checked = invertMovementToggle.checked;
+        });
+
+        invertMovementToggleLandscape.addEventListener("change", () => {
+            invertMovementToggle.checked = invertMovementToggleLandscape.checked;
+        });
+
+        function getActiveMovementAxisSelect() {
+            return isMobileLandscapeMode() ? movementAxisSelectLandscape : movementAxisSelect;
+        }
+
+        function getActiveInvertToggle() {
+            return isMobileLandscapeMode() ? invertMovementToggleLandscape : invertMovementToggle;
+        }
+
+        function updateSpeedDisplays(value) {
+            speedSlider.value = value;
+            speedValText.innerText = value.toFixed(1);
+            speedSliderLandscapeLeft.value = value;
+            speedValLandscapeLeft.innerText = value.toFixed(1);
+        }
+
+        function getActiveJoystickRefs(side) {
+            if (isMobileLandscapeMode()) {
+                return side === "left"
+                    ? { joystick: leftJoystickLandscape, stick: leftStickLandscape }
+                    : { joystick: rightJoystickLandscape, stick: rightStickLandscape };
+            }
+
+            if (isPortraitPhoneMode()) {
+                return side === "left"
+                    ? { joystick: leftJoystickPortrait, stick: leftStickPortrait }
+                    : { joystick: rightJoystickPortrait, stick: rightStickPortrait };
+            }
+
+            return side === "left"
+                ? { joystick: leftJoystick, stick: leftStick }
+                : { joystick: rightJoystick, stick: rightStick };
+        }
+
+        function setStickVisual(stickEl, axisX, axisY, maxRadius) {
+            const px = axisX * maxRadius;
+            const py = axisY * maxRadius;
+            stickEl.style.transform = `translate(calc(-50% + ${px}px), calc(-50% + ${py}px))`;
+        }
+
+        function syncAllStickVisuals(side) {
+            const axisX = touchState[side].axisX;
+            const axisY = touchState[side].axisY;
+            const radius = touchState[side].maxRadius;
+
+            if (side === "left") {
+                setStickVisual(leftStick, axisX, axisY, radius);
+                setStickVisual(leftStickPortrait, axisX, axisY, radius);
+                setStickVisual(leftStickLandscape, axisX, axisY, radius);
+            } else {
+                setStickVisual(rightStick, axisX, axisY, radius);
+                setStickVisual(rightStickPortrait, axisX, axisY, radius);
+                setStickVisual(rightStickLandscape, axisX, axisY, radius);
+            }
+        }
+
         function resizeCanvasForLayout() {
-            const containerWidth = Math.min(canvas.parentElement.clientWidth, 800);
-            canvas.style.width = containerWidth + "px";
+            const mainWidth = Math.min(canvas.parentElement.clientWidth, 800);
+            canvas.style.width = mainWidth + "px";
+
+            const landscapeWrap = landscapeCanvas.parentElement;
+            const landscapeWidth = Math.min(landscapeWrap.clientWidth, 800);
+            landscapeCanvas.style.width = landscapeWidth + "px";
 
             if (window.innerWidth <= 640) {
-                canvas.style.height = Math.round(containerWidth * 0.72) + "px";
+                canvas.style.height = Math.round(mainWidth * 0.72) + "px";
+                landscapeCanvas.style.height = Math.round(landscapeWidth * 0.64) + "px";
             } else if (window.innerWidth <= 980) {
-                canvas.style.height = Math.round(containerWidth * 0.66) + "px";
+                canvas.style.height = Math.round(mainWidth * 0.66) + "px";
+                landscapeCanvas.style.height = Math.round(landscapeWidth * 0.60) + "px";
             } else {
                 canvas.style.height = "auto";
+                landscapeCanvas.style.height = "auto";
             }
 
-            if (isTouchDevice()) {
-                touchControls.classList.add("active");
-            } else {
+            if (!isTouchDevice()) {
                 touchControls.classList.remove("active");
+                portraitTouchControls.classList.remove("active");
+                mobileLandscapeLayout.style.display = "none";
+                return;
             }
+
+            if (isMobileLandscapeMode()) {
+                touchControls.classList.remove("active");
+                portraitTouchControls.classList.remove("active");
+                mobileLandscapeLayout.style.display = "flex";
+            } else if (isPortraitPhoneMode()) {
+                touchControls.classList.remove("active");
+                portraitTouchControls.classList.add("active");
+                mobileLandscapeLayout.style.display = "none";
+            } else {
+                touchControls.classList.add("active");
+                portraitTouchControls.classList.remove("active");
+                mobileLandscapeLayout.style.display = "none";
+            }
+
+            syncAllStickVisuals("left");
+            syncAllStickVisuals("right");
+            syncMirroredControls();
         }
 
         function getScaledWidth() {
@@ -672,19 +1046,27 @@
 
         function renderHighScores() {
             const scores = getHighScores();
+
             scoreboardList.innerHTML = "";
+            scoreboardListLandscape.innerHTML = "";
 
             if (scores.length === 0) {
                 scoreboardEmpty.style.display = "block";
+                scoreboardEmptyLandscape.style.display = "block";
                 return;
             }
 
             scoreboardEmpty.style.display = "none";
+            scoreboardEmptyLandscape.style.display = "none";
 
             scores.forEach((value) => {
-                const li = document.createElement("li");
-                li.textContent = value;
-                scoreboardList.appendChild(li);
+                const li1 = document.createElement("li");
+                li1.textContent = value;
+                scoreboardList.appendChild(li1);
+
+                const li2 = document.createElement("li");
+                li2.textContent = value;
+                scoreboardListLandscape.appendChild(li2);
             });
         }
 
@@ -696,6 +1078,11 @@
             saveHighScores(scores);
             scoreRecordedForThisCrash = true;
             renderHighScores();
+        }
+
+        function updateScoreDisplays(text) {
+            scoreElement.innerText = text;
+            scoreLandscapeElement.innerText = text;
         }
 
         function resetGame() {
@@ -710,14 +1097,14 @@
             readyToRestart = false;
             frames = 0;
             scoreRecordedForThisCrash = false;
-            scoreElement.innerText = "SCORE: 0";
+            updateScoreDisplays("SCORE: 0");
         }
 
         function getMovementAxisValue(gp) {
-            const selectedAxis = parseInt(movementAxisSelect.value, 10);
+            const selectedAxis = parseInt(getActiveMovementAxisSelect().value, 10);
             let rawY = gp.axes[selectedAxis] ?? 0;
 
-            if (invertMovementToggle.checked) {
+            if (getActiveInvertToggle().checked) {
                 rawY = -rawY;
             }
 
@@ -744,19 +1131,12 @@
         }
 
         function updateTouchInput() {
-            if (!isTouchDevice()) {
-                usingTouchInput = false;
-                return;
-            }
-
-            usingTouchInput = hasActiveTouchInput();
-
-            if (!usingTouchInput) {
-                return;
+            if (!isTouchDevice() || !hasActiveTouchInput()) {
+                return false;
             }
 
             let rawY = touchState.left.axisY;
-            if (invertMovementToggle.checked) {
+            if (getActiveInvertToggle().checked) {
                 rawY = -rawY;
             }
 
@@ -772,8 +1152,7 @@
             const mappedSpeed = ((rawRightX + 1) / 2) * (3.0 - 0.5) + 0.5;
 
             gameSpeedMultiplier = mappedSpeed;
-            speedSlider.value = mappedSpeed;
-            speedValText.innerText = mappedSpeed.toFixed(1);
+            updateSpeedDisplays(mappedSpeed);
 
             player.scale = 1.0;
 
@@ -785,6 +1164,8 @@
             if (!gameActive && readyToRestart && throttleValue > 0.1) {
                 resetGame();
             }
+
+            return true;
         }
 
         function updateGamepadInput() {
@@ -799,11 +1180,8 @@
             }
 
             if (!gp) {
-                usingGamepadInput = false;
                 return false;
             }
-
-            usingGamepadInput = true;
 
             const rawY = getMovementAxisValue(gp);
             throttleValue = (rawY + 1) / 2;
@@ -817,8 +1195,7 @@
             const mappedSpeed = ((rawRightX + 1) / 2) * (3.0 - 0.5) + 0.5;
 
             gameSpeedMultiplier = mappedSpeed;
-            speedSlider.value = mappedSpeed;
-            speedValText.innerText = mappedSpeed.toFixed(1);
+            updateSpeedDisplays(mappedSpeed);
 
             const leftTrigger = getTriggerValue(gp, 4, 6);
             const rightTrigger = getTriggerValue(gp, 5, 7);
@@ -831,8 +1208,8 @@
                 player.scale = 1.0;
             }
 
-            const movementStickName = movementAxisSelect.value === "1" ? "L-Y" : "R-Y";
-            const invertText = invertMovementToggle.checked ? " | INV" : "";
+            const movementStickName = getActiveMovementAxisSelect().value === "1" ? "L-Y" : "R-Y";
+            const invertText = getActiveInvertToggle().checked ? " | INV" : "";
 
             debugElement.innerText =
                 `Xbox ${movementStickName}: ${Math.round(throttleValue * 100)}% | ` +
@@ -849,70 +1226,73 @@
         }
 
         function updateInput() {
-            if (hasActiveTouchInput()) {
-                updateTouchInput();
+            if (updateTouchInput()) {
                 return;
             }
 
-            const gamepadFound = updateGamepadInput();
-
-            if (gamepadFound) {
+            if (updateGamepadInput()) {
                 return;
             }
+
+            gameSpeedMultiplier = 1.0;
+            updateSpeedDisplays(1.0);
 
             if (isTouchDevice()) {
-                gameSpeedMultiplier = 1.0;
-                speedSlider.value = 1.0;
-                speedValText.innerText = "1.0";
-                debugElement.innerText = "USE TOUCH JOYSTICKS ON MOBILE";
+                if (isMobileLandscapeMode()) {
+                    debugElement.innerText = "LANDSCAPE MOBILE: CANVAS CENTER, JOYSTICKS ON SIDES";
+                } else if (isPortraitPhoneMode()) {
+                    debugElement.innerText = "USE JOYSTICKS BELOW THE CANVAS";
+                } else {
+                    debugElement.innerText = "USE TOUCH JOYSTICKS ON MOBILE";
+                }
             } else {
                 debugElement.innerText = "SEARCHING FOR GAME CONTROLLER...";
             }
         }
 
-        function drawPlayer() {
-            const scaledWidth = getScaledWidth();
-            const scaledHeight = getScaledHeight();
-
-            ctx.save();
-            ctx.translate(player.x + player.baseWidth / 2, player.y + player.baseHeight / 2);
-
-            const targetRot = throttleValue > 0.5 ? -10 : 10;
-            player.rotation += (targetRot - player.rotation) * 0.1;
-            ctx.rotate(player.rotation * Math.PI / 180);
-
-            ctx.shadowColor = "#00d2ff";
-            ctx.shadowBlur = 18;
-
-            const img = throttleValue > 0.5 ? droneHorizImg : droneTiltImg;
-            ctx.drawImage(img, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
-
-            ctx.shadowBlur = 0;
-            ctx.restore();
-        }
-
-        function createObstacle() {
-            const minH = 60;
-            const maxH = canvas.height - obstacleGap - 60;
-            const h = Math.random() * (maxH - minH) + minH;
-
-            obstacles.push({ x: canvas.width, y: 0, w: 50, h: h, passed: false });
-            obstacles.push({ x: canvas.width, y: h + obstacleGap, w: 50, h: canvas.height, passed: false });
-        }
-
-        function drawBackgroundGrid() {
-            ctx.strokeStyle = "rgba(0, 210, 255, 0.08)";
+        function drawBackgroundGrid(activeCtx, activeCanvas) {
+            activeCtx.strokeStyle = "rgba(0, 210, 255, 0.08)";
             const scrollOffset = (frames * 2 * gameSpeedMultiplier) % 40;
 
-            for (let i = 0; i <= canvas.width + 40; i += 40) {
-                ctx.beginPath();
-                ctx.moveTo(i - scrollOffset, 0);
-                ctx.lineTo(i - scrollOffset, canvas.height);
-                ctx.stroke();
+            for (let i = 0; i <= activeCanvas.width + 40; i += 40) {
+                activeCtx.beginPath();
+                activeCtx.moveTo(i - scrollOffset, 0);
+                activeCtx.lineTo(i - scrollOffset, activeCanvas.height);
+                activeCtx.stroke();
             }
         }
 
-        function updatePlayerPhysics() {
+        function drawPlayer(activeCtx) {
+            const scaledWidth = getScaledWidth();
+            const scaledHeight = getScaledHeight();
+
+            activeCtx.save();
+            activeCtx.translate(player.x + player.baseWidth / 2, player.y + player.baseHeight / 2);
+
+            const targetRot = throttleValue > 0.5 ? -10 : 10;
+            player.rotation += (targetRot - player.rotation) * 0.1;
+            activeCtx.rotate(player.rotation * Math.PI / 180);
+
+            activeCtx.shadowColor = "#00d2ff";
+            activeCtx.shadowBlur = 18;
+
+            const img = throttleValue > 0.5 ? droneHorizImg : droneTiltImg;
+            activeCtx.drawImage(img, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
+
+            activeCtx.shadowBlur = 0;
+            activeCtx.restore();
+        }
+
+        function createObstacle(activeCanvas) {
+            const minH = 60;
+            const maxH = activeCanvas.height - obstacleGap - 60;
+            const h = Math.random() * (maxH - minH) + minH;
+
+            obstacles.push({ x: activeCanvas.width, y: 0, w: 50, h: h, passed: false });
+            obstacles.push({ x: activeCanvas.width, y: h + obstacleGap, w: 50, h: activeCanvas.height, passed: false });
+        }
+
+        function updatePlayerPhysics(activeCanvas) {
             player.dy += player.gravity;
             player.dy += throttleValue * player.thrustPower;
             player.dy *= 0.98;
@@ -920,23 +1300,23 @@
 
             const bounds = getPlayerBounds();
 
-            if (bounds.y < 0 || bounds.y + bounds.height > canvas.height) {
+            if (bounds.y < 0 || bounds.y + bounds.height > activeCanvas.height) {
                 gameActive = false;
             }
         }
 
-        function updateObstacles() {
+        function updateObstacles(activeCtx) {
             const bounds = getPlayerBounds();
 
             for (let i = obstacles.length - 1; i >= 0; i--) {
                 const o = obstacles[i];
                 o.x -= 4 * gameSpeedMultiplier;
 
-                ctx.fillStyle = "#ff4757";
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = "#ff4757";
-                ctx.fillRect(o.x, o.y, o.w, o.h);
-                ctx.shadowBlur = 0;
+                activeCtx.fillStyle = "#ff4757";
+                activeCtx.shadowBlur = 10;
+                activeCtx.shadowColor = "#ff4757";
+                activeCtx.fillRect(o.x, o.y, o.w, o.h);
+                activeCtx.shadowBlur = 0;
 
                 if (
                     bounds.x + 15 < o.x + o.w &&
@@ -951,7 +1331,7 @@
                     o.passed = true;
                     if (o.y === 0) {
                         score++;
-                        scoreElement.innerText = `SCORE: ${score}`;
+                        updateScoreDisplays(`SCORE: ${score}`);
                     }
                 }
 
@@ -961,57 +1341,81 @@
             }
         }
 
-        function drawGameStateText() {
-            ctx.fillStyle = "white";
-            ctx.textAlign = "center";
-            ctx.font = "bold 16px Courier New";
+        function drawGameStateText(activeCtx, activeCanvas) {
+            activeCtx.fillStyle = "white";
+            activeCtx.textAlign = "center";
+            activeCtx.font = "bold 16px Courier New";
 
             if (!gameStarted) {
-                ctx.fillText(isTouchDevice() ? "PUSH LEFT TOUCH STICK UP TO START" : "PUSH LEFT STICK UP TO START", canvas.width / 2, canvas.height / 2);
+                let startText = "PUSH LEFT STICK UP TO START";
+
+                if (isTouchDevice()) {
+                    if (isMobileLandscapeMode()) {
+                        startText = "USE LEFT JOYSTICK ON THE LEFT PANEL TO START";
+                    } else if (isPortraitPhoneMode()) {
+                        startText = "USE JOYSTICKS BELOW TO START";
+                    } else {
+                        startText = "PUSH LEFT TOUCH STICK UP TO START";
+                    }
+                }
+
+                activeCtx.fillText(startText, activeCanvas.width / 2, activeCanvas.height / 2);
                 return;
             }
 
             recordScoreIfNeeded();
 
-            ctx.fillStyle = "#ff4757";
-            ctx.fillText("SYSTEM CRASH", canvas.width / 2, canvas.height / 2 - 20);
+            activeCtx.fillStyle = "#ff4757";
+            activeCtx.fillText("SYSTEM CRASH", activeCanvas.width / 2, activeCanvas.height / 2 - 20);
 
-            ctx.fillStyle = "white";
-            ctx.font = "12px Courier New";
-            ctx.fillText(isTouchDevice() ? "PULL LEFT TOUCH STICK DOWN TO REBOOT" : "PULL LEFT STICK DOWN TO REBOOT", canvas.width / 2, canvas.height / 2 + 20);
+            activeCtx.fillStyle = "white";
+            activeCtx.font = "12px Courier New";
+
+            let rebootText = "PULL LEFT STICK DOWN TO REBOOT";
+
+            if (isTouchDevice()) {
+                if (isMobileLandscapeMode()) {
+                    rebootText = "PULL LEFT JOYSTICK DOWN ON THE LEFT PANEL TO REBOOT";
+                } else if (isPortraitPhoneMode()) {
+                    rebootText = "PULL LEFT JOYSTICK DOWN BELOW TO REBOOT";
+                } else {
+                    rebootText = "PULL LEFT TOUCH STICK DOWN TO REBOOT";
+                }
+            }
+
+            activeCtx.fillText(rebootText, activeCanvas.width / 2, activeCanvas.height / 2 + 20);
         }
 
         function update() {
-            updateInput();
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const activeCanvas = getActiveCanvas();
+            const activeCtx = getActiveCtx();
 
-            drawBackgroundGrid();
+            updateInput();
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            landscapeCtx.clearRect(0, 0, landscapeCanvas.width, landscapeCanvas.height);
+
+            drawBackgroundGrid(activeCtx, activeCanvas);
 
             if (!gameActive) {
-                drawPlayer();
-                drawGameStateText();
+                drawPlayer(activeCtx);
+                drawGameStateText(activeCtx, activeCanvas);
                 requestAnimationFrame(update);
                 return;
             }
 
-            updatePlayerPhysics();
+            updatePlayerPhysics(activeCanvas);
 
             const spawnRate = Math.max(30, Math.floor(100 / gameSpeedMultiplier));
             if (frames % spawnRate === 0) {
-                createObstacle();
+                createObstacle(activeCanvas);
             }
 
-            updateObstacles();
-            drawPlayer();
+            updateObstacles(activeCtx);
+            drawPlayer(activeCtx);
 
             frames++;
             requestAnimationFrame(update);
-        }
-
-        function setStickVisual(stickEl, axisX, axisY, maxRadius) {
-            const px = axisX * maxRadius;
-            const py = axisY * maxRadius;
-            stickEl.style.transform = `translate(calc(-50% + ${px}px), calc(-50% + ${py}px))`;
         }
 
         function resetTouchStick(side) {
@@ -1019,16 +1423,12 @@
             touchState[side].pointerId = null;
             touchState[side].axisX = 0;
             touchState[side].axisY = 0;
-
-            if (side === "left") {
-                setStickVisual(leftStick, 0, 0, touchState.left.maxRadius);
-            } else {
-                setStickVisual(rightStick, 0, 0, touchState.right.maxRadius);
-            }
+            syncAllStickVisuals(side);
         }
 
-        function updateTouchStick(side, event, joystickEl, stickEl) {
-            const rect = joystickEl.getBoundingClientRect();
+        function updateTouchStick(side, event) {
+            const { joystick } = getActiveJoystickRefs(side);
+            const rect = joystick.getBoundingClientRect();
             const cx = rect.left + rect.width / 2;
             const cy = rect.top + rect.height / 2;
 
@@ -1044,54 +1444,54 @@
                 dy *= scale;
             }
 
-            const axisX = dx / maxRadius;
-            const axisY = dy / maxRadius;
+            touchState[side].axisX = Math.max(-1, Math.min(1, dx / maxRadius));
+            touchState[side].axisY = Math.max(-1, Math.min(1, dy / maxRadius));
 
-            touchState[side].axisX = Math.max(-1, Math.min(1, axisX));
-            touchState[side].axisY = Math.max(-1, Math.min(1, axisY));
-
-            setStickVisual(stickEl, touchState[side].axisX, touchState[side].axisY, maxRadius);
+            syncAllStickVisuals(side);
         }
 
-        function attachJoystick(joystickEl, stickEl, side) {
-            joystickEl.addEventListener("pointerdown", (event) => {
-                if (!isTouchDevice()) return;
+        function handlePointerDown(side, event) {
+            if (!isTouchDevice()) return;
+            touchState[side].active = true;
+            touchState[side].pointerId = event.pointerId;
+            updateTouchStick(side, event);
+            event.currentTarget.setPointerCapture(event.pointerId);
+            event.preventDefault();
+        }
 
-                joystickEl.setPointerCapture(event.pointerId);
-                touchState[side].active = true;
-                touchState[side].pointerId = event.pointerId;
-                updateTouchStick(side, event, joystickEl, stickEl);
-                event.preventDefault();
-            });
+        function handlePointerMove(side, event) {
+            if (!touchState[side].active) return;
+            if (touchState[side].pointerId !== event.pointerId) return;
+            updateTouchStick(side, event);
+            event.preventDefault();
+        }
 
-            joystickEl.addEventListener("pointermove", (event) => {
-                if (!touchState[side].active) return;
-                if (touchState[side].pointerId !== event.pointerId) return;
+        function handlePointerEnd(side, event) {
+            if (touchState[side].pointerId !== event.pointerId) return;
+            resetTouchStick(side);
+            event.preventDefault();
+        }
 
-                updateTouchStick(side, event, joystickEl, stickEl);
-                event.preventDefault();
-            });
-
-            const endHandler = (event) => {
-                if (touchState[side].pointerId !== event.pointerId) return;
-                resetTouchStick(side);
-                event.preventDefault();
-            };
-
-            joystickEl.addEventListener("pointerup", endHandler);
-            joystickEl.addEventListener("pointercancel", endHandler);
-            joystickEl.addEventListener("lostpointercapture", () => {
-                resetTouchStick(side);
-            });
+        function bindJoystick(joystickEl, side) {
+            joystickEl.addEventListener("pointerdown", (event) => handlePointerDown(side, event));
+            joystickEl.addEventListener("pointermove", (event) => handlePointerMove(side, event));
+            joystickEl.addEventListener("pointerup", (event) => handlePointerEnd(side, event));
+            joystickEl.addEventListener("pointercancel", (event) => handlePointerEnd(side, event));
+            joystickEl.addEventListener("lostpointercapture", () => resetTouchStick(side));
         }
 
         window.addEventListener("resize", resizeCanvasForLayout);
         window.addEventListener("orientationchange", resizeCanvasForLayout);
 
-        attachJoystick(leftJoystick, leftStick, "left");
-        attachJoystick(rightJoystick, rightStick, "right");
+        bindJoystick(leftJoystick, "left");
+        bindJoystick(rightJoystick, "right");
+        bindJoystick(leftJoystickPortrait, "left");
+        bindJoystick(rightJoystickPortrait, "right");
+        bindJoystick(leftJoystickLandscape, "left");
+        bindJoystick(rightJoystickLandscape, "right");
 
         renderHighScores();
+        syncMirroredControls();
         resizeCanvasForLayout();
         update();
     </script>
