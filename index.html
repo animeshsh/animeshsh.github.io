@@ -3,49 +3,100 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Drone Pilot Pro </title>
+    <title>Drone Pilot Pro</title>
     <style>
         :root {
             --neon-blue: #00d2ff;
             --neon-red: #ff4757;
             --bg-dark: #0a0a0a;
+            --panel-bg: rgba(255, 255, 255, 0.03);
+            --panel-border: rgba(0, 210, 255, 0.3);
         }
 
         * {
             box-sizing: border-box;
         }
 
-        body {
+        html, body {
             margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
             background: var(--bg-dark);
             font-family: "Courier New", Courier, monospace;
             color: var(--neon-blue);
-            overflow: hidden;
+        }
+
+        body {
+            overflow-x: hidden;
+        }
+
+        .page-wrap {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 18px;
         }
 
         .game-container {
+            width: 100%;
+            max-width: 1220px;
             display: flex;
-            gap: 20px;
+            flex-direction: row;
             align-items: flex-start;
+            gap: 20px;
             position: relative;
         }
 
+        .canvas-column {
+            flex: 1 1 auto;
+            min-width: 0;
+            position: relative;
+        }
+
+        .canvas-shell {
+            position: relative;
+            width: 100%;
+        }
+
         canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-width: 800px;
             background: #121225;
             border: 2px solid var(--neon-blue);
             border-radius: 8px;
             box-shadow: 0 0 25px rgba(0, 210, 255, 0.15);
         }
 
+        .ui {
+            position: absolute;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+            width: calc(100% - 24px);
+            max-width: 800px;
+            text-align: center;
+            z-index: 2;
+        }
+
+        #score {
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--neon-blue);
+            letter-spacing: 1px;
+        }
+
         .side-panel {
-            width: 200px;
-            background: rgba(255, 255, 255, 0.03);
+            width: 280px;
+            flex: 0 0 280px;
+            background: var(--panel-bg);
             padding: 20px;
-            border: 1px solid rgba(0, 210, 255, 0.3);
+            border: 1px solid var(--panel-border);
             border-radius: 8px;
             display: flex;
             flex-direction: column;
@@ -75,29 +126,18 @@
             width: 100%;
         }
 
-        .ui {
-            position: absolute;
-            top: 40px;
-            pointer-events: none;
-            width: 800px;
-            text-align: center;
-        }
-
-        #score {
-            font-size: 28px;
-            font-weight: bold;
-            text-shadow: 0 0 10px var(--neon-blue);
-        }
-
         .debug {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
+            position: fixed;
+            bottom: 16px;
+            left: 16px;
             font-size: 11px;
             color: rgba(255, 255, 255, 0.35);
-            background: rgba(0, 0, 0, 0.55);
+            background: rgba(0, 0, 0, 0.60);
             padding: 6px 10px;
             border-radius: 4px;
+            z-index: 5;
+            max-width: calc(100vw - 32px);
+            word-break: break-word;
         }
 
         .control-wrap {
@@ -126,7 +166,7 @@
         }
 
         .check-row {
-            display: flex;
+            display: flex !important;
             align-items: center;
             gap: 8px;
             flex-direction: row !important;
@@ -167,7 +207,7 @@
         .panel-copy {
             font-size: 10px;
             color: #555;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
         .panel-link {
@@ -196,65 +236,153 @@
             width: 100%;
             margin: 0;
         }
+
+        @media (max-width: 980px) {
+            .page-wrap {
+                padding: 14px;
+            }
+
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 16px;
+            }
+
+            .canvas-column {
+                width: 100%;
+            }
+
+            .canvas-shell {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+            }
+
+            canvas {
+                max-width: 100%;
+            }
+
+            .side-panel {
+                width: 100%;
+                max-width: 800px;
+                flex: 0 0 auto;
+            }
+
+            .ui {
+                top: 14px;
+            }
+
+            #score {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page-wrap {
+                padding: 10px;
+            }
+
+            .game-container {
+                gap: 12px;
+            }
+
+            .side-panel {
+                padding: 14px;
+                gap: 12px;
+            }
+
+            .side-panel h3 {
+                font-size: 12px;
+            }
+
+            .panel-copy,
+            .scoreboard,
+            .control-wrap,
+            .panel-link a,
+            .footer-copy {
+                font-size: 10px;
+            }
+
+            .mini-text {
+                font-size: 8px;
+            }
+
+            #score {
+                font-size: 18px;
+            }
+
+            .debug {
+                left: 10px;
+                right: 10px;
+                bottom: 10px;
+                max-width: none;
+                font-size: 10px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="ui">
-            <div id="score">CONNECT GAME CONTROLLER</div>
-        </div>
-
-        <canvas id="gameCanvas" width="800" height="500"></canvas>
-
-        <div class="side-panel">
-            <h3>System Status</h3>
-            <div class="slider-wrap">
-                <label>Flow Speed: <span id="speedVal">1.0</span>x</label>
-                <input type="range" id="speedSlider" min="0.5" max="3" step="0.1" value="1" />
-                <div class="mini-text">RIGHT STICK CONTROL</div>
+    <div class="page-wrap">
+        <div class="game-container">
+            <div class="canvas-column">
+                <div class="canvas-shell">
+                    <div class="ui">
+                        <div id="score">CONNECT GAME CONTROLLER</div>
+                    </div>
+                    <canvas id="gameCanvas" width="800" height="500"></canvas>
+                </div>
             </div>
 
-            <hr />
+            <div class="side-panel">
+                <h3>System Status</h3>
+                <div class="slider-wrap">
+                    <label>Flow Speed: <span id="speedVal">1.0</span>x</label>
+                    <input type="range" id="speedSlider" min="0.5" max="3" step="0.1" value="1" />
+                    <div class="mini-text">RIGHT STICK CONTROL</div>
+                </div>
 
-            <div class="panel-copy">
-                Left Stick: Throttle<br /><br />
-                Right Stick X: Warp Speed<br /><br />
-                Right Trigger: Double Drone Size<br />
-                Left Trigger: Half Drone Size
+                <hr />
+
+                <div class="panel-copy">
+                    Left Stick: Throttle<br /><br />
+                    Right Stick X: Warp Speed<br /><br />
+                    Right Trigger: Double Drone Size<br />
+                    Left Trigger: Half Drone Size
+                </div>
+
+                <hr />
+
+                <h3>Control Mapping</h3>
+                <div class="control-wrap">
+                    <label>
+                        Movement Stick
+                        <select id="movementAxisSelect">
+                            <option value="1" selected>Left Stick Y</option>
+                            <option value="3">Right Stick Y</option>
+                        </select>
+                    </label>
+                    <label class="check-row">
+                        <input type="checkbox" id="invertMovementToggle" />
+                        Invert Movement
+                    </label>
+                </div>
+
+                <hr />
+
+                <h3>Top 3 Scores</h3>
+                <div class="scoreboard">
+                    <ol class="scoreboard-list" id="scoreboardList"></ol>
+                    <div class="scoreboard-empty" id="scoreboardEmpty">NO SCORES YET</div>
+                </div>
+
+                <hr />
+
+                <div class="panel-link">
+                    <a href="animesh.html">About Animesh</a>
+                </div>
+
+                <div class="footer-copy">(c) Animesh Sharma 2026</div>
             </div>
-
-            <hr />
-
-            <h3>Control Mapping</h3>
-            <div class="control-wrap">
-                <label>
-                    Movement Stick
-                    <select id="movementAxisSelect">
-                        <option value="1" selected>Left Stick Y</option>
-                        <option value="3">Right Stick Y</option>
-                    </select>
-                </label>
-                <label class="check-row">
-                    <input type="checkbox" id="invertMovementToggle" />
-                    Invert Movement
-                </label>
-            </div>
-
-            <hr />
-
-            <h3>Top 3 Scores</h3>
-            <div class="scoreboard">
-                <ol class="scoreboard-list" id="scoreboardList"></ol>
-                <div class="scoreboard-empty" id="scoreboardEmpty">NO SCORES YET</div>
-            </div>
-
-            <hr />
-
-            <div class="panel-link">
-                <a href="animesh.html">About Animesh</a>
-            </div>
-
-            <div class="footer-copy">(c) Animesh Sharma 2026</div>
         </div>
     </div>
 
@@ -331,6 +459,19 @@
 
         const obstacles = [];
         const obstacleGap = 180;
+
+        function resizeCanvasForLayout() {
+            const containerWidth = Math.min(canvas.parentElement.clientWidth, 800);
+            canvas.style.width = containerWidth + "px";
+
+            if (window.innerWidth <= 640) {
+                canvas.style.height = Math.round(containerWidth * 0.72) + "px";
+            } else if (window.innerWidth <= 980) {
+                canvas.style.height = Math.round(containerWidth * 0.66) + "px";
+            } else {
+                canvas.style.height = "auto";
+            }
+        }
 
         function getScaledWidth() {
             return player.baseWidth * player.scale;
@@ -632,7 +773,10 @@
             requestAnimationFrame(update);
         }
 
+        window.addEventListener("resize", resizeCanvasForLayout);
+
         renderHighScores();
+        resizeCanvasForLayout();
         update();
     </script>
 </body>
