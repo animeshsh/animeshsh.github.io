@@ -2,7 +2,7 @@
 
 Personal website hosted on GitHub Pages.
 
-#Coding and creating since before LLMs and GPTs
+Coding and creating since before LLMs and GPTs
 
 ## Live Site
 https://animeshsh.github.io
