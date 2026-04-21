@@ -21,18 +21,86 @@
       align-items: flex-start;
       gap: 24px;
       padding: 24px;
+      box-sizing: border-box;
     }
 
     .canvas-panel {
       display: flex;
       flex-direction: column;
       align-items: center;
+      gap: 16px;
+    }
+
+    .game-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
     }
 
     canvas {
       background: #1b1b1b;
       border: 3px solid #444;
       image-rendering: pixelated;
+      touch-action: none;
+    }
+
+    .touch-pad {
+      width: 150px;
+      height: 150px;
+      display: none;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr;
+      gap: 8px;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+    }
+
+    .touch-pad.active {
+      display: grid;
+    }
+
+    .touch-btn {
+      background: #222;
+      border: 2px solid #444;
+      border-radius: 14px;
+      color: #fff;
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: none;
+    }
+
+    .touch-btn:active,
+    .touch-btn.pressed {
+      background: #2d6cdf;
+      border-color: #5f92f0;
+    }
+
+    .touch-empty {
+      visibility: hidden;
+    }
+
+    .touch-up {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .touch-left {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .touch-right {
+      grid-column: 3;
+      grid-row: 2;
+    }
+
+    .touch-down {
+      grid-column: 2;
+      grid-row: 3;
     }
 
     .side-panel {
@@ -62,7 +130,8 @@
     .info div,
     .legend,
     .color-legend,
-    .nav-links {
+    .nav-links,
+    .touch-info {
       margin: 8px 0;
       line-height: 1.5;
     }
@@ -99,14 +168,16 @@
 
     .legend h3,
     .color-legend h3,
-    .nav-links h3 {
+    .nav-links h3,
+    .touch-info h3 {
       margin: 0 0 10px 0;
       font-size: 16px;
       color: #fff;
     }
 
     .legend strong,
-    .color-legend strong {
+    .color-legend strong,
+    .touch-info strong {
       color: #fff;
     }
 
@@ -131,25 +202,8 @@
       background: #32cd32;
     }
 
-    .swatch.player1-head {
-      background: #7CFC00;
-    }
-
     .swatch.player2 {
       background: #ff5555;
-    }
-
-    .swatch.player2-head {
-      background: #ff8888;
-    }
-
-    .swatch.food {
-      background: #ffd700;
-      border-radius: 50%;
-    }
-
-    .swatch.grid {
-      background: #2c2c2c;
     }
 
     .game-over h2 {
@@ -158,13 +212,11 @@
       font-size: 22px;
     }
 
-    .nav-links a,
     .footer a {
       color: #2d6cdf;
       text-decoration: none;
     }
 
-    .nav-links a:hover,
     .footer a:hover {
       text-decoration: underline;
     }
@@ -206,12 +258,74 @@
         width: 90vw;
       }
     }
+
+    @media (max-width: 950px) and (orientation: landscape) {
+      .container {
+        flex-direction: row;
+        align-items: flex-start;
+      }
+
+      .side-panel {
+        width: 320px;
+      }
+
+      canvas {
+        width: min(62vh, 62vw);
+        height: min(62vh, 62vw);
+      }
+
+      .touch-pad.mobile-visible {
+        display: grid;
+      }
+    }
+
+    @media (max-width: 950px) and (orientation: portrait) {
+      .game-area {
+        gap: 8px;
+      }
+
+      .touch-pad {
+        width: 110px;
+        height: 110px;
+        gap: 6px;
+      }
+
+      .touch-btn {
+        font-size: 22px;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="canvas-panel">
-      <canvas id="gameCanvas" width="600" height="600" class="hidden"></canvas>
+      <div class="game-area">
+        <div id="touchPadLeft" class="touch-pad">
+          <div class="touch-empty"></div>
+          <div class="touch-btn touch-up" data-pad="left" data-dir="up">▲</div>
+          <div class="touch-empty"></div>
+          <div class="touch-btn touch-left" data-pad="left" data-dir="left">◀</div>
+          <div class="touch-empty"></div>
+          <div class="touch-btn touch-right" data-pad="left" data-dir="right">▶</div>
+          <div class="touch-empty"></div>
+          <div class="touch-btn touch-down" data-pad="left" data-dir="down">▼</div>
+          <div class="touch-empty"></div>
+        </div>
+
+        <canvas id="gameCanvas" width="600" height="600" class="hidden"></canvas>
+
+        <div id="touchPadRight" class="touch-pad">
+          <div class="touch-empty"></div>
+          <div class="touch-btn touch-up" data-pad="right" data-dir="up">▲</div>
+          <div class="touch-empty"></div>
+          <div class="touch-btn touch-left" data-pad="right" data-dir="left">◀</div>
+          <div class="touch-empty"></div>
+          <div class="touch-btn touch-right" data-pad="right" data-dir="right">▶</div>
+          <div class="touch-empty"></div>
+          <div class="touch-btn touch-down" data-pad="right" data-dir="down">▼</div>
+          <div class="touch-empty"></div>
+        </div>
+      </div>
     </div>
 
     <div class="side-panel">
@@ -237,43 +351,24 @@
           <div><strong>Player 2:</strong> IJKL</div>
         </div>
 
+        <div class="touch-info section">
+          <h3>Mobile Touch Controls</h3>
+          <div><strong>Landscape PvP:</strong> left pad for Player 1, right pad for Player 2</div>
+          <div><strong>Landscape vs Computer:</strong> right pad controls Player 1</div>
+        </div>
+
         <div class="color-legend section">
           <h3>Color Legend</h3>
           <div class="color-row">
             <span class="swatch player1"></span>
-            <span>Player 1 </span>
+            <span>Player 1</span>
           </div>
-          <!--
-	  <div class="color-row">
-            <span class="swatch player1-head"></span>
-            <span>Player 1 head</span>
-          </div>
-	-->
           <div class="color-row">
             <span class="swatch player2"></span>
-            <span>Player 2 / Computer </span>
+            <span>Player 2 / Computer</span>
           </div>
-	<!--
-          <div class="color-row">
-            <span class="swatch player2-head"></span>
-            <span>Player 2 / Computer head</span>
-          </div>
-          <div class="color-row">
-            <span class="swatch food"></span>
-            <span>Food</span>
-          </div>
-          <div class="color-row">
-            <span class="swatch grid"></span>
-            <span>Grid lines</span>
-          </div>
-	-->
         </div>
-	<!--
-        <div class="nav-links section">
-          <h3>Links</h3>
-          <a href="animesh.html">About Animesh</a>
-        </div>
-	-->
+
         <div id="gameOver" class="game-over section hidden">
           <h2 id="gameOverText">Game Over</h2>
           <button id="restartBtn">Restart</button>
@@ -308,6 +403,10 @@
     const pvcBtn = document.getElementById("pvcBtn");
     const restartBtn = document.getElementById("restartBtn");
     const menuBtn = document.getElementById("menuBtn");
+
+    const touchPadLeft = document.getElementById("touchPadLeft");
+    const touchPadRight = document.getElementById("touchPadRight");
+    const touchButtons = document.querySelectorAll(".touch-btn");
 
     let mode = "pvp";
     let loop = null;
@@ -358,6 +457,7 @@
       food = spawnFood();
       gameEnded = false;
       updateHUD();
+      updateTouchPads();
       draw();
     }
 
@@ -384,6 +484,7 @@
       gameOverPanel.classList.add("hidden");
       menu.classList.remove("hidden");
       gameEnded = false;
+      hideTouchPads();
     }
 
     function updateHUD() {
@@ -442,6 +543,81 @@
         else if (key === "l") setSnakeDirection(snake2, { x: 1, y: 0 });
       }
     });
+
+    function handleTouchDirection(pad, dir) {
+      if (gameEnded || !snake1 || !snake2) return;
+
+      const directionMap = {
+        up: { x: 0, y: -1 },
+        down: { x: 0, y: 1 },
+        left: { x: -1, y: 0 },
+        right: { x: 1, y: 0 }
+      };
+
+      const newDir = directionMap[dir];
+      if (!newDir) return;
+
+      if (mode === "pvp") {
+        if (pad === "left") {
+          setSnakeDirection(snake1, newDir);
+        } else if (pad === "right") {
+          setSnakeDirection(snake2, newDir);
+        }
+      } else if (mode === "pvc") {
+        if (pad === "right") {
+          setSnakeDirection(snake1, newDir);
+        }
+      }
+    }
+
+    function addTouchHandlers(button) {
+      const press = (e) => {
+        e.preventDefault();
+        button.classList.add("pressed");
+        handleTouchDirection(button.dataset.pad, button.dataset.dir);
+      };
+
+      const release = (e) => {
+        e.preventDefault();
+        button.classList.remove("pressed");
+      };
+
+      button.addEventListener("touchstart", press, { passive: false });
+      button.addEventListener("touchend", release, { passive: false });
+      button.addEventListener("touchcancel", release, { passive: false });
+      button.addEventListener("mousedown", press);
+      button.addEventListener("mouseup", release);
+      button.addEventListener("mouseleave", release);
+    }
+
+    touchButtons.forEach(addTouchHandlers);
+
+    function isMobileLandscape() {
+      return window.matchMedia("(max-width: 950px) and (orientation: landscape)").matches;
+    }
+
+    function hideTouchPads() {
+      touchPadLeft.classList.remove("mobile-visible", "active");
+      touchPadRight.classList.remove("mobile-visible", "active");
+    }
+
+    function updateTouchPads() {
+      hideTouchPads();
+
+      if (!isMobileLandscape() || canvas.classList.contains("hidden")) {
+        return;
+      }
+
+      if (mode === "pvp") {
+        touchPadLeft.classList.add("mobile-visible", "active");
+        touchPadRight.classList.add("mobile-visible", "active");
+      } else if (mode === "pvc") {
+        touchPadRight.classList.add("mobile-visible", "active");
+      }
+    }
+
+    window.addEventListener("resize", updateTouchPads);
+    window.addEventListener("orientationchange", updateTouchPads);
 
     function wrapPosition(pos) {
       return {
