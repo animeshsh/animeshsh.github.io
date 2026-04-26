@@ -16,6 +16,8 @@ https://animeshsh.github.io
 PhD in Aeronautics and Astronautics (Purdue University, 2020)  
 Aerospace Engineer | Plasma Physicist | Drone Developer
 
+Built the first FPV flying wing in India (2015)
+
 ## Links
 - Google Scholar: https://scholar.google.com/citations?user=AnCBeHgAAAAJ
 - ORCID: https://orcid.org/0000-0003-4963-4648
