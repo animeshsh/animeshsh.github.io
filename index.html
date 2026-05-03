@@ -3,7 +3,29 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Drone Pilot Pro</title>
+    <title>Drone Pilot Pro by Animesh Sharma | Aerospace Drone Game</title>
+    <meta name="description" content="Play Drone Pilot Pro, a browser based aerospace drone game by Animesh Sharma. Explore drone flight, flappy drone mode, controller input, touch controls, and FPV inspired gameplay." />
+    <meta name="keywords" content="Animesh Sharma, Sharma Aerospace, aerospace, drone, drone game, FPV drone, browser game, flappy drone, quadcopter, UAV, drone pilot, drone simulator" />
+    <meta name="author" content="Animesh Sharma" />
+    <meta property="og:title" content="Drone Pilot Pro by Animesh Sharma" />
+    <meta property="og:description" content="A neon browser based drone game inspired by aerospace, FPV drones, UAV controls, and hands-on drone building." />
+    <meta property="og:type" content="website" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "VideoGame",
+      "name": "Drone Pilot Pro",
+      "author": {
+        "@type": "Person",
+        "name": "Animesh Sharma"
+      },
+      "description": "Drone Pilot Pro is a browser based aerospace drone game by Animesh Sharma with controller, touch, and flappy drone keyboard modes.",
+      "genre": ["Drone Game", "Aerospace Game", "Browser Game"],
+      "applicationCategory": "Game",
+      "operatingSystem": "Web Browser",
+      "keywords": "Animesh Sharma, Sharma Aerospace, aerospace, drone, FPV drone, UAV, drone game, flappy drone"
+    }
+    </script>
     <style>
         :root {
             --neon-blue: #00d2ff;
@@ -167,6 +189,42 @@
             font-family: inherit;
             font-size: 11px;
             outline: none;
+        }
+
+
+
+        .mode-button {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid rgba(0, 210, 255, 0.65);
+            border-radius: 6px;
+            background: rgba(0, 210, 255, 0.08);
+            color: var(--neon-blue);
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 0 12px rgba(0, 210, 255, 0.12);
+        }
+
+        .mode-button:hover,
+        .mode-button.active {
+            background: rgba(0, 210, 255, 0.20);
+            box-shadow: 0 0 18px rgba(0, 210, 255, 0.38);
+        }
+
+        .mode-button.active {
+            color: #ffffff;
+            border-color: #7feaff;
+        }
+
+        .mode-note {
+            font-size: 9px;
+            color: #7fdcff;
+            line-height: 1.5;
+            text-align: center;
         }
 
         .check-row {
@@ -485,23 +543,7 @@
             }
         }
 
-        @media (max-width: 640px) and (orientation: portrait) {
-            .touch-controls.default-overlay {
-                display: none !important;
-            }
 
-            .touch-controls.portrait-below {
-                display: none;
-            }
-
-            .touch-controls.portrait-below.active {
-                display: block;
-            }
-
-            .mobile-landscape-layout {
-                display: none !important;
-            }
-        }
 
         @media (max-width: 980px) and (orientation: landscape) and (pointer: coarse) {
             .game-container > .canvas-column,
@@ -596,6 +638,12 @@
 
                 <hr />
 
+                <h3>Game Mode</h3>
+                <button class="mode-button" id="flappyModeBtn" type="button">Flappy Drone Mode</button>
+                <div class="mode-note">Desktop: press Space to flap, start, and reboot.</div>
+
+                <hr />
+
                 <h3>Control Mapping</h3>
                 <div class="control-wrap">
                     <label>
@@ -683,6 +731,12 @@
 
                     <hr />
 
+                    <h3>Game Mode</h3>
+                    <button class="mode-button" id="flappyModeBtnLandscape" type="button">Flappy Drone</button>
+                    <div class="mode-note">Desktop mode uses Space key.</div>
+
+                    <hr />
+
                     <h3>Controls</h3>
                     <div class="control-wrap">
                         <label>
@@ -717,6 +771,41 @@
             </div>
         </div>
     </div>
+
+
+
+    <script type="application/ld+json" id="seo-aeo-content">
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {
+                    "@type": "Question",
+                    "name": "What is Drone Pilot Pro?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Drone Pilot Pro is a browser-based drone game by Animesh Sharma that combines aerospace-inspired flight control, FPV drone movement, obstacle navigation, and Flappy Drone Mode for desktop play using the Space key."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Who created Drone Pilot Pro?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Drone Pilot Pro was created by Animesh Sharma, an aerospace engineer, plasma scientist, drone developer, and creator associated with Sharma Aerospace style drone and UAV projects."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "What topics does this page cover?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "This page covers drones, aerospace, FPV flying, UAV controls, browser drone games, Flappy Drone Mode, drone simulation, and hands-on drone learning."
+                    }
+                }
+            ]
+        }
+    </script>
 
     <div class="debug" id="debugInfo">Awaiting Controller or Touch Input...</div>
 
@@ -766,6 +855,9 @@
         const rightJoystickLandscape = document.getElementById("rightJoystickLandscape");
         const leftStickLandscape = document.getElementById("leftStickLandscape");
         const rightStickLandscape = document.getElementById("rightStickLandscape");
+
+        const flappyModeBtn = document.getElementById("flappyModeBtn");
+        const flappyModeBtnLandscape = document.getElementById("flappyModeBtnLandscape");
 
         const HIGH_SCORE_KEY = "dronePilotProHighScores";
 
@@ -826,6 +918,10 @@
         let throttleValue = 0;
         let gameSpeedMultiplier = 1.0;
         let scoreRecordedForThisCrash = false;
+        let flappyDroneMode = false;
+        const flappyLift = -6.8;
+        const flappyGravity = 0.36;
+        const flappyDrag = 0.992;
 
         const player = {
             x: 120,
@@ -1226,6 +1322,15 @@
         }
 
         function updateInput() {
+            if (flappyDroneMode) {
+                throttleValue = player.dy < 0 ? 1 : 0;
+                gameSpeedMultiplier = 1.0;
+                updateSpeedDisplays(1.0);
+                player.scale = 1.0;
+                debugElement.innerText = "FLAPPY DRONE MODE: PRESS SPACE TO FLAP";
+                return;
+            }
+
             if (updateTouchInput()) {
                 return;
             }
@@ -1269,7 +1374,7 @@
             activeCtx.save();
             activeCtx.translate(player.x + player.baseWidth / 2, player.y + player.baseHeight / 2);
 
-            const targetRot = throttleValue > 0.5 ? -10 : 10;
+            const targetRot = flappyDroneMode ? Math.max(-18, Math.min(18, player.dy * 4)) : (throttleValue > 0.5 ? -10 : 10);
             player.rotation += (targetRot - player.rotation) * 0.1;
             activeCtx.rotate(player.rotation * Math.PI / 180);
 
@@ -1293,10 +1398,16 @@
         }
 
         function updatePlayerPhysics(activeCanvas) {
-            player.dy += player.gravity;
-            player.dy += throttleValue * player.thrustPower;
-            player.dy *= 0.98;
-            player.y += player.dy;
+            if (flappyDroneMode) {
+                player.dy += flappyGravity;
+                player.dy *= flappyDrag;
+                player.y += player.dy;
+            } else {
+                player.dy += player.gravity;
+                player.dy += throttleValue * player.thrustPower;
+                player.dy *= 0.98;
+                player.y += player.dy;
+            }
 
             const bounds = getPlayerBounds();
 
@@ -1347,9 +1458,9 @@
             activeCtx.font = "bold 16px Courier New";
 
             if (!gameStarted) {
-                let startText = "PUSH LEFT STICK UP TO START";
+                let startText = flappyDroneMode ? "PRESS SPACE TO START" : "PUSH LEFT STICK UP TO START";
 
-                if (isTouchDevice()) {
+                if (!flappyDroneMode && isTouchDevice()) {
                     if (isMobileLandscapeMode()) {
                         startText = "USE LEFT JOYSTICK ON THE LEFT PANEL TO START";
                     } else if (isPortraitPhoneMode()) {
@@ -1371,9 +1482,9 @@
             activeCtx.fillStyle = "white";
             activeCtx.font = "12px Courier New";
 
-            let rebootText = "PULL LEFT STICK DOWN TO REBOOT";
+            let rebootText = flappyDroneMode ? "PRESS SPACE TO REBOOT" : "PULL LEFT STICK DOWN TO REBOOT";
 
-            if (isTouchDevice()) {
+            if (!flappyDroneMode && isTouchDevice()) {
                 if (isMobileLandscapeMode()) {
                     rebootText = "PULL LEFT JOYSTICK DOWN ON THE LEFT PANEL TO REBOOT";
                 } else if (isPortraitPhoneMode()) {
@@ -1416,6 +1527,35 @@
 
             frames++;
             requestAnimationFrame(update);
+        }
+
+        function syncFlappyButtons() {
+            const text = flappyDroneMode ? "Flappy Drone: ON" : "Flappy Drone Mode";
+            [flappyModeBtn, flappyModeBtnLandscape].forEach((button) => {
+                if (!button) return;
+                button.textContent = text;
+                button.classList.toggle("active", flappyDroneMode);
+            });
+        }
+
+        function toggleFlappyDroneMode() {
+            flappyDroneMode = !flappyDroneMode;
+            player.dy = 0;
+            throttleValue = 0;
+            readyToRestart = false;
+            syncFlappyButtons();
+            updateScoreDisplays(flappyDroneMode ? "FLAPPY DRONE MODE" : (gameActive ? `SCORE: ${score}` : "CONNECT GAME CONTROLLER OR USE TOUCH"));
+        }
+
+        function flapDrone() {
+            if (!flappyDroneMode) return;
+
+            if (!gameActive) {
+                resetGame();
+            }
+
+            player.dy = flappyLift;
+            throttleValue = 1;
         }
 
         function resetTouchStick(side) {
@@ -1480,6 +1620,15 @@
             joystickEl.addEventListener("lostpointercapture", () => resetTouchStick(side));
         }
 
+        flappyModeBtn.addEventListener("click", toggleFlappyDroneMode);
+        flappyModeBtnLandscape.addEventListener("click", toggleFlappyDroneMode);
+
+        document.addEventListener("keydown", (event) => {
+            if (event.code !== "Space" || !flappyDroneMode) return;
+            event.preventDefault();
+            flapDrone();
+        });
+
         window.addEventListener("resize", resizeCanvasForLayout);
         window.addEventListener("orientationchange", resizeCanvasForLayout);
 
@@ -1490,6 +1639,7 @@
         bindJoystick(leftJoystickLandscape, "left");
         bindJoystick(rightJoystickLandscape, "right");
 
+        syncFlappyButtons();
         renderHighScores();
         syncMirroredControls();
         resizeCanvasForLayout();
