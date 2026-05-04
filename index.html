@@ -227,6 +227,57 @@
             text-align: center;
         }
 
+        .mobile-flap-button {
+            display: none;
+            position: absolute;
+            left: 50%;
+            bottom: 18px;
+            transform: translateX(-50%);
+            width: 132px;
+            height: 132px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 210, 255, 0.75);
+            background: radial-gradient(circle, rgba(0, 210, 255, 0.26) 0%, rgba(0, 0, 0, 0.50) 72%);
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 0 25px rgba(0, 210, 255, 0.35);
+            pointer-events: auto;
+            touch-action: manipulation;
+            user-select: none;
+            z-index: 5;
+        }
+
+        .mobile-flap-button.active {
+            display: block;
+        }
+
+        .mobile-flap-button:active {
+            transform: translateX(-50%) scale(0.96);
+            background: radial-gradient(circle, rgba(127, 234, 255, 0.50) 0%, rgba(0, 0, 0, 0.55) 72%);
+            box-shadow: 0 0 34px rgba(0, 210, 255, 0.70);
+        }
+
+        .mobile-flap-button.portrait-flap {
+            position: relative;
+            left: 50%;
+            bottom: auto;
+            margin-top: 8px;
+        }
+
+        .mobile-flap-button.landscape-flap {
+            position: relative;
+            left: 50%;
+            bottom: auto;
+            width: 92px;
+            height: 92px;
+            margin: 6px auto 14px auto;
+            font-size: 11px;
+        }
+
         .check-row {
             display: flex !important;
             align-items: center;
@@ -596,6 +647,7 @@
                             <div class="touch-stick" id="rightStick"></div>
                             <div class="touch-label">SPEED</div>
                         </div>
+                        <button class="mobile-flap-button" id="mobileFlapBtn" type="button">Tap<br />Flap</button>
                     </div>
 
                     <div class="touch-controls portrait-below" id="portraitTouchControls">
@@ -607,6 +659,7 @@
                             <div class="touch-stick" id="rightStickPortrait"></div>
                             <div class="touch-label">SPEED</div>
                         </div>
+                        <button class="mobile-flap-button portrait-flap" id="mobileFlapBtnPortrait" type="button">Tap<br />Flap</button>
                     </div>
                 </div>
             </div>
@@ -640,7 +693,7 @@
 
                 <h3>Game Mode</h3>
                 <button class="mode-button" id="flappyModeBtn" type="button">Flappy Drone Mode</button>
-                <div class="mode-note">Desktop: press Space to flap, start, and reboot.</div>
+                <div class="mode-note">Desktop: press Space. Mobile: select mode, then tap the Flap button to start, fly, and reboot.</div>
 
                 <hr />
 
@@ -733,7 +786,8 @@
 
                     <h3>Game Mode</h3>
                     <button class="mode-button" id="flappyModeBtnLandscape" type="button">Flappy Drone</button>
-                    <div class="mode-note">Desktop mode uses Space key.</div>
+                    <div class="mode-note">Mobile: tap Flap to start, fly, and reboot.</div>
+                    <button class="mobile-flap-button landscape-flap" id="mobileFlapBtnLandscape" type="button">Tap<br />Flap</button>
 
                     <hr />
 
@@ -766,7 +820,7 @@
                         <a href="animesh.html">About Animesh</a>
                     </div>
 
-                    <div class="footer-copy">(c) Animesh Sharma 2025</div>
+                    <div class="footer-copy">(c) Animesh Sharma 2026</div>
                 </div>
             </div>
         </div>
@@ -784,7 +838,7 @@
                     "name": "What is Drone Pilot Pro?",
                     "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "Drone Pilot Pro is a browser-based drone game by Animesh Sharma that combines aerospace-inspired flight control, FPV drone movement, obstacle navigation, and Flappy Drone Mode for desktop play using the Space key."
+                        "text": "Drone Pilot Pro is a browser-based drone game by Animesh Sharma that combines aerospace-inspired flight control, FPV drone movement, obstacle navigation, and Flappy Drone Mode for desktop play using the Space key and mobile play using the Tap Flap button."
                     }
                 },
                 {
@@ -858,6 +912,9 @@
 
         const flappyModeBtn = document.getElementById("flappyModeBtn");
         const flappyModeBtnLandscape = document.getElementById("flappyModeBtnLandscape");
+        const mobileFlapBtn = document.getElementById("mobileFlapBtn");
+        const mobileFlapBtnPortrait = document.getElementById("mobileFlapBtnPortrait");
+        const mobileFlapBtnLandscape = document.getElementById("mobileFlapBtnLandscape");
 
         const HIGH_SCORE_KEY = "dronePilotProHighScores";
 
@@ -1078,6 +1135,7 @@
                 touchControls.classList.remove("active");
                 portraitTouchControls.classList.remove("active");
                 mobileLandscapeLayout.style.display = "none";
+                updateMobileFlapButtons();
                 return;
             }
 
@@ -1098,6 +1156,7 @@
             syncAllStickVisuals("left");
             syncAllStickVisuals("right");
             syncMirroredControls();
+            updateMobileFlapButtons();
         }
 
         function getScaledWidth() {
@@ -1327,7 +1386,9 @@
                 gameSpeedMultiplier = 1.0;
                 updateSpeedDisplays(1.0);
                 player.scale = 1.0;
-                debugElement.innerText = "FLAPPY DRONE MODE: PRESS SPACE TO FLAP";
+                debugElement.innerText = isTouchDevice()
+                    ? "FLAPPY DRONE MODE: TAP THE FLAP BUTTON"
+                    : "FLAPPY DRONE MODE: PRESS SPACE TO FLAP";
                 return;
             }
 
@@ -1458,7 +1519,7 @@
             activeCtx.font = "bold 16px Courier New";
 
             if (!gameStarted) {
-                let startText = flappyDroneMode ? "PRESS SPACE TO START" : "PUSH LEFT STICK UP TO START";
+                let startText = flappyDroneMode ? (isTouchDevice() ? "TAP FLAP TO START" : "PRESS SPACE TO START") : "PUSH LEFT STICK UP TO START";
 
                 if (!flappyDroneMode && isTouchDevice()) {
                     if (isMobileLandscapeMode()) {
@@ -1482,7 +1543,7 @@
             activeCtx.fillStyle = "white";
             activeCtx.font = "12px Courier New";
 
-            let rebootText = flappyDroneMode ? "PRESS SPACE TO REBOOT" : "PULL LEFT STICK DOWN TO REBOOT";
+            let rebootText = flappyDroneMode ? (isTouchDevice() ? "TAP FLAP TO REBOOT" : "PRESS SPACE TO REBOOT") : "PULL LEFT STICK DOWN TO REBOOT";
 
             if (!flappyDroneMode && isTouchDevice()) {
                 if (isMobileLandscapeMode()) {
@@ -1535,6 +1596,15 @@
                 if (!button) return;
                 button.textContent = text;
                 button.classList.toggle("active", flappyDroneMode);
+            });
+            updateMobileFlapButtons();
+        }
+
+        function updateMobileFlapButtons() {
+            const showMobileFlap = flappyDroneMode && isTouchDevice();
+            [mobileFlapBtn, mobileFlapBtnPortrait, mobileFlapBtnLandscape].forEach((button) => {
+                if (!button) return;
+                button.classList.toggle("active", showMobileFlap);
             });
         }
 
@@ -1628,6 +1698,23 @@
             event.preventDefault();
             flapDrone();
         });
+
+        function bindMobileFlapButton(button) {
+            if (!button) return;
+            button.addEventListener("pointerdown", (event) => {
+                if (!flappyDroneMode) return;
+                event.preventDefault();
+                flapDrone();
+            });
+            button.addEventListener("click", (event) => {
+                if (!flappyDroneMode) return;
+                event.preventDefault();
+            });
+        }
+
+        bindMobileFlapButton(mobileFlapBtn);
+        bindMobileFlapButton(mobileFlapBtnPortrait);
+        bindMobileFlapButton(mobileFlapBtnLandscape);
 
         window.addEventListener("resize", resizeCanvasForLayout);
         window.addEventListener("orientationchange", resizeCanvasForLayout);
