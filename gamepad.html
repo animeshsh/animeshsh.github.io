@@ -3,385 +3,460 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Mobile Gamepad | Animesh Sharma</title>
 
-  <!-- PeerJS allows phone and desktop to talk using WebRTC from static GitHub Pages -->
-  <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
+  <title>Drone Gamepad | Mobile Controller</title>
 
   <style>
-    :root {
-      --bg: #05070f;
-      --panel: rgba(12, 18, 34, 0.92);
-      --text: #eaf6ff;
-      --muted: #8aa4b8;
-      --cyan: #00e5ff;
-      --green: #25ff8a;
-      --red: #ff4d6d;
-    }
-
     * {
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at center, #111933, #050816);
+      color: white;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
       touch-action: none;
     }
 
-    html,
-    body {
-      margin: 0;
-      height: 100%;
-      overflow: hidden;
-      background:
-        radial-gradient(circle at 50% 20%, rgba(0, 229, 255, 0.16), transparent 36%),
-        var(--bg);
-      color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
-    }
-
-    body {
-      display: grid;
-      grid-template-rows: auto 1fr;
-      gap: 10px;
-      padding: 12px;
-    }
-
-    header {
-      background: var(--panel);
-      border: 1px solid rgba(0, 229, 255, 0.25);
-      border-radius: 20px;
-      padding: 14px;
+    .screen {
+      width: 100vw;
+      height: 100vh;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
     }
 
     h1 {
-      margin: 0 0 8px;
-      font-size: 22px;
+      margin: 0;
+      color: cyan;
+      font-size: 26px;
+      text-shadow: 0 0 14px cyan;
     }
 
-    p {
-      margin: 6px 0;
-      color: var(--muted);
-      line-height: 1.35;
-      font-size: 14px;
-    }
-
-    .connectRow {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 8px;
-      margin-top: 10px;
+    .panel {
+      width: 100%;
+      max-width: 430px;
+      padding: 14px;
+      border: 1px solid rgba(0, 255, 255, 0.35);
+      border-radius: 16px;
+      background: rgba(0, 0, 0, 0.35);
+      box-shadow: 0 0 18px rgba(0, 255, 255, 0.2);
     }
 
     input {
       width: 100%;
-      border: 1px solid rgba(0, 229, 255, 0.35);
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.07);
-      color: var(--text);
-      padding: 13px;
-      font-size: 17px;
+      padding: 14px;
+      margin-top: 10px;
+      border-radius: 12px;
+      border: 1px solid cyan;
+      background: #07101f;
+      color: white;
+      font-size: 18px;
+      text-align: center;
       outline: none;
     }
 
     button {
-      border: 1px solid rgba(0, 229, 255, 0.35);
-      border-radius: 14px;
-      background: rgba(0, 229, 255, 0.14);
-      color: var(--text);
-      padding: 13px 15px;
-      font-size: 16px;
-      font-weight: 800;
+      border: 2px solid cyan;
+      background: rgba(0, 255, 255, 0.12);
+      color: white;
+      border-radius: 18px;
+      font-weight: bold;
+      box-shadow: 0 0 16px rgba(0, 255, 255, 0.35);
     }
 
-    button:active {
-      transform: scale(0.97);
-      background: rgba(0, 229, 255, 0.28);
+    button:active,
+    button.active {
+      background: cyan;
+      color: #050816;
     }
 
-    .status {
-      display: inline-flex;
-      gap: 8px;
-      align-items: center;
-      margin-top: 8px;
+    #connectBtn,
+    #motionBtn {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      font-size: 18px;
+    }
+
+    #status {
+      margin-top: 10px;
       font-size: 14px;
-      color: var(--muted);
+      opacity: 0.85;
+      text-align: center;
     }
 
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--red);
-      box-shadow: 0 0 12px var(--red);
-    }
-
-    .dot.connected {
-      background: var(--green);
-      box-shadow: 0 0 12px var(--green);
-    }
-
-    main {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      min-height: 0;
-    }
-
-    .padPanel {
-      background: var(--panel);
-      border: 1px solid rgba(0, 229, 255, 0.25);
-      border-radius: 24px;
-      position: relative;
-      min-height: 260px;
-      overflow: hidden;
+    .controls {
+      width: 100%;
+      max-width: 430px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
     }
 
     #joystickBase {
-      width: min(64vw, 270px);
-      height: min(64vw, 270px);
-      max-width: 100%;
-      max-height: 100%;
+      width: 190px;
+      height: 190px;
       border-radius: 50%;
-      border: 2px solid rgba(0, 229, 255, 0.4);
-      background:
-        radial-gradient(circle, rgba(0, 229, 255, 0.16), rgba(0, 229, 255, 0.04));
-      box-shadow: inset 0 0 30px rgba(0, 229, 255, 0.12);
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
+      border: 2px solid cyan;
+      position: relative;
+      box-shadow: 0 0 22px rgba(0, 255, 255, 0.55);
+      background: rgba(0, 255, 255, 0.08);
+      flex-shrink: 0;
     }
 
-    #stick {
-      width: 86px;
-      height: 86px;
+    #joystickStick {
+      width: 74px;
+      height: 74px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--cyan), #006eff);
-      box-shadow: 0 0 28px rgba(0, 229, 255, 0.7);
+      background: cyan;
       position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
+      left: 56px;
+      top: 56px;
+      box-shadow: 0 0 22px cyan;
     }
 
     .buttons {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      align-content: center;
-      padding: 18px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
     }
 
-    .action {
-      min-height: 84px;
-      border-radius: 22px;
-      font-size: 17px;
+    .gameBtn {
+      height: 70px;
+      font-size: 20px;
     }
 
-    .wide {
-      grid-column: 1 / -1;
+    .motionData {
+      width: 100%;
+      max-width: 430px;
+      font-size: 13px;
+      opacity: 0.8;
+      text-align: center;
+      line-height: 1.5;
     }
 
-    @media (orientation: portrait) {
-      main {
-        grid-template-columns: 1fr;
-        grid-template-rows: 1fr auto;
-      }
-
-      .buttons {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-
-    @media (orientation: landscape) {
-      body {
-        grid-template-rows: auto 1fr;
-      }
-
-      header {
-        display: grid;
-        grid-template-columns: 1fr 1.35fr;
-        gap: 10px;
-        align-items: center;
-      }
-
-      .connectRow {
-        margin-top: 0;
-      }
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 
 <body>
-  <header>
-    <div>
-      <h1>Mobile Gamepad</h1>
-                <div class="panel-link">
-                    <a href="animesh.html">About Animesh</a>
-                </div>
+  <div class="screen">
 
-                <div class="footer-copy">(c) Animesh Sharma 2026</div>
-      <p>Enter the Pair Code shown on desktop.html, then use the joystick to move the block.</p>
-      <div class="status">
-        <span id="dot" class="dot"></span>
-        <span id="statusText">Not connected</span>
+    <div class="panel">
+      <h1>Drone Gamepad</h1>
+
+      <input id="peerCodeInput" placeholder="Enter desktop pair code" />
+
+      <button id="connectBtn">Connect</button>
+
+      <button id="motionBtn">Enable Motion Control</button>
+
+      <div id="status">Not connected</div>
+    </div>
+
+    <div class="controls">
+      <div id="joystickBase">
+        <div id="joystickStick"></div>
+      </div>
+
+      <div class="buttons">
+        <button id="boostBtn" class="gameBtn">BOOST</button>
+        <button id="brakeBtn" class="gameBtn">BRAKE</button>
       </div>
     </div>
 
-    <div class="connectRow">
-      <input id="peerInput" placeholder="Example: drone-abc12" autocomplete="off" />
-      <button id="connectBtn">Connect</button>
+    <div class="motionData">
+      Control Mode: <span id="controlMode">Joystick</span><br />
+      Tilt X: <span id="tiltX">0.00</span> |
+      Tilt Y: <span id="tiltY">0.00</span>
     </div>
-  </header>
 
-  <main>
-    <section class="padPanel" id="joyPanel" aria-label="Joystick">
-      <div id="joystickBase"></div>
-      <div id="stick"></div>
-    </section>
+  </div>
 
-    <section class="padPanel buttons" aria-label="Action buttons">
-      <button class="action" data-button="boost">Bigger</button>
-      <button class="action" data-button="shrink">Smaller</button>
-      <button class="action" data-button="color">Color</button>
-      <button class="action" data-button="reset">Reset</button>
-      <button class="action wide" id="stopBtn">Stop</button>
-    </section>
-  </main>
+  <!-- PeerJS CDN -->
+  <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
 
   <script>
-    const peerInput = document.getElementById("peerInput");
+    const peerCodeInput = document.getElementById("peerCodeInput");
     const connectBtn = document.getElementById("connectBtn");
-    const statusText = document.getElementById("statusText");
-    const dot = document.getElementById("dot");
-    const joyPanel = document.getElementById("joyPanel");
-    const joystickBase = document.getElementById("joystickBase");
-    const stick = document.getElementById("stick");
-    const stopBtn = document.getElementById("stopBtn");
+    const motionBtn = document.getElementById("motionBtn");
+    const statusEl = document.getElementById("status");
 
-    let conn = null;
-    let activePointerId = null;
-    let center = { x: 0, y: 0 };
-    let radius = 100;
+    const base = document.getElementById("joystickBase");
+    const stick = document.getElementById("joystickStick");
 
-    const peer = new Peer(undefined, {
-      debug: 1
-    });
+    const boostBtn = document.getElementById("boostBtn");
+    const brakeBtn = document.getElementById("brakeBtn");
 
-    function setStatus(text, connected) {
-      statusText.textContent = text;
-      dot.classList.toggle("connected", connected);
+    const controlModeEl = document.getElementById("controlMode");
+    const tiltXEl = document.getElementById("tiltX");
+    const tiltYEl = document.getElementById("tiltY");
+
+    let peer;
+    let conn;
+
+    let inputX = 0;
+    let inputY = 0;
+    let boost = false;
+    let brake = false;
+
+    let motionEnabled = false;
+
+    const MOTION_DEADZONE = 0.08;
+    const MOTION_SENSITIVITY = 0.045;
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
     }
 
-    function connectToDesktop() {
-      const targetId = peerInput.value.trim();
+    function applyDeadzone(value) {
+      if (Math.abs(value) < MOTION_DEADZONE) return 0;
+      return value;
+    }
 
-      if (!targetId) {
-        setStatus("Enter desktop Pair Code first", false);
+    function sendInput() {
+      if (conn && conn.open) {
+        conn.send({
+          type: "input",
+          x: inputX,
+          y: inputY,
+          boost: boost,
+          brake: brake,
+          controlMode: motionEnabled ? "motion" : "joystick"
+        });
+      }
+    }
+
+    setInterval(sendInput, 16);
+
+    connectBtn.addEventListener("click", () => {
+      const desktopPeerId = peerCodeInput.value.trim();
+
+      if (!desktopPeerId) {
+        statusEl.textContent = "Enter the desktop pair code first.";
         return;
       }
 
-      setStatus("Connecting...", false);
-      conn = peer.connect(targetId, { reliable: true });
+      peer = new Peer();
 
-      conn.on("open", () => {
-        setStatus("Connected to desktop", true);
+      peer.on("open", () => {
+        conn = peer.connect(desktopPeerId);
+
+        conn.on("open", () => {
+          statusEl.textContent = "Connected to desktop.";
+        });
+
+        conn.on("close", () => {
+          statusEl.textContent = "Connection closed.";
+        });
+
+        conn.on("error", () => {
+          statusEl.textContent = "Connection error.";
+        });
       });
 
-      conn.on("close", () => {
-        setStatus("Disconnected", false);
+      peer.on("error", (err) => {
+        statusEl.textContent = "Peer error: " + err.type;
       });
+    });
 
-      conn.on("error", err => {
-        console.error(err);
-        setStatus("Connection failed", false);
-      });
+    function handleJoystick(clientX, clientY) {
+      if (motionEnabled) return;
+
+      const rect = base.getBoundingClientRect();
+
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      let dx = clientX - centerX;
+      let dy = clientY - centerY;
+
+      const maxRadius = rect.width / 2 - 37;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance > maxRadius) {
+        dx = (dx / distance) * maxRadius;
+        dy = (dy / distance) * maxRadius;
+      }
+
+      inputX = dx / maxRadius;
+      inputY = dy / maxRadius;
+
+      stick.style.left = 56 + dx + "px";
+      stick.style.top = 56 + dy + "px";
     }
 
-    function send(data) {
-      if (conn && conn.open) {
-        conn.send(data);
+    function resetJoystick() {
+      if (motionEnabled) return;
+
+      inputX = 0;
+      inputY = 0;
+
+      stick.style.left = "56px";
+      stick.style.top = "56px";
+    }
+
+    base.addEventListener("touchstart", (e) => {
+      const touch = e.touches[0];
+      handleJoystick(touch.clientX, touch.clientY);
+    });
+
+    base.addEventListener("touchmove", (e) => {
+      const touch = e.touches[0];
+      handleJoystick(touch.clientX, touch.clientY);
+      e.preventDefault();
+    }, { passive: false });
+
+    base.addEventListener("touchend", () => {
+      resetJoystick();
+    });
+
+    base.addEventListener("mousedown", (e) => {
+      handleJoystick(e.clientX, e.clientY);
+
+      function moveHandler(ev) {
+        handleJoystick(ev.clientX, ev.clientY);
+      }
+
+      function upHandler() {
+        resetJoystick();
+        window.removeEventListener("mousemove", moveHandler);
+        window.removeEventListener("mouseup", upHandler);
+      }
+
+      window.addEventListener("mousemove", moveHandler);
+      window.addEventListener("mouseup", upHandler);
+    });
+
+    boostBtn.addEventListener("touchstart", () => {
+      boost = true;
+      boostBtn.classList.add("active");
+    });
+
+    boostBtn.addEventListener("touchend", () => {
+      boost = false;
+      boostBtn.classList.remove("active");
+    });
+
+    boostBtn.addEventListener("mousedown", () => {
+      boost = true;
+      boostBtn.classList.add("active");
+    });
+
+    boostBtn.addEventListener("mouseup", () => {
+      boost = false;
+      boostBtn.classList.remove("active");
+    });
+
+    brakeBtn.addEventListener("touchstart", () => {
+      brake = true;
+      brakeBtn.classList.add("active");
+    });
+
+    brakeBtn.addEventListener("touchend", () => {
+      brake = false;
+      brakeBtn.classList.remove("active");
+    });
+
+    brakeBtn.addEventListener("mousedown", () => {
+      brake = true;
+      brakeBtn.classList.add("active");
+    });
+
+    brakeBtn.addEventListener("mouseup", () => {
+      brake = false;
+      brakeBtn.classList.remove("active");
+    });
+
+    async function enableMotionControls() {
+      try {
+        if (
+          typeof DeviceOrientationEvent !== "undefined" &&
+          typeof DeviceOrientationEvent.requestPermission === "function"
+        ) {
+          const permission = await DeviceOrientationEvent.requestPermission();
+
+          if (permission !== "granted") {
+            statusEl.textContent = "Motion permission denied.";
+            return;
+          }
+        }
+
+        motionEnabled = !motionEnabled;
+
+        if (motionEnabled) {
+          motionBtn.textContent = "Disable Motion Control";
+          motionBtn.classList.add("active");
+          controlModeEl.textContent = "Motion";
+          stick.style.left = "56px";
+          stick.style.top = "56px";
+          statusEl.textContent = "Motion control enabled.";
+        } else {
+          motionBtn.textContent = "Enable Motion Control";
+          motionBtn.classList.remove("active");
+          controlModeEl.textContent = "Joystick";
+          inputX = 0;
+          inputY = 0;
+          statusEl.textContent = "Joystick control enabled.";
+        }
+      } catch (error) {
+        statusEl.textContent = "Motion control not available.";
       }
     }
 
-    function measureJoystick() {
-      const baseRect = joystickBase.getBoundingClientRect();
-      center.x = baseRect.left + baseRect.width / 2;
-      center.y = baseRect.top + baseRect.height / 2;
-      radius = baseRect.width / 2 - 43;
-    }
+    motionBtn.addEventListener("click", enableMotionControls);
 
-    function moveStick(clientX, clientY) {
-      measureJoystick();
+    window.addEventListener("deviceorientation", (event) => {
+      if (!motionEnabled) return;
 
-      let dx = clientX - center.x;
-      let dy = clientY - center.y;
-      const distance = Math.hypot(dx, dy);
+      /*
+        beta  = front/back tilt, roughly -180 to 180
+        gamma = left/right tilt, roughly -90 to 90
 
-      if (distance > radius) {
-        dx = (dx / distance) * radius;
-        dy = (dy / distance) * radius;
-      }
+        Holding phone flat:
+        gamma controls left/right
+        beta controls forward/back
 
-      stick.style.left = `calc(50% + ${dx}px)`;
-      stick.style.top = `calc(50% + ${dy}px)`;
+        We map:
+        gamma → inputX
+        beta  → inputY
+      */
 
-      send({
-        type: "stick",
-        x: dx / radius,
-        y: dy / radius
-      });
-    }
+      let gamma = event.gamma || 0;
+      let beta = event.beta || 0;
 
-    function resetStick() {
-      stick.style.left = "50%";
-      stick.style.top = "50%";
-      send({ type: "stick", x: 0, y: 0 });
-    }
+      let x = gamma * MOTION_SENSITIVITY;
+      let y = beta * MOTION_SENSITIVITY;
 
-    connectBtn.addEventListener("click", connectToDesktop);
+      x = clamp(x, -1, 1);
+      y = clamp(y, -1, 1);
 
-    peerInput.addEventListener("keydown", event => {
-      if (event.key === "Enter") connectToDesktop();
+      x = applyDeadzone(x);
+      y = applyDeadzone(y);
+
+      inputX = x;
+      inputY = y;
+
+      tiltXEl.textContent = inputX.toFixed(2);
+      tiltYEl.textContent = inputY.toFixed(2);
+
+      const visualX = inputX * 56;
+      const visualY = inputY * 56;
+
+      stick.style.left = 56 + visualX + "px";
+      stick.style.top = 56 + visualY + "px";
     });
-
-    joyPanel.addEventListener("pointerdown", event => {
-      activePointerId = event.pointerId;
-      joyPanel.setPointerCapture(activePointerId);
-      moveStick(event.clientX, event.clientY);
-    });
-
-    joyPanel.addEventListener("pointermove", event => {
-      if (event.pointerId !== activePointerId) return;
-      moveStick(event.clientX, event.clientY);
-    });
-
-    joyPanel.addEventListener("pointerup", event => {
-      if (event.pointerId !== activePointerId) return;
-      activePointerId = null;
-      resetStick();
-    });
-
-    joyPanel.addEventListener("pointercancel", () => {
-      activePointerId = null;
-      resetStick();
-    });
-
-    document.querySelectorAll("[data-button]").forEach(button => {
-      const name = button.dataset.button;
-
-      button.addEventListener("pointerdown", () => {
-        send({ type: "button", button: name, pressed: true });
-      });
-
-      button.addEventListener("pointerup", () => {
-        send({ type: "button", button: name, pressed: false });
-      });
-    });
-
-    stopBtn.addEventListener("click", resetStick);
-
-    window.addEventListener("resize", measureJoystick);
-
-    setStatus("Not connected", false);
   </script>
 </body>
 </html>
