@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Mobile Gamepad | Animesh Sharma</title>
+
+  <!-- PeerJS allows phone and desktop to talk using WebRTC from static GitHub Pages -->
+  <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #05070f;
+      --panel: rgba(12, 18, 34, 0.92);
+      --text: #eaf6ff;
+      --muted: #8aa4b8;
+      --cyan: #00e5ff;
+      --green: #25ff8a;
+      --red: #ff4d6d;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: none;
+    }
+
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(0, 229, 255, 0.16), transparent 36%),
+        var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 10px;
+      padding: 12px;
+    }
+
+    header {
+      background: var(--panel);
+      border: 1px solid rgba(0, 229, 255, 0.25);
+      border-radius: 20px;
+      padding: 14px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+
+    p {
+      margin: 6px 0;
+      color: var(--muted);
+      line-height: 1.35;
+      font-size: 14px;
+    }
+
+    .connectRow {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--text);
+      padding: 13px;
+      font-size: 17px;
+      outline: none;
+    }
+
+    button {
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      border-radius: 14px;
+      background: rgba(0, 229, 255, 0.14);
+      color: var(--text);
+      padding: 13px 15px;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    button:active {
+      transform: scale(0.97);
+      background: rgba(0, 229, 255, 0.28);
+    }
+
+    .status {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--red);
+      box-shadow: 0 0 12px var(--red);
+    }
+
+    .dot.connected {
+      background: var(--green);
+      box-shadow: 0 0 12px var(--green);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .padPanel {
+      background: var(--panel);
+      border: 1px solid rgba(0, 229, 255, 0.25);
+      border-radius: 24px;
+      position: relative;
+      min-height: 260px;
+      overflow: hidden;
+    }
+
+    #joystickBase {
+      width: min(64vw, 270px);
+      height: min(64vw, 270px);
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 50%;
+      border: 2px solid rgba(0, 229, 255, 0.4);
+      background:
+        radial-gradient(circle, rgba(0, 229, 255, 0.16), rgba(0, 229, 255, 0.04));
+      box-shadow: inset 0 0 30px rgba(0, 229, 255, 0.12);
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    #stick {
+      width: 86px;
+      height: 86px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--cyan), #006eff);
+      box-shadow: 0 0 28px rgba(0, 229, 255, 0.7);
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      align-content: center;
+      padding: 18px;
+    }
+
+    .action {
+      min-height: 84px;
+      border-radius: 22px;
+      font-size: 17px;
+    }
+
+    .wide {
+      grid-column: 1 / -1;
+    }
+
+    @media (orientation: portrait) {
+      main {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr auto;
+      }
+
+      .buttons {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (orientation: landscape) {
+      body {
+        grid-template-rows: auto 1fr;
+      }
+
+      header {
+        display: grid;
+        grid-template-columns: 1fr 1.35fr;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .connectRow {
+        margin-top: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div>
+      <h1>Mobile Gamepad</h1>
+      <p>Enter the Pair Code shown on desktop.html, then use the joystick to move the block.</p>
+      <div class="status">
+        <span id="dot" class="dot"></span>
+        <span id="statusText">Not connected</span>
+      </div>
+    </div>
+
+    <div class="connectRow">
+      <input id="peerInput" placeholder="Example: drone-abc12" autocomplete="off" />
+      <button id="connectBtn">Connect</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="padPanel" id="joyPanel" aria-label="Joystick">
+      <div id="joystickBase"></div>
+      <div id="stick"></div>
+    </section>
+
+    <section class="padPanel buttons" aria-label="Action buttons">
+      <button class="action" data-button="boost">Bigger</button>
+      <button class="action" data-button="shrink">Smaller</button>
+      <button class="action" data-button="color">Color</button>
+      <button class="action" data-button="reset">Reset</button>
+      <button class="action wide" id="stopBtn">Stop</button>
+    </section>
+  </main>
+
+  <script>
+    const peerInput = document.getElementById("peerInput");
+    const connectBtn = document.getElementById("connectBtn");
+    const statusText = document.getElementById("statusText");
+    const dot = document.getElementById("dot");
+    const joyPanel = document.getElementById("joyPanel");
+    const joystickBase = document.getElementById("joystickBase");
+    const stick = document.getElementById("stick");
+    const stopBtn = document.getElementById("stopBtn");
+
+    let conn = null;
+    let activePointerId = null;
+    let center = { x: 0, y: 0 };
+    let radius = 100;
+
+    const peer = new Peer(undefined, {
+      debug: 1
+    });
+
+    function setStatus(text, connected) {
+      statusText.textContent = text;
+      dot.classList.toggle("connected", connected);
+    }
+
+    function connectToDesktop() {
+      const targetId = peerInput.value.trim();
+
+      if (!targetId) {
+        setStatus("Enter desktop Pair Code first", false);
+        return;
+      }
+
+      setStatus("Connecting...", false);
+      conn = peer.connect(targetId, { reliable: true });
+
+      conn.on("open", () => {
+        setStatus("Connected to desktop", true);
+      });
+
+      conn.on("close", () => {
+        setStatus("Disconnected", false);
+      });
+
+      conn.on("error", err => {
+        console.error(err);
+        setStatus("Connection failed", false);
+      });
+    }
+
+    function send(data) {
+      if (conn && conn.open) {
+        conn.send(data);
+      }
+    }
+
+    function measureJoystick() {
+      const baseRect = joystickBase.getBoundingClientRect();
+      center.x = baseRect.left + baseRect.width / 2;
+      center.y = baseRect.top + baseRect.height / 2;
+      radius = baseRect.width / 2 - 43;
+    }
+
+    function moveStick(clientX, clientY) {
+      measureJoystick();
+
+      let dx = clientX - center.x;
+      let dy = clientY - center.y;
+      const distance = Math.hypot(dx, dy);
+
+      if (distance > radius) {
+        dx = (dx / distance) * radius;
+        dy = (dy / distance) * radius;
+      }
+
+      stick.style.left = `calc(50% + ${dx}px)`;
+      stick.style.top = `calc(50% + ${dy}px)`;
+
+      send({
+        type: "stick",
+        x: dx / radius,
+        y: dy / radius
+      });
+    }
+
+    function resetStick() {
+      stick.style.left = "50%";
+      stick.style.top = "50%";
+      send({ type: "stick", x: 0, y: 0 });
+    }
+
+    connectBtn.addEventListener("click", connectToDesktop);
+
+    peerInput.addEventListener("keydown", event => {
+      if (event.key === "Enter") connectToDesktop();
+    });
+
+    joyPanel.addEventListener("pointerdown", event => {
+      activePointerId = event.pointerId;
+      joyPanel.setPointerCapture(activePointerId);
+      moveStick(event.clientX, event.clientY);
+    });
+
+    joyPanel.addEventListener("pointermove", event => {
+      if (event.pointerId !== activePointerId) return;
+      moveStick(event.clientX, event.clientY);
+    });
+
+    joyPanel.addEventListener("pointerup", event => {
+      if (event.pointerId !== activePointerId) return;
+      activePointerId = null;
+      resetStick();
+    });
+
+    joyPanel.addEventListener("pointercancel", () => {
+      activePointerId = null;
+      resetStick();
+    });
+
+    document.querySelectorAll("[data-button]").forEach(button => {
+      const name = button.dataset.button;
+
+      button.addEventListener("pointerdown", () => {
+        send({ type: "button", button: name, pressed: true });
+      });
+
+      button.addEventListener("pointerup", () => {
+        send({ type: "button", button: name, pressed: false });
+      });
+    });
+
+    stopBtn.addEventListener("click", resetStick);
+
+    window.addEventListener("resize", measureJoystick);
+
+    setStatus("Not connected", false);
+  </script>
+</body>
+</html>
