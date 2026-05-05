@@ -3,366 +3,448 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Desktop Block Game | Animesh Sharma</title>
 
-  <!-- PeerJS allows phone and desktop to talk using WebRTC from static GitHub Pages -->
-  <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
+  <title>Drone Desktop Screen | Phone Gamepad</title>
 
   <style>
-    :root {
-      --bg: #05070f;
-      --panel: rgba(12, 18, 34, 0.9);
-      --text: #eaf6ff;
-      --muted: #8aa4b8;
-      --cyan: #00e5ff;
-      --green: #25ff8a;
-      --red: #ff4d6d;
-    }
-
     * {
       box-sizing: border-box;
     }
 
     body {
       margin: 0;
-      min-height: 100vh;
-      background:
-        radial-gradient(circle at 20% 20%, rgba(0, 229, 255, 0.12), transparent 32%),
-        radial-gradient(circle at 80% 70%, rgba(37, 255, 138, 0.08), transparent 30%),
-        var(--bg);
-      color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
-      display: grid;
-      grid-template-columns: minmax(640px, 1fr) 360px;
-      gap: 18px;
-      padding: 18px;
+      background: #050816;
+      color: white;
+      font-family: Arial, sans-serif;
       overflow: hidden;
     }
 
     #gameArea {
+      width: 100vw;
+      height: 100vh;
       position: relative;
-      height: calc(100vh - 36px);
-      border: 1px solid rgba(0, 229, 255, 0.35);
-      border-radius: 24px;
-      overflow: hidden;
       background:
-        linear-gradient(rgba(0, 229, 255, 0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 229, 255, 0.08) 1px, transparent 1px),
-        rgba(2, 6, 15, 0.92);
-      background-size: 40px 40px;
-      box-shadow: 0 0 32px rgba(0, 229, 255, 0.16);
+        linear-gradient(rgba(0, 255, 255, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 255, 0.08) 1px, transparent 1px),
+        radial-gradient(circle at center, #111933, #050816);
+      background-size: 40px 40px, 40px 40px, 100% 100%;
+      overflow: hidden;
     }
 
-    #block {
-      width: 70px;
-      height: 70px;
+    #infoPanel {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      width: 330px;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(0, 255, 255, 0.45);
+      background: rgba(0, 0, 0, 0.58);
+      box-shadow: 0 0 22px rgba(0, 255, 255, 0.22);
+      z-index: 10;
+      backdrop-filter: blur(8px);
+    }
+
+    #infoPanel h1 {
+      margin: 0 0 10px 0;
+      font-size: 24px;
+      color: cyan;
+      text-shadow: 0 0 12px cyan;
+    }
+
+    .label {
+      color: #9ff;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+
+    .value {
+      font-size: 16px;
+      margin-top: 4px;
+      word-break: break-word;
+    }
+
+    #peerId {
+      display: inline-block;
+      padding: 8px 10px;
+      margin-top: 6px;
+      border-radius: 10px;
+      background: rgba(0, 255, 255, 0.12);
+      border: 1px solid rgba(0, 255, 255, 0.55);
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    #copyBtn {
+      margin-top: 8px;
+      width: 100%;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid cyan;
+      background: rgba(0, 255, 255, 0.12);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #copyBtn:hover {
+      background: rgba(0, 255, 255, 0.25);
+    }
+
+    #status {
+      color: #7dff7d;
+      font-weight: bold;
+    }
+
+    #drone {
+      width: 76px;
+      height: 76px;
       position: absolute;
       left: 50%;
       top: 50%;
-      transform: translate(-50%, -50%);
-      border-radius: 16px;
-      background: linear-gradient(135deg, var(--cyan), #006eff);
+      transform: translate(-50%, -50%) rotate(0deg);
+      border-radius: 18px;
+      background: cyan;
       box-shadow:
-        0 0 20px rgba(0, 229, 255, 0.95),
-        0 0 60px rgba(0, 229, 255, 0.38);
+        0 0 18px cyan,
+        0 0 42px rgba(0, 255, 255, 0.75),
+        0 0 70px rgba(0, 255, 255, 0.35);
+      transition: box-shadow 0.08s linear;
     }
 
-    #block::after {
+    #drone::before,
+    #drone::after {
       content: "";
       position: absolute;
-      inset: 18px;
+      background: rgba(0, 255, 255, 0.8);
+      box-shadow: 0 0 12px cyan;
+      border-radius: 8px;
+    }
+
+    #drone::before {
+      width: 130px;
+      height: 12px;
+      left: -27px;
+      top: 32px;
+    }
+
+    #drone::after {
+      width: 12px;
+      height: 130px;
+      left: 32px;
+      top: -27px;
+    }
+
+    .prop {
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      border: 2px solid #050816;
+      background: white;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.82);
-      box-shadow: 0 0 16px rgba(255, 255, 255, 0.8);
+      z-index: 2;
+      box-shadow: 0 0 12px white;
     }
 
-    aside {
-      height: calc(100vh - 36px);
-      background: var(--panel);
-      border: 1px solid rgba(0, 229, 255, 0.24);
-      border-radius: 24px;
-      padding: 22px;
-      box-shadow: 0 0 24px rgba(0, 229, 255, 0.10);
-      overflow: auto;
+    #p1 {
+      left: -36px;
+      top: -36px;
     }
 
-    h1 {
-      margin: 0 0 8px;
-      font-size: 26px;
-      line-height: 1.1;
+    #p2 {
+      right: -36px;
+      top: -36px;
     }
 
-    p {
-      color: var(--muted);
-      line-height: 1.45;
+    #p3 {
+      left: -36px;
+      bottom: -36px;
     }
 
-    .status {
-      display: inline-flex;
-      gap: 8px;
-      align-items: center;
-      padding: 10px 12px;
+    #p4 {
+      right: -36px;
+      bottom: -36px;
+    }
+
+    #trailCanvas {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.85;
+    }
+
+    #bottomHud {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 14px;
+      padding: 12px 16px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.06);
-      margin: 10px 0 16px;
+      border: 1px solid rgba(0, 255, 255, 0.35);
+      background: rgba(0, 0, 0, 0.52);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+      z-index: 10;
+      font-size: 14px;
+      backdrop-filter: blur(8px);
     }
 
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--red);
-      box-shadow: 0 0 12px var(--red);
+    .hudItem span {
+      color: cyan;
+      font-weight: bold;
     }
 
-    .dot.connected {
-      background: var(--green);
-      box-shadow: 0 0 12px var(--green);
-    }
-
-    .box {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 16px;
-      padding: 14px;
-      margin: 12px 0;
-    }
-
-    .code {
-      user-select: all;
-      overflow-wrap: anywhere;
-      font-size: 26px;
-      letter-spacing: 2px;
-      color: var(--cyan);
-      font-weight: 800;
-      text-shadow: 0 0 12px rgba(0, 229, 255, 0.7);
-    }
-
-    input[type="range"] {
-      width: 100%;
-      accent-color: var(--cyan);
-    }
-
-    button {
-      width: 100%;
-      border: 0;
-      border-radius: 14px;
-      padding: 12px 14px;
-      background: rgba(0, 229, 255, 0.14);
-      color: var(--text);
-      font-weight: 700;
-      cursor: pointer;
-      border: 1px solid rgba(0, 229, 255, 0.35);
-    }
-
-    button:hover {
-      background: rgba(0, 229, 255, 0.22);
-    }
-
-    .small {
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    @media (max-width: 900px) {
-      body {
-        grid-template-columns: 1fr;
-        overflow: auto;
+    @media (max-width: 700px) {
+      #infoPanel {
+        width: calc(100vw - 32px);
       }
 
-      #gameArea, aside {
-        height: 60vh;
+      #bottomHud {
+        width: calc(100vw - 32px);
+        justify-content: center;
+        flex-wrap: wrap;
+        border-radius: 18px;
       }
     }
   </style>
 </head>
 
 <body>
-  <main id="gameArea" aria-label="Game area">
-    <div id="block"></div>
-  </main>
+  <div id="gameArea">
+    <canvas id="trailCanvas"></canvas>
 
-  <aside>
-    <h1>Desktop Block Game</h1>
-    <p>Open this file on your laptop or desktop browser. Open <strong>Gamepad</strong> on your phone and enter the Pair Code below.</p>
-                <div class="panel-link">
-                    <a href="animesh.html">About Animesh</a>
-                </div>
-
-                <div class="footer-copy">(c) Animesh Sharma 2026</div>
-
-    <div class="status">
-      <span id="dot" class="dot"></span>
-      <span id="statusText">Waiting for phone controller</span>
+    <div id="drone">
+      <div class="prop" id="p1"></div>
+      <div class="prop" id="p2"></div>
+      <div class="prop" id="p3"></div>
+      <div class="prop" id="p4"></div>
     </div>
+  </div>
 
-    <div class="box">
-      <div class="small">Pair Code</div>
-      <div id="peerId" class="code">Loading...</div>
+  <div id="infoPanel">
+    <h1>Drone Screen</h1>
+
+    <div class="label">Pair Code</div>
+    <div id="peerId">Creating...</div>
+
+    <button id="copyBtn">Copy Pair Code</button>
+
+    <div class="label">Status</div>
+    <div class="value" id="status">Starting PeerJS...</div>
+
+    <div class="label">Open on phone</div>
+    <div class="value">
+      Open <strong>gamepad.html</strong> on your mobile and enter the Pair Code.
     </div>
+  </div>
 
-    <div class="box">
-      <label for="speed">Keyboard speed: <span id="speedValue">6</span></label>
-      <input id="speed" type="range" min="2" max="20" value="6" />
-      <p class="small">The mobile joystick sends analog speed. This slider affects keyboard control.</p>
-    </div>
+  <div id="bottomHud">
+    <div class="hudItem">Mode: <span id="modeHud">Waiting</span></div>
+    <div class="hudItem">X: <span id="xHud">0</span></div>
+    <div class="hudItem">Y: <span id="yHud">0</span></div>
+    <div class="hudItem">Speed: <span id="speedHud">Normal</span></div>
+  </div>
 
-    <div class="box">
-      <button id="resetBtn">Reset Block Position</button>
-    </div>
-
-
+  <!-- PeerJS CDN -->
+  <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
 
   <script>
-    const gameArea = document.getElementById("gameArea");
-    const block = document.getElementById("block");
     const peerIdEl = document.getElementById("peerId");
-    const statusText = document.getElementById("statusText");
-    const dot = document.getElementById("dot");
-    const speedSlider = document.getElementById("speed");
-    const speedValue = document.getElementById("speedValue");
-    const resetBtn = document.getElementById("resetBtn");
+    const statusEl = document.getElementById("status");
+    const copyBtn = document.getElementById("copyBtn");
 
-    const state = {
-      x: 300,
-      y: 300,
-      size: 70,
-      vx: 0,
-      vy: 0,
-      keyboardSpeed: 6,
-      connected: false,
-      keys: {},
-      hue: 190
-    };
+    const drone = document.getElementById("drone");
+    const gameArea = document.getElementById("gameArea");
 
-    function shortCode() {
-      return "drone-" + Math.random().toString(36).slice(2, 7);
+    const modeHud = document.getElementById("modeHud");
+    const xHud = document.getElementById("xHud");
+    const yHud = document.getElementById("yHud");
+    const speedHud = document.getElementById("speedHud");
+
+    const trailCanvas = document.getElementById("trailCanvas");
+    const ctx = trailCanvas.getContext("2d");
+
+    let peer;
+    let conn;
+
+    let x = window.innerWidth / 2;
+    let y = window.innerHeight / 2;
+
+    let inputX = 0;
+    let inputY = 0;
+
+    let boost = false;
+    let brake = false;
+    let controlMode = "waiting";
+
+    let angle = 0;
+
+    const baseSpeed = 5.2;
+    const droneSize = 76;
+
+    function resizeCanvas() {
+      trailCanvas.width = window.innerWidth;
+      trailCanvas.height = window.innerHeight;
     }
 
-    const peer = new Peer(shortCode(), {
-      debug: 1
+    resizeCanvas();
+
+    window.addEventListener("resize", () => {
+      resizeCanvas();
+
+      x = Math.max(droneSize / 2, Math.min(window.innerWidth - droneSize / 2, x));
+      y = Math.max(droneSize / 2, Math.min(window.innerHeight - droneSize / 2, y));
     });
 
-    peer.on("open", id => {
-      peerIdEl.textContent = id;
-    });
+    function createPeerId() {
+      const randomPart = Math.random().toString(36).substring(2, 8);
+      return "drone-" + randomPart;
+    }
 
-    peer.on("connection", conn => {
-      statusText.textContent = "Phone controller connected";
-      dot.classList.add("connected");
-      state.connected = true;
+    function setupPeer() {
+      const customPeerId = createPeerId();
 
-      conn.on("data", data => {
-        handleControllerData(data);
+      peer = new Peer(customPeerId);
+
+      peer.on("open", (id) => {
+        peerIdEl.textContent = id;
+        statusEl.textContent = "Waiting for phone controller...";
+        modeHud.textContent = "Waiting";
       });
 
-      conn.on("close", () => {
-        statusText.textContent = "Controller disconnected";
-        dot.classList.remove("connected");
-        state.connected = false;
-        state.vx = 0;
-        state.vy = 0;
+      peer.on("connection", (connection) => {
+        conn = connection;
+
+        statusEl.textContent = "Phone connected.";
+        modeHud.textContent = "Connected";
+
+        conn.on("data", (data) => {
+          if (!data || data.type !== "input") return;
+
+          inputX = Number(data.x) || 0;
+          inputY = Number(data.y) || 0;
+
+          boost = Boolean(data.boost);
+          brake = Boolean(data.brake);
+
+          controlMode = data.controlMode || "gamepad";
+
+          if (controlMode === "motion") {
+            modeHud.textContent = "Motion";
+          } else {
+            modeHud.textContent = "Joystick";
+          }
+        });
+
+        conn.on("close", () => {
+          statusEl.textContent = "Phone disconnected.";
+          modeHud.textContent = "Disconnected";
+          inputX = 0;
+          inputY = 0;
+          boost = false;
+          brake = false;
+        });
+
+        conn.on("error", () => {
+          statusEl.textContent = "Connection error.";
+        });
       });
-    });
 
-    peer.on("error", err => {
-      statusText.textContent = "Connection error. Refresh and try again.";
-      console.error(err);
-    });
-
-    function handleControllerData(data) {
-      if (!data || typeof data !== "object") return;
-
-      if (data.type === "stick") {
-        const maxSpeed = 11;
-        state.vx = data.x * maxSpeed;
-        state.vy = data.y * maxSpeed;
-      }
-
-      if (data.type === "button") {
-        if (data.button === "boost" && data.pressed) {
-          state.size = Math.min(150, state.size + 10);
-        }
-
-        if (data.button === "shrink" && data.pressed) {
-          state.size = Math.max(30, state.size - 10);
-        }
-
-        if (data.button === "color" && data.pressed) {
-          state.hue = (state.hue + 60) % 360;
-          block.style.background = `linear-gradient(135deg, hsl(${state.hue}, 100%, 55%), hsl(${(state.hue + 60) % 360}, 100%, 45%))`;
-          block.style.boxShadow = `0 0 20px hsla(${state.hue}, 100%, 55%, 0.95), 0 0 60px hsla(${state.hue}, 100%, 55%, 0.38)`;
-        }
-
-        if (data.button === "reset" && data.pressed) {
-          resetBlock();
-        }
-      }
+      peer.on("error", (error) => {
+        statusEl.textContent = "PeerJS error: " + error.type;
+      });
     }
 
-    function resetBlock() {
-      const rect = gameArea.getBoundingClientRect();
-      state.x = rect.width / 2 - state.size / 2;
-      state.y = rect.height / 2 - state.size / 2;
-      state.vx = 0;
-      state.vy = 0;
+    copyBtn.addEventListener("click", async () => {
+      const code = peerIdEl.textContent;
+
+      if (!code || code === "Creating...") return;
+
+      try {
+        await navigator.clipboard.writeText(code);
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => {
+          copyBtn.textContent = "Copy Pair Code";
+        }, 1200);
+      } catch {
+        copyBtn.textContent = "Copy failed";
+        setTimeout(() => {
+          copyBtn.textContent = "Copy Pair Code";
+        }, 1200);
+      }
+    });
+
+    function drawTrail() {
+      ctx.fillStyle = "rgba(5, 8, 22, 0.12)";
+      ctx.fillRect(0, 0, trailCanvas.width, trailCanvas.height);
+
+      ctx.beginPath();
+      ctx.arc(x, y, 5, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(0, 255, 255, 0.8)";
+      ctx.shadowBlur = 18;
+      ctx.shadowColor = "cyan";
+      ctx.fill();
+      ctx.shadowBlur = 0;
     }
 
-    function updateBlock() {
-      const rect = gameArea.getBoundingClientRect();
+    function updateDrone() {
+      let finalSpeed = baseSpeed;
 
-      let kx = 0;
-      let ky = 0;
-
-      if (state.keys["ArrowLeft"] || state.keys["a"]) kx -= 1;
-      if (state.keys["ArrowRight"] || state.keys["d"]) kx += 1;
-      if (state.keys["ArrowUp"] || state.keys["w"]) ky -= 1;
-      if (state.keys["ArrowDown"] || state.keys["s"]) ky += 1;
-
-      if (kx !== 0 || ky !== 0) {
-        const length = Math.hypot(kx, ky) || 1;
-        state.x += (kx / length) * state.keyboardSpeed;
-        state.y += (ky / length) * state.keyboardSpeed;
+      if (boost) {
+        finalSpeed = baseSpeed * 2.1;
+        speedHud.textContent = "Boost";
+      } else if (brake) {
+        finalSpeed = baseSpeed * 0.35;
+        speedHud.textContent = "Brake";
       } else {
-        state.x += state.vx;
-        state.y += state.vy;
+        speedHud.textContent = "Normal";
       }
 
-      state.x = Math.max(0, Math.min(rect.width - state.size, state.x));
-      state.y = Math.max(0, Math.min(rect.height - state.size, state.y));
+      const dx = inputX * finalSpeed;
+      const dy = inputY * finalSpeed;
 
-      block.style.width = state.size + "px";
-      block.style.height = state.size + "px";
-      block.style.left = state.x + "px";
-      block.style.top = state.y + "px";
-      block.style.transform = "none";
+      x += dx;
+      y += dy;
 
-      requestAnimationFrame(updateBlock);
+      const half = droneSize / 2;
+
+      x = Math.max(half, Math.min(window.innerWidth - half, x));
+      y = Math.max(half, Math.min(window.innerHeight - half, y));
+
+      if (Math.abs(dx) > 0.05 || Math.abs(dy) > 0.05) {
+        angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+      }
+
+      drone.style.left = x + "px";
+      drone.style.top = y + "px";
+      drone.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+
+      if (boost) {
+        drone.style.boxShadow =
+          "0 0 26px cyan, 0 0 70px rgba(0,255,255,0.95), 0 0 110px rgba(0,255,255,0.5)";
+      } else if (brake) {
+        drone.style.boxShadow =
+          "0 0 12px cyan, 0 0 24px rgba(0,255,255,0.55)";
+      } else {
+        drone.style.boxShadow =
+          "0 0 18px cyan, 0 0 42px rgba(0,255,255,0.75), 0 0 70px rgba(0,255,255,0.35)";
+      }
+
+      xHud.textContent = Math.round(x);
+      yHud.textContent = Math.round(y);
     }
 
-    window.addEventListener("keydown", event => {
-      state.keys[event.key] = true;
+    function gameLoop() {
+      drawTrail();
+      updateDrone();
+      requestAnimationFrame(gameLoop);
+    }
 
-      if (event.code === "Space") {
-        handleControllerData({ type: "button", button: "color", pressed: true });
-      }
-    });
-
-    window.addEventListener("keyup", event => {
-      state.keys[event.key] = false;
-    });
-
-    speedSlider.addEventListener("input", () => {
-      state.keyboardSpeed = Number(speedSlider.value);
-      speedValue.textContent = speedSlider.value;
-    });
-
-    resetBtn.addEventListener("click", resetBlock);
-
-    window.addEventListener("resize", resetBlock);
-
-    resetBlock();
-    updateBlock();
+    setupPeer();
+    gameLoop();
   </script>
 </body>
 </html>
