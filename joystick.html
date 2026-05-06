@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MAVLink Virtual Joystick</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            color: white;
+            font-family: sans-serif;
+            overflow: hidden;
+            touch-action: none;
+        }
+        #header {
+            text-align: center;
+            padding: 10px;
+            background: #333;
+        }
+        .status {
+            font-weight: bold;
+            color: #ff4444;
+        }
+        .connected { color: #44ff44; }
+
+        /* Container for the joysticks */
+        #controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 80vh;
+            padding: 0 50px;
+        }
+
+        .zone {
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .label {
+            text-align: center;
+            margin-top: 220px;
+            color: #aaa;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="header">
+    MAVLink Controller: <span id="status" class="status">DISCONNECTED (Run Python Script)</span>
+</div>
+
+<div id="controls">
+    <div id="left-zone" class="zone">
+        <div class="label">Throttle / Yaw</div>
+    </div>
+
+    <div id="right-zone" class="zone">
+        <div class="label">Pitch / Roll</div>
+    </div>
+</div>
+
+<script>
+    // Configuration
+    const WS_URL = "ws://localhost:8765";
+    const SEND_INTERVAL = 50; // Send data every 50ms (20Hz)
+
+    let socket = null;
+    let connected = false;
+
+    // Joystick State (MAVLink RC values 1000-2000, 1500 is neutral)
+    let channels = {
+        pitch: 1500,
+        roll: 1500,
+        throttle: 1000, // Start at zero throttle
+        yaw: 1500
+    };
+
+    // Connect to the Python Relay
+    function connect() {
+        socket = new WebSocket(WS_URL);
+
+        socket.onopen = () => {
+            connected = true;
+            document.getElementById('status').innerText = "CONNECTED";
+            document.getElementById('status').className = "status connected";
+        };
+
+        socket.onclose = () => {
+            connected = false;
+            document.getElementById('status').innerText = "DISCONNECTED - Retrying...";
+            document.getElementById('status').className = "status";
+            setTimeout(connect, 2000); // Auto-reconnect
+        };
+    }
+
+    // Initialize Joysticks
+    const leftManager = nipplejs.create({
+        zone: document.getElementById('left-zone'),
+        mode: 'static',
+        position: { left: '50%', top: '50%' },
+        color: 'blue'
+    });
+
+    const rightManager = nipplejs.create({
+        zone: document.getElementById('right-zone'),
+        mode: 'static',
+        position: { left: '50%', top: '50%' },
+        color: 'red'
+    });
+
+    // Map Joystick movement to 1000-2000 range
+    leftManager.on('move', (evt, data) => {
+        // Throttle (Up/Down) - Map to Ch 3
+        if (data.direction) {
+            const distY = Math.sin(data.angle.radian) * data.distance;
+            channels.throttle = Math.round(1500 + (distY * 10)); // Scale as needed
+            
+            const distX = Math.cos(data.angle.radian) * data.distance;
+            channels.yaw = Math.round(1500 + (distX * 10));
+        }
+    });
+
+    rightManager.on('move', (evt, data) => {
+        const distY = Math.sin(data.angle.radian) * data.distance;
+        const distX = Math.cos(data.angle.radian) * data.distance;
+        
+        channels.pitch = Math.round(1500 + (distY * 10));
+        channels.roll = Math.round(1500 + (distX * 10));
+    });
+
+    // Reset sticks on release (except throttle usually stays if you want, 
+    // but here we reset all for safety in sim)
+    leftManager.on('end', () => { 
+        channels.yaw = 1500; 
+        channels.throttle = 1000; 
+    });
+    rightManager.on('end', () => { 
+        channels.pitch = 1500; 
+        channels.roll = 1500; 
+    });
+
+    // Send loop
+    setInterval(() => {
+        if (connected) {
+            socket.send(JSON.stringify(channels));
+        }
+    }, SEND_INTERVAL);
+
+    connect();
+</script>
+
+</body>
+</html>
