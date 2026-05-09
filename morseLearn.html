@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Mobile friendly neon Morse code learner and translator with sound, tap practice, dots, dashes, and 10-letter training mode.">
+<title>Neon Morse Code Learner</title>
+
+<style>
+:root {
+    --bg: #020617;
+    --card: rgba(8, 13, 30, 0.96);
+    --cyan: #00f5ff;
+    --green: #39ff14;
+    --pink: #ff2bd6;
+    --yellow: #faff00;
+    --red: #ff1744;
+    --text: #e0f7ff;
+    --muted: #8aa4b8;
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Arial, sans-serif;
+    overscroll-behavior: none;
+}
+
+body {
+    background:
+        radial-gradient(circle at top left, rgba(0,245,255,0.2), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(255,43,214,0.2), transparent 30%),
+        linear-gradient(135deg, #020617, #050816 60%, #09001f);
+    padding: 8px;
+}
+
+.app {
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid rgba(0,245,255,0.45);
+    border-radius: 18px;
+    padding: 12px;
+    box-shadow:
+        0 0 16px rgba(0,245,255,0.25),
+        inset 0 0 18px rgba(0,245,255,0.06);
+}
+
+h1 {
+    margin: 4px 0 2px;
+    text-align: center;
+    color: var(--cyan);
+    font-size: 1.55rem;
+    text-shadow: 0 0 10px rgba(0,245,255,0.9);
+}
+
+.subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.82rem;
+    margin: 0 0 10px;
+}
+
+.tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.tab-btn {
+    min-height: 40px;
+    margin: 0;
+    border-radius: 12px;
+    background: #020617;
+    border: 1px solid rgba(0,245,255,0.5);
+    color: var(--cyan);
+    box-shadow: 0 0 8px rgba(0,245,255,0.25);
+}
+
+.tab-btn.active {
+    background: linear-gradient(135deg, #00f5ff, #2563eb);
+    color: white;
+}
+
+.panel {
+    display: none;
+}
+
+.panel.active {
+    display: block;
+}
+
+.label {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    font-size: 0.88rem;
+    font-weight: bold;
+    color: var(--cyan);
+}
+
+textarea {
+    width: 100%;
+    height: 74px;
+    background: #020617;
+    color: var(--text);
+    padding: 10px;
+    border: 1.5px solid rgba(0,245,255,0.55);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    outline: none;
+    resize: none;
+}
+
+textarea:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 10px rgba(57,255,20,0.4);
+}
+
+.output-box {
+    background: #020617;
+    color: var(--yellow);
+    padding: 10px;
+    border-radius: 12px;
+    min-height: 44px;
+    font-family: "Courier New", monospace;
+    font-size: 1rem;
+    word-break: break-word;
+    border: 1px solid rgba(250,255,0,0.55);
+    box-shadow: inset 0 0 12px rgba(250,255,0,0.08);
+}
+
+button {
+    width: 100%;
+    min-height: 42px;
+    margin-top: 8px;
+    padding: 10px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #00f5ff, #2563eb);
+    color: white;
+    font-size: 0.95rem;
+    cursor: pointer;
+    font-weight: bold;
+    touch-action: manipulation;
+    box-shadow: 0 0 10px rgba(0,245,255,0.45);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.secondary {
+    background: linear-gradient(135deg, #ff2bd6, #7c3aed);
+}
+
+.danger {
+    background: linear-gradient(135deg, #ff1744, #ff2bd6);
+}
+
+.small {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.35;
+    margin: 6px 0 8px;
+}
+
+.practice-strip {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 4px;
+    margin: 8px 0;
+}
+
+.letter-box {
+    background: #020617;
+    border: 1px solid rgba(57,255,20,0.5);
+    color: var(--green);
+    border-radius: 8px;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(57,255,20,0.8);
+}
+
+.letter-box.current {
+    background: rgba(57,255,20,0.16);
+    border-color: var(--green);
+    box-shadow: 0 0 12px rgba(57,255,20,0.55);
+}
+
+.letter-box.done {
+    opacity: 0.45;
+}
+
+.progress {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin: 4px 0;
+}
+
+.tap-area {
+    background:
+        radial-gradient(circle, rgba(57,255,20,0.12), transparent 60%),
+        #020617;
+    color: var(--text);
+    border-radius: 18px;
+    height: 132px;
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    border: 2px solid rgba(0,245,255,0.7);
+    box-shadow:
+        0 0 14px rgba(0,245,255,0.35),
+        inset 0 0 18px rgba(0,245,255,0.1);
+}
+
+.tap-area.active {
+    background:
+        radial-gradient(circle, rgba(57,255,20,0.45), transparent 60%),
+        #052e16;
+    border-color: var(--green);
+    box-shadow:
+        0 0 18px rgba(57,255,20,0.8),
+        inset 0 0 20px rgba(57,255,20,0.18);
+}
+
+.tap-main {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.tap-sub {
+    font-size: 0.75rem;
+    color: var(--muted);
+}
+
+.status {
+    text-align: center;
+    font-weight: bold;
+    margin-top: 8px;
+    min-height: 20px;
+    font-size: 0.9rem;
+}
+
+.good {
+    color: var(--green);
+}
+
+.bad {
+    color: var(--red);
+}
+
+.toggle-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 8px;
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+
+.toggle-row input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--green);
+}
+
+.footer-note {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.75rem;
+    margin-top: 8px;
+}
+
+@media (max-height: 720px) {
+    h1 {
+        font-size: 1.35rem;
+    }
+
+    .subtitle {
+        display: none;
+    }
+
+    textarea {
+        height: 64px;
+    }
+
+    .tap-area {
+        height: 112px;
+    }
+
+    .letter-box {
+        min-height: 32px;
+        font-size: 1rem;
+    }
+
+    button {
+        min-height: 38px;
+        padding: 8px;
+    }
+}
+
+@media (max-width: 380px) {
+    body {
+        padding: 6px;
+    }
+
+    .card {
+        padding: 10px;
+    }
+
+    .practice-strip {
+        gap: 3px;
+    }
+
+    .letter-box {
+        font-size: 0.95rem;
+        min-height: 32px;
+    }
+
+    .tap-area {
+        height: 118px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<main class="app">
+<section class="card">
+
+<h1>Neon Morse</h1>
+<p class="subtitle">Mobile Morse translator and tap trainer</p>
+
+<div class="tabs">
+    <button class="tab-btn active" id="translatorTab">Translator</button>
+    <button class="tab-btn" id="practiceTab">Practice</button>
+</div>
+
+<div id="translatorPanel" class="panel active">
+    <span class="label">Input</span>
+    <textarea id="mainInput" placeholder="Type HELLO or .... . .-.. .-.. ---"></textarea>
+
+    <span class="label">Result</span>
+    <div id="display" class="output-box"></div>
+
+    <div class="row">
+        <button id="btnPlay">Play 🔊</button>
+        <button id="btnClear" class="danger">Clear</button>
+    </div>
+
+    <div class="toggle-row">
+        <input type="checkbox" id="noiseToggle">
+        <label for="noiseToggle">Background noise tone</label>
+    </div>
+
+    <p class="small">
+        Tip: In Morse input, use spaces between letters and / between words.
+        Example: .... . .-.. .-.. --- / .-- --- .-. .-.. -..
+    </p>
+</div>
+
+<div id="practicePanel" class="panel">
+    <p class="small">
+        Practice 10 letters. Short tap = dot. Long tap = dash. Very long tap = clear current input.
+    </p>
+
+    <div class="practice-strip" id="practiceStrip"></div>
+    <div class="progress" id="progressText">Letter 1 of 10</div>
+
+    <span class="label">Your Morse Input</span>
+    <div id="tapOutput" class="output-box"></div>
+
+    <div id="tapArea" class="tap-area">
+        <div class="tap-main">Tap / Hold</div>
+        <div class="tap-sub">Touch, mouse, or spacebar</div>
+    </div>
+
+    <div class="status" id="statusText"></div>
+
+    <div class="row">
+        <button id="checkAnswer">Check</button>
+        <button id="newSet" class="secondary">New 10 Letters</button>
+    </div>
+
+    <span class="label">Decoded Correct Letters</span>
+    <div id="historyBox" class="output-box"></div>
+</div>
+
+<p class="footer-note">Static HTML. GitHub Pages ready.</p>
+
+</section>
+</main>
+
+<script>
+const MORSE = {
+    "A": ".-", "B": "-...", "C": "-.-.", "D": "-..", "E": ".", "F": "..-.",
+    "G": "--.", "H": "....", "I": "..", "J": ".---", "K": "-.-", "L": ".-..",
+    "M": "--", "N": "-.", "O": "---", "P": ".--.", "Q": "--.-", "R": ".-.",
+    "S": "...", "T": "-", "U": "..-", "V": "...-", "W": ".--", "X": "-..-",
+    "Y": "-.--", "Z": "--..",
+    "1": ".----", "2": "..---", "3": "...--", "4": "....-", "5": ".....",
+    "6": "-....", "7": "--...", "8": "---..", "9": "----.", "0": "-----",
+    " ": "/"
+};
+
+const TEXT = Object.fromEntries(
+    Object.entries(MORSE).map(([letter, code]) => [code, letter])
+);
+
+const translatorTab = document.getElementById("translatorTab");
+const practiceTab = document.getElementById("practiceTab");
+const translatorPanel = document.getElementById("translatorPanel");
+const practicePanel = document.getElementById("practicePanel");
+
+const input = document.getElementById("mainInput");
+const display = document.getElementById("display");
+const btnPlay = document.getElementById("btnPlay");
+const btnClear = document.getElementById("btnClear");
+const noiseToggle = document.getElementById("noiseToggle");
+
+const practiceStrip = document.getElementById("practiceStrip");
+const progressText = document.getElementById("progressText");
+const checkAnswer = document.getElementById("checkAnswer");
+const newSet = document.getElementById("newSet");
+const tapOutput = document.getElementById("tapOutput");
+const tapArea = document.getElementById("tapArea");
+const statusText = document.getElementById("statusText");
+const historyBox = document.getElementById("historyBox");
+
+let audioCtx = null;
+let tapStart = 0;
+let activePointerId = null;
+let currentTapMorse = "";
+let practiceLetters = [];
+let currentIndex = 0;
+let history = [];
+
+function switchTab(tab) {
+    const practice = tab === "practice";
+
+    translatorTab.classList.toggle("active", !practice);
+    practiceTab.classList.toggle("active", practice);
+
+    translatorPanel.classList.toggle("active", !practice);
+    practicePanel.classList.toggle("active", practice);
+}
+
+translatorTab.addEventListener("click", () => switchTab("translator"));
+practiceTab.addEventListener("click", () => switchTab("practice"));
+
+function getAudioContext() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return audioCtx;
+}
+
+async function unlockAudio() {
+    const ctx = getAudioContext();
+    if (ctx.state === "suspended") {
+        await ctx.resume();
+    }
+}
+
+function isMorseText(value) {
+    return /^[.\-\/\s]+$/.test(value.trim());
+}
+
+function encodeText(text) {
+    return text.toUpperCase()
+        .split("")
+        .map(char => MORSE[char] || "")
+        .join(" ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function decodeMorse(morse) {
+    return morse.trim()
+        .split(/\s+/)
+        .map(code => TEXT[code] || (code === "/" ? " " : "?"))
+        .join("");
+}
+
+input.addEventListener("input", () => {
+    const val = input.value.trim();
+
+    if (!val) {
+        display.innerText = "";
+        return;
+    }
+
+    display.innerText = isMorseText(val) ? decodeMorse(val) : encodeText(val);
+});
+
+btnClear.addEventListener("click", () => {
+    input.value = "";
+    display.innerText = "";
+});
+
+function playTone(startTime, duration, frequency = 600, volume = 0.12) {
+    const ctx = getAudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.value = frequency;
+
+    gain.gain.setValueAtTime(volume, startTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(startTime);
+    osc.stop(startTime + duration);
+}
+
+function playNoise(startTime, duration) {
+    const ctx = getAudioContext();
+    const bufferSize = Math.floor(ctx.sampleRate * duration);
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+
+    for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * 0.03;
+    }
+
+    const noise = ctx.createBufferSource();
+    const gain = ctx.createGain();
+
+    noise.buffer = buffer;
+    gain.gain.value = 0.04;
+
+    noise.connect(gain);
+    gain.connect(ctx.destination);
+
+    noise.start(startTime);
+    noise.stop(startTime + duration);
+}
+
+async function playMorse(morse) {
+    await unlockAudio();
+
+    const ctx = getAudioContext();
+    let time = ctx.currentTime + 0.05;
+
+    if (noiseToggle.checked) {
+        playNoise(time, 7);
+    }
+
+    morse.split("").forEach(symbol => {
+        if (symbol === "." || symbol === "-") {
+            const duration = symbol === "." ? 0.1 : 0.3;
+            playTone(time, duration);
+            time += duration + 0.1;
+        } else if (symbol === " ") {
+            time += 0.25;
+        } else if (symbol === "/") {
+            time += 0.5;
+        }
+    });
+}
+
+btnPlay.addEventListener("click", () => {
+    const val = input.value.trim();
+
+    if (!val && !display.innerText.trim()) {
+        return;
+    }
+
+    const morseToPlay = isMorseText(val) ? val : display.innerText;
+    playMorse(morseToPlay);
+});
+
+function makePracticeSet() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    practiceLetters = [];
+
+    for (let i = 0; i < 10; i++) {
+        practiceLetters.push(chars[Math.floor(Math.random() * chars.length)]);
+    }
+
+    currentIndex = 0;
+    currentTapMorse = "";
+    history = [];
+    tapOutput.innerText = "";
+    historyBox.innerText = "";
+    statusText.innerText = "";
+    renderPracticeStrip();
+}
+
+function renderPracticeStrip() {
+    practiceStrip.innerHTML = "";
+
+    practiceLetters.forEach((letter, index) => {
+        const box = document.createElement("div");
+        box.className = "letter-box";
+
+        if (index === currentIndex) {
+            box.classList.add("current");
+        }
+
+        if (index < currentIndex) {
+            box.classList.add("done");
+        }
+
+        box.innerText = letter;
+        practiceStrip.appendChild(box);
+    });
+
+    progressText.innerText = `Letter ${Math.min(currentIndex + 1, 10)} of 10`;
+}
+
+newSet.addEventListener("click", makePracticeSet);
+
+checkAnswer.addEventListener("click", () => {
+    if (currentIndex >= practiceLetters.length) {
+        statusText.innerText = "Set complete. Start a new 10-letter set.";
+        statusText.className = "status good";
+        return;
+    }
+
+    const target = practiceLetters[currentIndex];
+    const expected = MORSE[target];
+
+    if (currentTapMorse === expected) {
+        statusText.innerText = "Correct!";
+        statusText.className = "status good";
+
+        history.push(target);
+        historyBox.innerText = history.join(" ");
+
+        currentIndex++;
+        currentTapMorse = "";
+        tapOutput.innerText = "";
+
+        if (currentIndex >= practiceLetters.length) {
+            statusText.innerText = "10-letter set complete!";
+        }
+
+        renderPracticeStrip();
+    } else {
+        statusText.innerText = `${target} is ${expected}. Try again.`;
+        statusText.className = "status bad";
+    }
+});
+
+async function startTap(pointerId = null) {
+    await unlockAudio();
+
+    if (tapStart) {
+        return;
+    }
+
+    activePointerId = pointerId;
+    tapStart = performance.now();
+    tapArea.classList.add("active");
+
+    const ctx = getAudioContext();
+    playTone(ctx.currentTime, 0.05, 760, 0.08);
+}
+
+function endTap(pointerId = null) {
+    if (!tapStart) {
+        return;
+    }
+
+    if (activePointerId !== null && pointerId !== null && pointerId !== activePointerId) {
+        return;
+    }
+
+    const duration = performance.now() - tapStart;
+
+    tapStart = 0;
+    activePointerId = null;
+    tapArea.classList.remove("active");
+
+    if (duration > 1200) {
+        currentTapMorse = "";
+        tapOutput.innerText = "";
+        statusText.innerText = "Cleared";
+        statusText.className = "status";
+        return;
+    }
+
+    currentTapMorse += duration < 250 ? "." : "-";
+    tapOutput.innerText = currentTapMorse;
+}
+
+tapArea.addEventListener("pointerdown", event => {
+    event.preventDefault();
+    tapArea.setPointerCapture(event.pointerId);
+    startTap(event.pointerId);
+});
+
+tapArea.addEventListener("pointerup", event => {
+    event.preventDefault();
+    endTap(event.pointerId);
+});
+
+tapArea.addEventListener("pointercancel", event => {
+    event.preventDefault();
+    endTap(event.pointerId);
+});
+
+function isTypingField(element) {
+    return (
+        element &&
+        (
+            element.tagName === "TEXTAREA" ||
+            element.tagName === "INPUT" ||
+            element.isContentEditable
+        )
+    );
+}
+
+document.addEventListener("keydown", event => {
+    if (isTypingField(document.activeElement)) {
+        return;
+    }
+
+    if (event.code === "Space" && !tapStart) {
+        event.preventDefault();
+        startTap("keyboard");
+    }
+});
+
+document.addEventListener("keyup", event => {
+    if (isTypingField(document.activeElement)) {
+        return;
+    }
+
+    if (event.code === "Space") {
+        event.preventDefault();
+        endTap("keyboard");
+    }
+});
+
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+        tapStart = 0;
+        activePointerId = null;
+        tapArea.classList.remove("active");
+    }
+});
+
+makePracticeSet();
+</script>
+
+</body>
+</html>
