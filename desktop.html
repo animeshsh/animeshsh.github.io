@@ -11,11 +11,14 @@
       box-sizing: border-box;
     }
 
+    html,
     body {
       margin: 0;
+      width: 100%;
+      height: 100%;
       background: #050816;
       color: white;
-      font-family: Arial, sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
       overflow: hidden;
     }
 
@@ -23,79 +26,21 @@
       width: 100vw;
       height: 100vh;
       position: relative;
+      overflow: hidden;
       background:
         linear-gradient(rgba(0, 255, 255, 0.08) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0, 255, 255, 0.08) 1px, transparent 1px),
-        radial-gradient(circle at center, #111933, #050816);
+        radial-gradient(circle at center, #111933, #050816 70%);
       background-size: 40px 40px, 40px 40px, 100% 100%;
-      overflow: hidden;
     }
 
-    #infoPanel {
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      width: 330px;
-      padding: 16px;
-      border-radius: 16px;
-      border: 1px solid rgba(0, 255, 255, 0.45);
-      background: rgba(0, 0, 0, 0.58);
-      box-shadow: 0 0 22px rgba(0, 255, 255, 0.22);
-      z-index: 10;
-      backdrop-filter: blur(8px);
-    }
-
-    #infoPanel h1 {
-      margin: 0 0 10px 0;
-      font-size: 24px;
-      color: cyan;
-      text-shadow: 0 0 12px cyan;
-    }
-
-    .label {
-      color: #9ff;
-      font-size: 13px;
-      margin-top: 10px;
-    }
-
-    .value {
-      font-size: 16px;
-      margin-top: 4px;
-      word-break: break-word;
-    }
-
-    #peerId {
-      display: inline-block;
-      padding: 8px 10px;
-      margin-top: 6px;
-      border-radius: 10px;
-      background: rgba(0, 255, 255, 0.12);
-      border: 1px solid rgba(0, 255, 255, 0.55);
-      color: white;
-      font-size: 18px;
-      font-weight: bold;
-      letter-spacing: 1px;
-    }
-
-    #copyBtn {
-      margin-top: 8px;
+    #trailCanvas {
+      position: absolute;
+      inset: 0;
       width: 100%;
-      padding: 10px;
-      border-radius: 12px;
-      border: 1px solid cyan;
-      background: rgba(0, 255, 255, 0.12);
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    #copyBtn:hover {
-      background: rgba(0, 255, 255, 0.25);
-    }
-
-    #status {
-      color: #7dff7d;
-      font-weight: bold;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
     }
 
     #drone {
@@ -107,6 +52,7 @@
       transform: translate(-50%, -50%) rotate(0deg);
       border-radius: 18px;
       background: cyan;
+      z-index: 3;
       box-shadow:
         0 0 18px cyan,
         0 0 42px rgba(0, 255, 255, 0.75),
@@ -118,9 +64,10 @@
     #drone::after {
       content: "";
       position: absolute;
-      background: rgba(0, 255, 255, 0.8);
+      background: rgba(0, 255, 255, 0.85);
       box-shadow: 0 0 12px cyan;
       border-radius: 8px;
+      z-index: 1;
     }
 
     #drone::before {
@@ -144,7 +91,7 @@
       border: 2px solid #050816;
       background: white;
       border-radius: 50%;
-      z-index: 2;
+      z-index: 4;
       box-shadow: 0 0 12px white;
     }
 
@@ -168,28 +115,158 @@
       bottom: -36px;
     }
 
-    #trailCanvas {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0.85;
+    #infoPanel {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      width: 360px;
+      max-width: calc(100vw - 32px);
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(0, 255, 255, 0.45);
+      background: rgba(0, 0, 0, 0.62);
+      box-shadow: 0 0 24px rgba(0, 255, 255, 0.24);
+      z-index: 20;
+      backdrop-filter: blur(10px);
+    }
+
+    #infoPanel h1 {
+      margin: 0 0 10px 0;
+      color: cyan;
+      font-size: 24px;
+      text-shadow: 0 0 12px cyan;
+    }
+
+    .label {
+      color: #9ff;
+      font-size: 12px;
+      margin-top: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+    }
+
+    .value {
+      margin-top: 5px;
+      font-size: 14px;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    #peerId {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 9px 11px;
+      border-radius: 12px;
+      background: rgba(0, 255, 255, 0.12);
+      border: 1px solid rgba(0, 255, 255, 0.6);
+      color: white;
+      font-size: 19px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      user-select: all;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 9px;
+      padding: 11px;
+      border-radius: 12px;
+      border: 1px solid cyan;
+      background: rgba(0, 255, 255, 0.12);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: rgba(0, 255, 255, 0.25);
+    }
+
+    #newCodeBtn {
+      border-color: #ff4fd8;
+      background: rgba(255, 79, 216, 0.1);
+    }
+
+    #newCodeBtn:hover {
+      background: rgba(255, 79, 216, 0.22);
+    }
+
+    #status {
+      color: #7dff7d;
+      font-weight: bold;
+    }
+
+    #errorBox {
+      display: none;
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 79, 216, 0.55);
+      background: rgba(255, 79, 216, 0.1);
+      color: #ffd6f5;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    #debugBox {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(0, 255, 255, 0.25);
+      background: rgba(0, 255, 255, 0.06);
+      color: #cff;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    #keyboardHelp {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      width: 290px;
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      background: rgba(0, 0, 0, 0.48);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
+      z-index: 20;
+      backdrop-filter: blur(10px);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    #keyboardHelp h2 {
+      margin: 0 0 8px;
+      color: cyan;
+      font-size: 16px;
+      text-shadow: 0 0 10px cyan;
+    }
+
+    .key {
+      display: inline-block;
+      padding: 2px 6px;
+      margin: 1px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.12);
+      font-weight: bold;
     }
 
     #bottomHud {
       position: fixed;
-      bottom: 16px;
       left: 50%;
+      bottom: 16px;
       transform: translateX(-50%);
       display: flex;
       gap: 14px;
       padding: 12px 16px;
       border-radius: 999px;
       border: 1px solid rgba(0, 255, 255, 0.35);
-      background: rgba(0, 0, 0, 0.52);
+      background: rgba(0, 0, 0, 0.55);
       box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
-      z-index: 10;
-      font-size: 14px;
+      z-index: 20;
       backdrop-filter: blur(8px);
+      font-size: 14px;
     }
 
     .hudItem span {
@@ -197,9 +274,9 @@
       font-weight: bold;
     }
 
-    @media (max-width: 700px) {
-      #infoPanel {
-        width: calc(100vw - 32px);
+    @media (max-width: 850px) {
+      #keyboardHelp {
+        display: none;
       }
 
       #bottomHud {
@@ -231,13 +308,39 @@
     <div id="peerId">Creating...</div>
 
     <button id="copyBtn">Copy Pair Code</button>
+    <button id="newCodeBtn">Create New Pair Code</button>
 
     <div class="label">Status</div>
-    <div class="value" id="status">Starting PeerJS...</div>
+    <div class="value" id="status">Starting...</div>
 
-    <div class="label">Open on phone</div>
+    <div id="errorBox"></div>
+
+    <div class="label">Open on iPhone</div>
     <div class="value">
-      Open <strong>gamepad.html</strong> on your mobile and enter the Pair Code.
+      Open <strong>gamepad.html</strong> from the same GitHub Pages site and enter this Pair Code.
+    </div>
+
+    <div id="debugBox">
+      <strong>Debug</strong><br />
+      PeerJS: <span id="peerDebug">Checking...</span><br />
+      Page: <span id="pageDebug">Checking...</span><br />
+      Browser: <span id="browserDebug">Checking...</span>
+    </div>
+  </div>
+
+  <div id="keyboardHelp">
+    <h2>MacBook Test Controls</h2>
+    <div>
+      Use <span class="key">W</span>
+      <span class="key">A</span>
+      <span class="key">S</span>
+      <span class="key">D</span>
+      or arrow keys to move.
+    </div>
+    <br />
+    <div>
+      Hold <span class="key">Shift</span> for boost.
+      Hold <span class="key">Space</span> for brake.
     </div>
   </div>
 
@@ -248,27 +351,30 @@
     <div class="hudItem">Speed: <span id="speedHud">Normal</span></div>
   </div>
 
-  <!-- PeerJS CDN -->
   <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
 
   <script>
     const peerIdEl = document.getElementById("peerId");
     const statusEl = document.getElementById("status");
     const copyBtn = document.getElementById("copyBtn");
+    const newCodeBtn = document.getElementById("newCodeBtn");
+    const errorBox = document.getElementById("errorBox");
+
+    const peerDebug = document.getElementById("peerDebug");
+    const pageDebug = document.getElementById("pageDebug");
+    const browserDebug = document.getElementById("browserDebug");
 
     const drone = document.getElementById("drone");
-    const gameArea = document.getElementById("gameArea");
+    const trailCanvas = document.getElementById("trailCanvas");
+    const ctx = trailCanvas.getContext("2d");
 
     const modeHud = document.getElementById("modeHud");
     const xHud = document.getElementById("xHud");
     const yHud = document.getElementById("yHud");
     const speedHud = document.getElementById("speedHud");
 
-    const trailCanvas = document.getElementById("trailCanvas");
-    const ctx = trailCanvas.getContext("2d");
-
-    let peer;
-    let conn;
+    let peer = null;
+    let conn = null;
 
     let x = window.innerWidth / 2;
     let y = window.innerHeight / 2;
@@ -276,14 +382,46 @@
     let inputX = 0;
     let inputY = 0;
 
+    let keyboardX = 0;
+    let keyboardY = 0;
+
     let boost = false;
     let brake = false;
-    let controlMode = "waiting";
+    let keyboardBoost = false;
+    let keyboardBrake = false;
 
     let angle = 0;
 
     const baseSpeed = 5.2;
     const droneSize = 76;
+
+    const keys = {
+      up: false,
+      down: false,
+      left: false,
+      right: false
+    };
+
+    function createPeerId() {
+      const randomPart = Math.random().toString(36).substring(2, 8);
+      return "drone-" + randomPart;
+    }
+
+    function showError(message) {
+      errorBox.style.display = "block";
+      errorBox.textContent = message;
+    }
+
+    function clearError() {
+      errorBox.style.display = "none";
+      errorBox.textContent = "";
+    }
+
+    function updateDebug() {
+      peerDebug.textContent = typeof Peer === "undefined" ? "Not loaded" : "Loaded";
+      pageDebug.textContent = location.protocol + "//" + location.host;
+      browserDebug.textContent = navigator.userAgent;
+    }
 
     function resizeCanvas() {
       trailCanvas.width = window.innerWidth;
@@ -291,35 +429,78 @@
     }
 
     resizeCanvas();
+    updateDebug();
 
     window.addEventListener("resize", () => {
       resizeCanvas();
 
-      x = Math.max(droneSize / 2, Math.min(window.innerWidth - droneSize / 2, x));
-      y = Math.max(droneSize / 2, Math.min(window.innerHeight - droneSize / 2, y));
+      const half = droneSize / 2;
+      x = Math.max(half, Math.min(window.innerWidth - half, x));
+      y = Math.max(half, Math.min(window.innerHeight - half, y));
     });
 
-    function createPeerId() {
-      const randomPart = Math.random().toString(36).substring(2, 8);
-      return "drone-" + randomPart;
-    }
-
     function setupPeer() {
+      clearError();
+
       const customPeerId = createPeerId();
 
-      peer = new Peer(customPeerId);
+      peerIdEl.textContent = customPeerId;
+      statusEl.textContent = "Creating PeerJS connection...";
+      modeHud.textContent = "Starting";
+
+      if (typeof Peer === "undefined") {
+        peerDebug.textContent = "Not loaded";
+        statusEl.textContent = "PeerJS failed to load.";
+        modeHud.textContent = "PeerJS missing";
+
+        showError(
+          "PeerJS did not load on this browser. On MacBook, try Cmd + Shift + R, disable ad blockers, or test in Safari/Chrome Incognito."
+        );
+
+        return;
+      }
+
+      peerDebug.textContent = "Loaded";
+
+      try {
+        peer = new Peer(customPeerId, {
+          host: "0.peerjs.com",
+          port: 443,
+          path: "/",
+          secure: true,
+          debug: 2,
+          config: {
+            iceServers: [
+              { urls: "stun:stun.l.google.com:19302" },
+              { urls: "stun:global.stun.twilio.com:3478" }
+            ]
+          }
+        });
+      } catch (err) {
+        statusEl.textContent = "Could not start PeerJS.";
+        modeHud.textContent = "Error";
+        showError("PeerJS start error: " + err.message);
+        return;
+      }
 
       peer.on("open", (id) => {
         peerIdEl.textContent = id;
-        statusEl.textContent = "Waiting for phone controller...";
+        statusEl.textContent = "Pair Code ready. Waiting for iPhone controller...";
         modeHud.textContent = "Waiting";
+        clearError();
       });
 
       peer.on("connection", (connection) => {
         conn = connection;
 
-        statusEl.textContent = "Phone connected.";
+        statusEl.textContent = "iPhone connected.";
         modeHud.textContent = "Connected";
+        clearError();
+
+        conn.on("open", () => {
+          statusEl.textContent = "iPhone controller active.";
+          modeHud.textContent = "Connected";
+        });
 
         conn.on("data", (data) => {
           if (!data || data.type !== "input") return;
@@ -330,9 +511,7 @@
           boost = Boolean(data.boost);
           brake = Boolean(data.brake);
 
-          controlMode = data.controlMode || "gamepad";
-
-          if (controlMode === "motion") {
+          if (data.controlMode === "motion") {
             modeHud.textContent = "Motion";
           } else {
             modeHud.textContent = "Joystick";
@@ -340,21 +519,66 @@
         });
 
         conn.on("close", () => {
-          statusEl.textContent = "Phone disconnected.";
+          statusEl.textContent = "iPhone disconnected.";
           modeHud.textContent = "Disconnected";
+
           inputX = 0;
           inputY = 0;
           boost = false;
           brake = false;
+          conn = null;
         });
 
-        conn.on("error", () => {
-          statusEl.textContent = "Connection error.";
+        conn.on("error", (error) => {
+          statusEl.textContent = "Phone connection error.";
+          showError("Phone connection error: " + (error.type || error.message || "unknown error"));
         });
       });
 
+      peer.on("disconnected", () => {
+        statusEl.textContent = "PeerJS disconnected. Trying to reconnect...";
+        modeHud.textContent = "Reconnecting";
+
+        try {
+          peer.reconnect();
+        } catch {
+          statusEl.textContent = "Reconnect failed.";
+          modeHud.textContent = "Error";
+          showError("Reconnect failed. Reload the page to create a new Pair Code.");
+        }
+      });
+
+      peer.on("close", () => {
+        statusEl.textContent = "PeerJS connection closed.";
+        modeHud.textContent = "Closed";
+      });
+
       peer.on("error", (error) => {
-        statusEl.textContent = "PeerJS error: " + error.type;
+        console.error("PeerJS error:", error);
+
+        modeHud.textContent = "Error";
+
+        if (error.type === "unavailable-id") {
+          statusEl.textContent = "Pair Code already used.";
+          showError("This Pair Code is already in use. Click Create New Pair Code.");
+        } else if (error.type === "network") {
+          statusEl.textContent = "PeerJS network error.";
+          showError(
+            "MacBook cannot reach the PeerJS server. Try Cmd + Shift + R, disable VPN/ad blockers, use another browser, or try another network/hotspot."
+          );
+        } else if (error.type === "server-error") {
+          statusEl.textContent = "PeerJS server error.";
+          showError("The public PeerJS server returned an error. Reload and try again.");
+        } else if (error.type === "browser-incompatible") {
+          statusEl.textContent = "Browser incompatible.";
+          showError("This browser does not fully support WebRTC. Try Chrome, Safari, or Firefox.");
+        } else if (error.type === "peer-unavailable") {
+          statusEl.textContent = "Peer unavailable.";
+          showError("The phone could not find the Pair Code. Check the code and keep this page open.");
+        } else {
+          statusEl.textContent = "PeerJS error: " + (error.type || "unknown");
+          showError("PeerJS error: " + (error.type || error.message || "unknown error"));
+        }
       });
     }
 
@@ -370,20 +594,98 @@
           copyBtn.textContent = "Copy Pair Code";
         }, 1200);
       } catch {
-        copyBtn.textContent = "Copy failed";
+        copyBtn.textContent = "Select code manually";
         setTimeout(() => {
           copyBtn.textContent = "Copy Pair Code";
-        }, 1200);
+        }, 1600);
       }
     });
 
+    newCodeBtn.addEventListener("click", () => {
+      location.reload();
+    });
+
+    window.addEventListener("keydown", (event) => {
+      const key = event.key.toLowerCase();
+
+      if (key === "w" || key === "arrowup") {
+        keys.up = true;
+      }
+
+      if (key === "s" || key === "arrowdown") {
+        keys.down = true;
+      }
+
+      if (key === "a" || key === "arrowleft") {
+        keys.left = true;
+      }
+
+      if (key === "d" || key === "arrowright") {
+        keys.right = true;
+      }
+
+      if (key === "shift") {
+        keyboardBoost = true;
+      }
+
+      if (key === " ") {
+        keyboardBrake = true;
+        event.preventDefault();
+      }
+    });
+
+    window.addEventListener("keyup", (event) => {
+      const key = event.key.toLowerCase();
+
+      if (key === "w" || key === "arrowup") {
+        keys.up = false;
+      }
+
+      if (key === "s" || key === "arrowdown") {
+        keys.down = false;
+      }
+
+      if (key === "a" || key === "arrowleft") {
+        keys.left = false;
+      }
+
+      if (key === "d" || key === "arrowright") {
+        keys.right = false;
+      }
+
+      if (key === "shift") {
+        keyboardBoost = false;
+      }
+
+      if (key === " ") {
+        keyboardBrake = false;
+      }
+    });
+
+    function updateKeyboardInput() {
+      keyboardX = 0;
+      keyboardY = 0;
+
+      if (keys.left) keyboardX -= 1;
+      if (keys.right) keyboardX += 1;
+      if (keys.up) keyboardY -= 1;
+      if (keys.down) keyboardY += 1;
+
+      const length = Math.hypot(keyboardX, keyboardY);
+
+      if (length > 1) {
+        keyboardX /= length;
+        keyboardY /= length;
+      }
+    }
+
     function drawTrail() {
-      ctx.fillStyle = "rgba(5, 8, 22, 0.12)";
+      ctx.fillStyle = "rgba(5, 8, 22, 0.13)";
       ctx.fillRect(0, 0, trailCanvas.width, trailCanvas.height);
 
       ctx.beginPath();
       ctx.arc(x, y, 5, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(0, 255, 255, 0.8)";
+      ctx.fillStyle = "rgba(0, 255, 255, 0.85)";
       ctx.shadowBlur = 18;
       ctx.shadowColor = "cyan";
       ctx.fill();
@@ -391,20 +693,39 @@
     }
 
     function updateDrone() {
+      updateKeyboardInput();
+
+      let finalInputX = inputX;
+      let finalInputY = inputY;
+
+      const keyboardActive = Math.abs(keyboardX) > 0 || Math.abs(keyboardY) > 0;
+
+      if (keyboardActive) {
+        finalInputX = keyboardX;
+        finalInputY = keyboardY;
+
+        if (!conn) {
+          modeHud.textContent = "Keyboard";
+        }
+      }
+
+      const activeBoost = boost || keyboardBoost;
+      const activeBrake = brake || keyboardBrake;
+
       let finalSpeed = baseSpeed;
 
-      if (boost) {
+      if (activeBoost) {
         finalSpeed = baseSpeed * 2.1;
         speedHud.textContent = "Boost";
-      } else if (brake) {
+      } else if (activeBrake) {
         finalSpeed = baseSpeed * 0.35;
         speedHud.textContent = "Brake";
       } else {
         speedHud.textContent = "Normal";
       }
 
-      const dx = inputX * finalSpeed;
-      const dy = inputY * finalSpeed;
+      const dx = finalInputX * finalSpeed;
+      const dy = finalInputY * finalSpeed;
 
       x += dx;
       y += dy;
@@ -422,10 +743,10 @@
       drone.style.top = y + "px";
       drone.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
 
-      if (boost) {
+      if (activeBoost) {
         drone.style.boxShadow =
           "0 0 26px cyan, 0 0 70px rgba(0,255,255,0.95), 0 0 110px rgba(0,255,255,0.5)";
-      } else if (brake) {
+      } else if (activeBrake) {
         drone.style.boxShadow =
           "0 0 12px cyan, 0 0 24px rgba(0,255,255,0.55)";
       } else {
