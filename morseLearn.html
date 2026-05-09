@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="description" content="Mobile friendly neon Morse code learner and translator with sound, tap practice, dots, dashes, and 10-letter training mode.">
+<meta name="description" content="Mobile friendly neon Morse code learner and translator with sound, tap practice, and touch based Morse writing.">
 <title>Neon Morse Code Learner</title>
 
 <style>
@@ -75,8 +75,8 @@ h1 {
 
 .tabs {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
     margin-bottom: 10px;
 }
 
@@ -88,6 +88,7 @@ h1 {
     border: 1px solid rgba(0,245,255,0.5);
     color: var(--cyan);
     box-shadow: 0 0 8px rgba(0,245,255,0.25);
+    font-size: 0.82rem;
 }
 
 .tab-btn.active {
@@ -166,6 +167,12 @@ button:active {
 .row {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.row3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 8px;
 }
 
@@ -351,6 +358,10 @@ button:active {
     .tap-area {
         height: 118px;
     }
+
+    .tab-btn {
+        font-size: 0.76rem;
+    }
 }
 </style>
 </head>
@@ -361,13 +372,12 @@ button:active {
 <section class="card">
 
 <h1>Neon Morse</h1>
-<p class="subtitle">Mobile Morse translator and tap trainer</p>
-
-    
+<p class="subtitle">Mobile Morse translator, trainer, and touch writer</p>
 
 <div class="tabs">
     <button class="tab-btn active" id="translatorTab">Translator</button>
     <button class="tab-btn" id="practiceTab">Practice</button>
+    <button class="tab-btn" id="writeTab">Write Morse</button>
 </div>
 
 <div id="translatorPanel" class="panel active">
@@ -389,7 +399,6 @@ button:active {
 
     <p class="small">
         Tip: In Morse input, use spaces between letters and / between words.
-        Example: .... . .-.. .-.. --- / .-- --- .-. .-.. -..
     </p>
 </div>
 
@@ -404,7 +413,7 @@ button:active {
     <span class="label">Your Morse Input</span>
     <div id="tapOutput" class="output-box"></div>
 
-    <div id="tapArea" class="tap-area">
+    <div id="practiceTapArea" class="tap-area">
         <div class="tap-main">Tap / Hold</div>
         <div class="tap-sub">Touch, mouse, or spacebar</div>
     </div>
@@ -420,10 +429,48 @@ button:active {
     <div id="historyBox" class="output-box"></div>
 </div>
 
+<div id="writePanel" class="panel">
+    <p class="small">
+        Write Morse using touch, mouse, or spacebar. Short tap = dot. Long tap = dash.
+        Press Letter Space after each character. Press Word Space between words.
+    </p>
+
+    <span class="label">Current Letter Morse</span>
+    <div id="writeCurrent" class="output-box"></div>
+
+    <div id="writeTapArea" class="tap-area">
+        <div class="tap-main">Tap / Hold to Write</div>
+        <div class="tap-sub">Short = dot, long = dash</div>
+    </div>
+
+    <div class="row3">
+        <button id="letterSpace">Letter Space</button>
+        <button id="wordSpace" class="secondary">Word Space</button>
+        <button id="backspaceWrite" class="danger">Back</button>
+    </div>
+
+    <span class="label">Morse Message</span>
+    <div id="writeMorse" class="output-box"></div>
+
+    <span class="label">Translation</span>
+    <div id="writeTranslation" class="output-box"></div>
+
+    <div class="row">
+        <button id="playWritten">Play Written 🔊</button>
+        <button id="clearWritten" class="danger">Clear All</button>
+    </div>
+
+    <p class="small">
+        Keyboard shortcut: spacebar writes dots and dashes only on this tab. Use Enter for Letter Space.
+    </p>
+</div>
+
 <p class="footer-note">
-    
+    <div class="footer">
         <a href="animesh.html">About Animesh</a>
         (c) Animesh Sharma 2026
+      </div>
+    
 </p>
 
 </section>
@@ -447,8 +494,11 @@ const TEXT = Object.fromEntries(
 
 const translatorTab = document.getElementById("translatorTab");
 const practiceTab = document.getElementById("practiceTab");
+const writeTab = document.getElementById("writeTab");
+
 const translatorPanel = document.getElementById("translatorPanel");
 const practicePanel = document.getElementById("practicePanel");
+const writePanel = document.getElementById("writePanel");
 
 const input = document.getElementById("mainInput");
 const display = document.getElementById("display");
@@ -461,30 +511,48 @@ const progressText = document.getElementById("progressText");
 const checkAnswer = document.getElementById("checkAnswer");
 const newSet = document.getElementById("newSet");
 const tapOutput = document.getElementById("tapOutput");
-const tapArea = document.getElementById("tapArea");
+const practiceTapArea = document.getElementById("practiceTapArea");
 const statusText = document.getElementById("statusText");
 const historyBox = document.getElementById("historyBox");
 
+const writeTapArea = document.getElementById("writeTapArea");
+const writeCurrent = document.getElementById("writeCurrent");
+const writeMorse = document.getElementById("writeMorse");
+const writeTranslation = document.getElementById("writeTranslation");
+const letterSpace = document.getElementById("letterSpace");
+const wordSpace = document.getElementById("wordSpace");
+const backspaceWrite = document.getElementById("backspaceWrite");
+const playWritten = document.getElementById("playWritten");
+const clearWritten = document.getElementById("clearWritten");
+
 let audioCtx = null;
+
+let activeMode = "practice";
 let tapStart = 0;
 let activePointerId = null;
+let activeTapArea = null;
+
 let currentTapMorse = "";
 let practiceLetters = [];
 let currentIndex = 0;
 let history = [];
 
+let writeCurrentCode = "";
+let writeCodes = [];
+
 function switchTab(tab) {
-    const practice = tab === "practice";
+    translatorTab.classList.toggle("active", tab === "translator");
+    practiceTab.classList.toggle("active", tab === "practice");
+    writeTab.classList.toggle("active", tab === "write");
 
-    translatorTab.classList.toggle("active", !practice);
-    practiceTab.classList.toggle("active", practice);
-
-    translatorPanel.classList.toggle("active", !practice);
-    practicePanel.classList.toggle("active", practice);
+    translatorPanel.classList.toggle("active", tab === "translator");
+    practicePanel.classList.toggle("active", tab === "practice");
+    writePanel.classList.toggle("active", tab === "write");
 }
 
 translatorTab.addEventListener("click", () => switchTab("translator"));
 practiceTab.addEventListener("click", () => switchTab("practice"));
+writeTab.addEventListener("click", () => switchTab("write"));
 
 function getAudioContext() {
     if (!audioCtx) {
@@ -635,13 +703,8 @@ function renderPracticeStrip() {
         const box = document.createElement("div");
         box.className = "letter-box";
 
-        if (index === currentIndex) {
-            box.classList.add("current");
-        }
-
-        if (index < currentIndex) {
-            box.classList.add("done");
-        }
+        if (index === currentIndex) box.classList.add("current");
+        if (index < currentIndex) box.classList.add("done");
 
         box.innerText = letter;
         practiceStrip.appendChild(box);
@@ -684,14 +747,67 @@ checkAnswer.addEventListener("click", () => {
     }
 });
 
-async function startTap(pointerId = null) {
-    await unlockAudio();
+function updateWritePanel() {
+    writeCurrent.innerText = writeCurrentCode || "";
+    writeMorse.innerText = writeCodes.join(" ") + (writeCurrentCode ? " " + writeCurrentCode : "");
+    writeTranslation.innerText = writeCodes
+        .map(code => TEXT[code] || (code === "/" ? " " : "?"))
+        .join("");
+}
 
-    if (tapStart) {
-        return;
+function commitLetter() {
+    if (!writeCurrentCode) return;
+
+    writeCodes.push(writeCurrentCode);
+    writeCurrentCode = "";
+    updateWritePanel();
+}
+
+function commitWordSpace() {
+    commitLetter();
+
+    if (writeCodes.length > 0 && writeCodes[writeCodes.length - 1] !== "/") {
+        writeCodes.push("/");
     }
 
+    updateWritePanel();
+}
+
+function backspaceWriter() {
+    if (writeCurrentCode.length > 0) {
+        writeCurrentCode = writeCurrentCode.slice(0, -1);
+    } else {
+        writeCodes.pop();
+    }
+
+    updateWritePanel();
+}
+
+letterSpace.addEventListener("click", commitLetter);
+wordSpace.addEventListener("click", commitWordSpace);
+backspaceWrite.addEventListener("click", backspaceWriter);
+
+clearWritten.addEventListener("click", () => {
+    writeCurrentCode = "";
+    writeCodes = [];
+    updateWritePanel();
+});
+
+playWritten.addEventListener("click", () => {
+    const morse = writeCodes.join(" ") + (writeCurrentCode ? " " + writeCurrentCode : "");
+    if (morse.trim()) {
+        playMorse(morse.trim());
+    }
+});
+
+async function startTap(mode, tapArea, pointerId = null) {
+    await unlockAudio();
+
+    if (tapStart) return;
+
+    activeMode = mode;
     activePointerId = pointerId;
+    activeTapArea = tapArea;
     tapStart = performance.now();
     tapArea.classList.add("active");
 
@@ -700,9 +816,7 @@ async function startTap(pointerId = null) {
 }
 
 function endTap(pointerId = null) {
-    if (!tapStart) {
-        return;
-    }
+    if (!tapStart) return;
 
     if (activePointerId !== null && pointerId !== null && pointerId !== activePointerId) {
         return;
@@ -712,32 +826,68 @@ function endTap(pointerId = null) {
 
     tapStart = 0;
     activePointerId = null;
-    tapArea.classList.remove("active");
+
+    if (activeTapArea) {
+        activeTapArea.classList.remove("active");
+    }
+
+    const symbol = duration < 250 ? "." : "-";
 
     if (duration > 1200) {
-        currentTapMorse = "";
-        tapOutput.innerText = "";
-        statusText.innerText = "Cleared";
-        statusText.className = "status";
+        if (activeMode === "practice") {
+            currentTapMorse = "";
+            tapOutput.innerText = "";
+            statusText.innerText = "Cleared";
+            statusText.className = "status";
+        }
+
+        if (activeMode === "write") {
+            writeCurrentCode = "";
+            updateWritePanel();
+        }
+
         return;
     }
 
-    currentTapMorse += duration < 250 ? "." : "-";
-    tapOutput.innerText = currentTapMorse;
+    if (activeMode === "practice") {
+        currentTapMorse += symbol;
+        tapOutput.innerText = currentTapMorse;
+    }
+
+    if (activeMode === "write") {
+        writeCurrentCode += symbol;
+        updateWritePanel();
+    }
 }
 
-tapArea.addEventListener("pointerdown", event => {
+practiceTapArea.addEventListener("pointerdown", event => {
     event.preventDefault();
-    tapArea.setPointerCapture(event.pointerId);
-    startTap(event.pointerId);
+    practiceTapArea.setPointerCapture(event.pointerId);
+    startTap("practice", practiceTapArea, event.pointerId);
 });
 
-tapArea.addEventListener("pointerup", event => {
+practiceTapArea.addEventListener("pointerup", event => {
     event.preventDefault();
     endTap(event.pointerId);
 });
 
-tapArea.addEventListener("pointercancel", event => {
+practiceTapArea.addEventListener("pointercancel", event => {
+    event.preventDefault();
+    endTap(event.pointerId);
+});
+
+writeTapArea.addEventListener("pointerdown", event => {
+    event.preventDefault();
+    writeTapArea.setPointerCapture(event.pointerId);
+    startTap("write", writeTapArea, event.pointerId);
+});
+
+writeTapArea.addEventListener("pointerup", event => {
+    event.preventDefault();
+    endTap(event.pointerId);
+});
+
+writeTapArea.addEventListener("pointercancel", event => {
     event.preventDefault();
     endTap(event.pointerId);
 });
@@ -753,23 +903,46 @@ function isTypingField(element) {
     );
 }
 
+function currentVisiblePanel() {
+    if (practicePanel.classList.contains("active")) return "practice";
+    if (writePanel.classList.contains("active")) return "write";
+    return "translator";
+}
+
 document.addEventListener("keydown", event => {
-    if (isTypingField(document.activeElement)) {
-        return;
-    }
+    if (isTypingField(document.activeElement)) return;
+
+    const panel = currentVisiblePanel();
 
     if (event.code === "Space" && !tapStart) {
         event.preventDefault();
-        startTap("keyboard");
+
+        if (panel === "practice") {
+            startTap("practice", practiceTapArea, "keyboard");
+        }
+
+        if (panel === "write") {
+            startTap("write", writeTapArea, "keyboard");
+        }
+    }
+
+    if (panel === "write" && event.code === "Enter") {
+        event.preventDefault();
+        commitLetter();
+    }
+
+    if (panel === "write" && event.code === "Backspace") {
+        event.preventDefault();
+        backspaceWriter();
     }
 });
 
 document.addEventListener("keyup", event => {
-    if (isTypingField(document.activeElement)) {
-        return;
-    }
+    if (isTypingField(document.activeElement)) return;
 
-    if (event.code === "Space") {
+    const panel = currentVisiblePanel();
+
+    if (event.code === "Space" && (panel === "practice" || panel === "write")) {
         event.preventDefault();
         endTap("keyboard");
     }
@@ -779,11 +952,15 @@ document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
         tapStart = 0;
         activePointerId = null;
-        tapArea.classList.remove("active");
+
+        if (activeTapArea) {
+            activeTapArea.classList.remove("active");
+        }
     }
 });
 
 makePracticeSet();
+updateWritePanel();
 </script>
 
 </body>
