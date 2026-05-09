@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="description" content="Mobile friendly neon Morse code learner and translator with sound, tap practice, and touch based Morse writing.">
+<meta name="description" content="Mobile friendly neon Morse code learner and translator with sound, tap practice, automatic timing, and touch based Morse writing.">
 <title>Neon Morse Code Learner</title>
 
 <style>
@@ -431,8 +431,8 @@ button:active {
 
 <div id="writePanel" class="panel">
     <p class="small">
-        Write Morse using touch, mouse, or spacebar. Short tap = dot. Long tap = dash.
-        Press Letter Space after each character. Press Word Space between words.
+        Timed Morse writing. Short tap = dit. Long tap = dah.
+        Pause for 3 units to finish a letter. Pause for 7 units to finish a word.
     </p>
 
     <span class="label">Current Letter Morse</span>
@@ -440,7 +440,7 @@ button:active {
 
     <div id="writeTapArea" class="tap-area">
         <div class="tap-main">Tap / Hold to Write</div>
-        <div class="tap-sub">Short = dot, long = dash</div>
+        <div class="tap-sub">Auto spacing: 3 units letter, 7 units word</div>
     </div>
 
     <div class="row3">
@@ -461,16 +461,15 @@ button:active {
     </div>
 
     <p class="small">
-        Keyboard shortcut: spacebar writes dots and dashes only on this tab. Use Enter for Letter Space.
+        Keyboard: Spacebar writes dits and dahs. Enter inserts letter space. Backspace deletes.
     </p>
 </div>
 
 <p class="footer-note">
-    <div class="footer">
-        <a href="animesh.html">About Animesh</a>
+        <a href="animesh.html">
+        About Animesh 
+        </a>
         (c) Animesh Sharma 2026
-      </div>
-    
 </p>
 
 </section>
@@ -491,6 +490,11 @@ const MORSE = {
 const TEXT = Object.fromEntries(
     Object.entries(MORSE).map(([letter, code]) => [code, letter])
 );
+
+const UNIT = 180;
+const DOT_MAX = UNIT * 1.5;
+const LETTER_GAP = UNIT * 3;
+const WORD_GAP = UNIT * 7;
 
 const translatorTab = document.getElementById("translatorTab");
 const practiceTab = document.getElementById("practiceTab");
@@ -539,6 +543,8 @@ let history = [];
 
 let writeCurrentCode = "";
 let writeCodes = [];
+let writeGapTimer = null;
+let lastWriteInputTime = 0;
 
 function switchTab(tab) {
     translatorTab.classList.toggle("active", tab === "translator");
@@ -657,13 +663,13 @@ async function playMorse(morse) {
 
     morse.split("").forEach(symbol => {
         if (symbol === "." || symbol === "-") {
-            const duration = symbol === "." ? 0.1 : 0.3;
+            const duration = symbol === "." ? UNIT / 1000 : (UNIT * 3) / 1000;
             playTone(time, duration);
-            time += duration + 0.1;
+            time += duration + UNIT / 1000;
         } else if (symbol === " ") {
-            time += 0.25;
+            time += (UNIT * 3) / 1000;
         } else if (symbol === "/") {
-            time += 0.5;
+            time += (UNIT * 7) / 1000;
         }
     });
 }
@@ -748,8 +754,13 @@ checkAnswer.addEventListener("click", () => {
 });
 
 function updateWritePanel() {
+    const morseMessage =
+        writeCodes.join(" ") +
+        (writeCurrentCode ? " " + writeCurrentCode : "");
+
     writeCurrent.innerText = writeCurrentCode || "";
-    writeMorse.innerText = writeCodes.join(" ") + (writeCurrentCode ? " " + writeCurrentCode : "");
+    writeMorse.innerText = morseMessage.trim();
+
     writeTranslation.innerText = writeCodes
         .map(code => TEXT[code] || (code === "/" ? " " : "?"))
         .join("");
@@ -773,7 +784,23 @@ function commitWordSpace() {
     updateWritePanel();
 }
 
+function resetWriteGapTimer() {
+    clearTimeout(writeGapTimer);
+
+    writeGapTimer = setTimeout(() => {
+        const silenceTime = performance.now() - lastWriteInputTime;
+
+        if (silenceTime >= WORD_GAP) {
+            commitWordSpace();
+        } else if (silenceTime >= LETTER_GAP) {
+            commitLetter();
+        }
+    }, WORD_GAP + 20);
+}
+
 function backspaceWriter() {
+    clearTimeout(writeGapTimer);
+
     if (writeCurrentCode.length > 0) {
         writeCurrentCode = writeCurrentCode.slice(0, -1);
     } else {
@@ -783,11 +810,20 @@ function backspaceWriter() {
     updateWritePanel();
 }
 
-letterSpace.addEventListener("click", commitLetter);
-wordSpace.addEventListener("click", commitWordSpace);
+letterSpace.addEventListener("click", () => {
+    clearTimeout(writeGapTimer);
+    commitLetter();
+});
+
+wordSpace.addEventListener("click", () => {
+    clearTimeout(writeGapTimer);
+    commitWordSpace();
+});
+
 backspaceWrite.addEventListener("click", backspaceWriter);
 
 clearWritten.addEventListener("click", () => {
+    clearTimeout(writeGapTimer);
     writeCurrentCode = "";
     writeCodes = [];
     updateWritePanel();
@@ -831,7 +867,7 @@ function endTap(pointerId = null) {
         activeTapArea.classList.remove("active");
     }
 
-    const symbol = duration < 250 ? "." : "-";
+    const symbol = duration < DOT_MAX ? "." : "-";
 
     if (duration > 1200) {
         if (activeMode === "practice") {
@@ -842,6 +878,7 @@ function endTap(pointerId = null) {
         }
 
         if (activeMode === "write") {
+            clearTimeout(writeGapTimer);
             writeCurrentCode = "";
             updateWritePanel();
         }
@@ -856,7 +893,9 @@ function endTap(pointerId = null) {
 
     if (activeMode === "write") {
         writeCurrentCode += symbol;
+        lastWriteInputTime = performance.now();
         updateWritePanel();
+        resetWriteGapTimer();
     }
 }
 
@@ -928,6 +967,7 @@ document.addEventListener("keydown", event => {
 
     if (panel === "write" && event.code === "Enter") {
         event.preventDefault();
+        clearTimeout(writeGapTimer);
         commitLetter();
     }
 
@@ -952,6 +992,7 @@ document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
         tapStart = 0;
         activePointerId = null;
+        clearTimeout(writeGapTimer);
 
         if (activeTapArea) {
             activeTapArea.classList.remove("active");
