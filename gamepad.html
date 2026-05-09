@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, user-scalable=no"
+  />
 
   <title>Drone Gamepad | Mobile Controller</title>
 
@@ -12,12 +15,14 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    html,
     body {
       margin: 0;
-      min-height: 100vh;
+      width: 100%;
+      height: 100%;
       background: radial-gradient(circle at center, #111933, #050816);
       color: white;
-      font-family: Arial, sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
       overflow: hidden;
       touch-action: none;
     }
@@ -25,18 +30,11 @@
     .screen {
       width: 100vw;
       height: 100vh;
-      padding: 18px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
-    }
-
-    h1 {
-      margin: 0;
-      color: cyan;
-      font-size: 26px;
-      text-shadow: 0 0 14px cyan;
     }
 
     .panel {
@@ -45,8 +43,17 @@
       padding: 14px;
       border: 1px solid rgba(0, 255, 255, 0.35);
       border-radius: 16px;
-      background: rgba(0, 0, 0, 0.35);
+      background: rgba(0, 0, 0, 0.38);
       box-shadow: 0 0 18px rgba(0, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+    }
+
+    h1 {
+      margin: 0 0 8px 0;
+      color: cyan;
+      font-size: 26px;
+      text-align: center;
+      text-shadow: 0 0 14px cyan;
     }
 
     input {
@@ -60,6 +67,7 @@
       font-size: 18px;
       text-align: center;
       outline: none;
+      letter-spacing: 1px;
     }
 
     button {
@@ -69,6 +77,7 @@
       border-radius: 18px;
       font-weight: bold;
       box-shadow: 0 0 16px rgba(0, 255, 255, 0.35);
+      touch-action: none;
     }
 
     button:active,
@@ -78,6 +87,7 @@
     }
 
     #connectBtn,
+    #disconnectBtn,
     #motionBtn {
       width: 100%;
       padding: 14px;
@@ -85,11 +95,29 @@
       font-size: 18px;
     }
 
+    #disconnectBtn {
+      border-color: #ff4fd8;
+      background: rgba(255, 79, 216, 0.12);
+    }
+
     #status {
       margin-top: 10px;
       font-size: 14px;
-      opacity: 0.85;
+      opacity: 0.92;
       text-align: center;
+      line-height: 1.45;
+    }
+
+    #debugBox {
+      margin-top: 10px;
+      padding: 9px;
+      border-radius: 12px;
+      border: 1px solid rgba(0, 255, 255, 0.22);
+      background: rgba(0, 255, 255, 0.06);
+      color: #cff;
+      font-size: 12px;
+      line-height: 1.45;
+      word-break: break-word;
     }
 
     .controls {
@@ -121,6 +149,7 @@
       left: 56px;
       top: 56px;
       box-shadow: 0 0 22px cyan;
+      pointer-events: none;
     }
 
     .buttons {
@@ -139,13 +168,44 @@
       width: 100%;
       max-width: 430px;
       font-size: 13px;
-      opacity: 0.8;
+      opacity: 0.85;
       text-align: center;
       line-height: 1.5;
+      padding-bottom: 4px;
     }
 
-    .hidden {
-      display: none;
+    @media (orientation: landscape) and (max-height: 520px) {
+      .screen {
+        flex-direction: row;
+        gap: 12px;
+        padding: 10px;
+      }
+
+      .panel {
+        max-width: 300px;
+      }
+
+      .controls {
+        max-width: 420px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      #joystickBase {
+        width: 170px;
+        height: 170px;
+      }
+
+      .gameBtn {
+        height: 60px;
+      }
+
+      .motionData {
+        max-width: 240px;
+        font-size: 12px;
+      }
     }
   </style>
 </head>
@@ -156,13 +216,25 @@
     <div class="panel">
       <h1>Drone Gamepad</h1>
 
-      <input id="peerCodeInput" placeholder="Enter desktop pair code" />
+      <input
+        id="peerCodeInput"
+        placeholder="Enter desktop pair code"
+        autocomplete="off"
+        autocapitalize="none"
+        spellcheck="false"
+      />
 
       <button id="connectBtn">Connect</button>
-
+      <button id="disconnectBtn">Disconnect</button>
       <button id="motionBtn">Enable Motion Control</button>
 
       <div id="status">Not connected</div>
+
+      <div id="debugBox">
+        PeerJS: <span id="peerDebug">Checking...</span><br />
+        Mobile Peer ID: <span id="mobilePeerId">Not created</span><br />
+        Target Desktop ID: <span id="targetPeerId">None</span>
+      </div>
     </div>
 
     <div class="controls">
@@ -178,20 +250,24 @@
 
     <div class="motionData">
       Control Mode: <span id="controlMode">Joystick</span><br />
-      Tilt X: <span id="tiltX">0.00</span> |
-      Tilt Y: <span id="tiltY">0.00</span>
+      X: <span id="tiltX">0.00</span> |
+      Y: <span id="tiltY">0.00</span>
     </div>
 
   </div>
 
-  <!-- PeerJS CDN -->
   <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
 
   <script>
     const peerCodeInput = document.getElementById("peerCodeInput");
     const connectBtn = document.getElementById("connectBtn");
+    const disconnectBtn = document.getElementById("disconnectBtn");
     const motionBtn = document.getElementById("motionBtn");
     const statusEl = document.getElementById("status");
+
+    const peerDebug = document.getElementById("peerDebug");
+    const mobilePeerId = document.getElementById("mobilePeerId");
+    const targetPeerId = document.getElementById("targetPeerId");
 
     const base = document.getElementById("joystickBase");
     const stick = document.getElementById("joystickStick");
@@ -203,130 +279,286 @@
     const tiltXEl = document.getElementById("tiltX");
     const tiltYEl = document.getElementById("tiltY");
 
-    let peer;
-    let conn;
+    let peer = null;
+    let conn = null;
 
     let inputX = 0;
     let inputY = 0;
     let boost = false;
     let brake = false;
-
     let motionEnabled = false;
 
     const MOTION_DEADZONE = 0.08;
     const MOTION_SENSITIVITY = 0.045;
+
+    const PEER_CONFIG = {
+      host: "0.peerjs.com",
+      port: 443,
+      path: "/",
+      secure: true,
+      debug: 2,
+      config: {
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          { urls: "stun:global.stun.twilio.com:3478" }
+        ]
+      }
+    };
+
+    function setStatus(message) {
+      statusEl.textContent = message;
+    }
+
+    function updateDebug() {
+      peerDebug.textContent = typeof Peer === "undefined" ? "Not loaded" : "Loaded";
+    }
+
+    updateDebug();
 
     function clamp(value, min, max) {
       return Math.max(min, Math.min(max, value));
     }
 
     function applyDeadzone(value) {
-      if (Math.abs(value) < MOTION_DEADZONE) return 0;
+      if (Math.abs(value) < MOTION_DEADZONE) {
+        return 0;
+      }
+
       return value;
     }
 
+    function cleanPeerCode(code) {
+      return code
+        .trim()
+        .replace(/\s+/g, "")
+        .replace(/[“”]/g, "")
+        .replace(/[‘’]/g, "");
+    }
+
     function sendInput() {
-      if (conn && conn.open) {
-        conn.send({
-          type: "input",
-          x: inputX,
-          y: inputY,
-          boost: boost,
-          brake: brake,
-          controlMode: motionEnabled ? "motion" : "joystick"
-        });
+      if (!conn || !conn.open) {
+        return;
       }
+
+      conn.send({
+        type: "input",
+        x: inputX,
+        y: inputY,
+        boost: boost,
+        brake: brake,
+        controlMode: motionEnabled ? "motion" : "joystick"
+      });
     }
 
     setInterval(sendInput, 16);
 
-    connectBtn.addEventListener("click", () => {
-      const desktopPeerId = peerCodeInput.value.trim();
+    function disconnectExisting() {
+      if (conn) {
+        try {
+          conn.close();
+        } catch (error) {}
+
+        conn = null;
+      }
+
+      if (peer) {
+        try {
+          peer.destroy();
+        } catch (error) {}
+
+        peer = null;
+      }
+
+      mobilePeerId.textContent = "Not created";
+      connectBtn.classList.remove("active");
+    }
+
+    function connectToDesktop() {
+      const desktopPeerId = cleanPeerCode(peerCodeInput.value);
 
       if (!desktopPeerId) {
-        statusEl.textContent = "Enter the desktop pair code first.";
+        setStatus("Enter the desktop pair code first.");
         return;
       }
 
-      peer = new Peer();
+      targetPeerId.textContent = desktopPeerId;
 
-      peer.on("open", () => {
-        conn = peer.connect(desktopPeerId);
+      if (typeof Peer === "undefined") {
+        peerDebug.textContent = "Not loaded";
+        setStatus("PeerJS did not load. Refresh the page or check internet.");
+        return;
+      }
+
+      disconnectExisting();
+
+      setStatus("Creating mobile peer...");
+
+      try {
+        peer = new Peer(null, PEER_CONFIG);
+      } catch (error) {
+        setStatus("Could not create mobile peer: " + error.message);
+        return;
+      }
+
+      peer.on("open", (id) => {
+        mobilePeerId.textContent = id;
+        setStatus("Mobile peer ready. Connecting to desktop...");
+
+        conn = peer.connect(desktopPeerId, {
+          reliable: true,
+          serialization: "json"
+        });
 
         conn.on("open", () => {
-          statusEl.textContent = "Connected to desktop.";
+          connectBtn.classList.add("active");
+          setStatus("Connected to desktop. Use joystick or motion.");
         });
 
         conn.on("close", () => {
-          statusEl.textContent = "Connection closed.";
+          connectBtn.classList.remove("active");
+          setStatus("Connection closed.");
         });
 
-        conn.on("error", () => {
-          statusEl.textContent = "Connection error.";
+        conn.on("error", (error) => {
+          connectBtn.classList.remove("active");
+          setStatus("Data connection error: " + (error.type || error.message || "unknown"));
         });
       });
 
-      peer.on("error", (err) => {
-        statusEl.textContent = "Peer error: " + err.type;
+      peer.on("error", (error) => {
+        console.error("Peer error:", error);
+        connectBtn.classList.remove("active");
+
+        if (error.type === "peer-unavailable") {
+          setStatus("Desktop not found. Check Pair Code and keep desktop.html open.");
+        } else if (error.type === "network") {
+          setStatus("PeerJS network error. Try reload, another browser, or hotspot.");
+        } else if (error.type === "server-error") {
+          setStatus("PeerJS server error. Reload and try again.");
+        } else if (error.type === "browser-incompatible") {
+          setStatus("Browser incompatible with WebRTC.");
+        } else {
+          setStatus("Peer error: " + (error.type || error.message || "unknown"));
+        }
       });
+
+      peer.on("disconnected", () => {
+        setStatus("Mobile peer disconnected from PeerJS server.");
+      });
+
+      peer.on("close", () => {
+        setStatus("Mobile peer closed.");
+      });
+    }
+
+    connectBtn.addEventListener("click", connectToDesktop);
+
+    peerCodeInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        connectToDesktop();
+      }
     });
 
-    function handleJoystick(clientX, clientY) {
-      if (motionEnabled) return;
+    disconnectBtn.addEventListener("click", () => {
+      disconnectExisting();
 
+      inputX = 0;
+      inputY = 0;
+      boost = false;
+      brake = false;
+
+      resetJoystick();
+
+      setStatus("Disconnected.");
+    });
+
+    function getJoystickData() {
       const rect = base.getBoundingClientRect();
+      const stickSize = stick.offsetWidth || 74;
 
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
+      return {
+        rect: rect,
+        stickSize: stickSize,
+        centerX: rect.left + rect.width / 2,
+        centerY: rect.top + rect.height / 2,
+        maxRadius: rect.width / 2 - stickSize / 2
+      };
+    }
 
-      let dx = clientX - centerX;
-      let dy = clientY - centerY;
+    function setStickPosition(dx, dy) {
+      const rect = base.getBoundingClientRect();
+      const stickSize = stick.offsetWidth || 74;
+      const centerOffset = rect.width / 2 - stickSize / 2;
 
-      const maxRadius = rect.width / 2 - 37;
-      const distance = Math.sqrt(dx * dx + dy * dy);
+      stick.style.left = centerOffset + dx + "px";
+      stick.style.top = centerOffset + dy + "px";
+    }
 
-      if (distance > maxRadius) {
-        dx = (dx / distance) * maxRadius;
-        dy = (dy / distance) * maxRadius;
+    function handleJoystick(clientX, clientY) {
+      if (motionEnabled) {
+        return;
       }
 
-      inputX = dx / maxRadius;
-      inputY = dy / maxRadius;
+      const data = getJoystickData();
 
-      stick.style.left = 56 + dx + "px";
-      stick.style.top = 56 + dy + "px";
+      let dx = clientX - data.centerX;
+      let dy = clientY - data.centerY;
+
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance > data.maxRadius) {
+        dx = (dx / distance) * data.maxRadius;
+        dy = (dy / distance) * data.maxRadius;
+      }
+
+      inputX = dx / data.maxRadius;
+      inputY = dy / data.maxRadius;
+
+      tiltXEl.textContent = inputX.toFixed(2);
+      tiltYEl.textContent = inputY.toFixed(2);
+
+      setStickPosition(dx, dy);
     }
 
     function resetJoystick() {
-      if (motionEnabled) return;
+      if (motionEnabled) {
+        return;
+      }
 
       inputX = 0;
       inputY = 0;
 
-      stick.style.left = "56px";
-      stick.style.top = "56px";
+      tiltXEl.textContent = "0.00";
+      tiltYEl.textContent = "0.00";
+
+      setStickPosition(0, 0);
     }
 
-    base.addEventListener("touchstart", (e) => {
-      const touch = e.touches[0];
+    base.addEventListener("touchstart", (event) => {
+      const touch = event.touches[0];
       handleJoystick(touch.clientX, touch.clientY);
-    });
+      event.preventDefault();
+    }, { passive: false });
 
-    base.addEventListener("touchmove", (e) => {
-      const touch = e.touches[0];
+    base.addEventListener("touchmove", (event) => {
+      const touch = event.touches[0];
       handleJoystick(touch.clientX, touch.clientY);
-      e.preventDefault();
+      event.preventDefault();
     }, { passive: false });
 
     base.addEventListener("touchend", () => {
       resetJoystick();
     });
 
-    base.addEventListener("mousedown", (e) => {
-      handleJoystick(e.clientX, e.clientY);
+    base.addEventListener("touchcancel", () => {
+      resetJoystick();
+    });
 
-      function moveHandler(ev) {
-        handleJoystick(ev.clientX, ev.clientY);
+    base.addEventListener("mousedown", (event) => {
+      handleJoystick(event.clientX, event.clientY);
+
+      function moveHandler(moveEvent) {
+        handleJoystick(moveEvent.clientX, moveEvent.clientY);
       }
 
       function upHandler() {
@@ -339,44 +571,64 @@
       window.addEventListener("mouseup", upHandler);
     });
 
-    boostBtn.addEventListener("touchstart", () => {
-      boost = true;
-      boostBtn.classList.add("active");
-    });
+    function activateButton(button, callback) {
+      callback(true);
+      button.classList.add("active");
+    }
+
+    function deactivateButton(button, callback) {
+      callback(false);
+      button.classList.remove("active");
+    }
+
+    boostBtn.addEventListener("touchstart", (event) => {
+      activateButton(boostBtn, (value) => boost = value);
+      event.preventDefault();
+    }, { passive: false });
 
     boostBtn.addEventListener("touchend", () => {
-      boost = false;
-      boostBtn.classList.remove("active");
+      deactivateButton(boostBtn, (value) => boost = value);
+    });
+
+    boostBtn.addEventListener("touchcancel", () => {
+      deactivateButton(boostBtn, (value) => boost = value);
     });
 
     boostBtn.addEventListener("mousedown", () => {
-      boost = true;
-      boostBtn.classList.add("active");
+      activateButton(boostBtn, (value) => boost = value);
     });
 
     boostBtn.addEventListener("mouseup", () => {
-      boost = false;
-      boostBtn.classList.remove("active");
+      deactivateButton(boostBtn, (value) => boost = value);
     });
 
-    brakeBtn.addEventListener("touchstart", () => {
-      brake = true;
-      brakeBtn.classList.add("active");
+    boostBtn.addEventListener("mouseleave", () => {
+      deactivateButton(boostBtn, (value) => boost = value);
     });
+
+    brakeBtn.addEventListener("touchstart", (event) => {
+      activateButton(brakeBtn, (value) => brake = value);
+      event.preventDefault();
+    }, { passive: false });
 
     brakeBtn.addEventListener("touchend", () => {
-      brake = false;
-      brakeBtn.classList.remove("active");
+      deactivateButton(brakeBtn, (value) => brake = value);
+    });
+
+    brakeBtn.addEventListener("touchcancel", () => {
+      deactivateButton(brakeBtn, (value) => brake = value);
     });
 
     brakeBtn.addEventListener("mousedown", () => {
-      brake = true;
-      brakeBtn.classList.add("active");
+      activateButton(brakeBtn, (value) => brake = value);
     });
 
     brakeBtn.addEventListener("mouseup", () => {
-      brake = false;
-      brakeBtn.classList.remove("active");
+      deactivateButton(brakeBtn, (value) => brake = value);
+    });
+
+    brakeBtn.addEventListener("mouseleave", () => {
+      deactivateButton(brakeBtn, (value) => brake = value);
     });
 
     async function enableMotionControls() {
@@ -388,7 +640,7 @@
           const permission = await DeviceOrientationEvent.requestPermission();
 
           if (permission !== "granted") {
-            statusEl.textContent = "Motion permission denied.";
+            setStatus("Motion permission denied.");
             return;
           }
         }
@@ -399,39 +651,34 @@
           motionBtn.textContent = "Disable Motion Control";
           motionBtn.classList.add("active");
           controlModeEl.textContent = "Motion";
-          stick.style.left = "56px";
-          stick.style.top = "56px";
-          statusEl.textContent = "Motion control enabled.";
+
+          inputX = 0;
+          inputY = 0;
+          setStickPosition(0, 0);
+
+          setStatus(conn && conn.open ? "Motion control enabled." : "Motion enabled. Not connected yet.");
         } else {
           motionBtn.textContent = "Enable Motion Control";
           motionBtn.classList.remove("active");
           controlModeEl.textContent = "Joystick";
+
           inputX = 0;
           inputY = 0;
-          statusEl.textContent = "Joystick control enabled.";
+          setStickPosition(0, 0);
+
+          setStatus(conn && conn.open ? "Joystick control enabled." : "Joystick enabled. Not connected yet.");
         }
       } catch (error) {
-        statusEl.textContent = "Motion control not available.";
+        setStatus("Motion control not available.");
       }
     }
 
     motionBtn.addEventListener("click", enableMotionControls);
 
     window.addEventListener("deviceorientation", (event) => {
-      if (!motionEnabled) return;
-
-      /*
-        beta  = front/back tilt, roughly -180 to 180
-        gamma = left/right tilt, roughly -90 to 90
-
-        Holding phone flat:
-        gamma controls left/right
-        beta controls forward/back
-
-        We map:
-        gamma → inputX
-        beta  → inputY
-      */
+      if (!motionEnabled) {
+        return;
+      }
 
       let gamma = event.gamma || 0;
       let beta = event.beta || 0;
@@ -451,11 +698,14 @@
       tiltXEl.textContent = inputX.toFixed(2);
       tiltYEl.textContent = inputY.toFixed(2);
 
-      const visualX = inputX * 56;
-      const visualY = inputY * 56;
+      const data = getJoystickData();
 
-      stick.style.left = 56 + visualX + "px";
-      stick.style.top = 56 + visualY + "px";
+      setStickPosition(inputX * data.maxRadius, inputY * data.maxRadius);
+    });
+
+    window.addEventListener("load", () => {
+      updateDebug();
+      setStickPosition(0, 0);
     });
   </script>
 </body>
