@@ -315,7 +315,7 @@
 
     <div id="errorBox"></div>
 
-    <div class="label">Open on iPhone</div>
+    <div class="label">Open on Phone</div>
     <div class="value">
       Open <strong>gamepad.html</strong> from the same GitHub Pages site and enter this Pair Code.
     </div>
@@ -329,7 +329,7 @@
   </div>
 
   <div id="keyboardHelp">
-    <h2>MacBook Test Controls</h2>
+    <h2>Desktop Test Controls</h2>
     <div>
       Use <span class="key">W</span>
       <span class="key">A</span>
@@ -454,7 +454,7 @@
         modeHud.textContent = "PeerJS missing";
 
         showError(
-          "PeerJS did not load on this browser. On MacBook, try Cmd + Shift + R, disable ad blockers, or test in Safari/Chrome Incognito."
+          "PeerJS did not load on this browser. On Desktop, try Cmd + Shift + R, disable ad blockers, or test in Safari/Chrome Incognito."
         );
 
         return;
@@ -485,7 +485,7 @@
 
       peer.on("open", (id) => {
         peerIdEl.textContent = id;
-        statusEl.textContent = "Pair Code ready. Waiting for iPhone controller...";
+        statusEl.textContent = "Pair Code ready. Waiting for Phone controller...";
         modeHud.textContent = "Waiting";
         clearError();
       });
@@ -493,12 +493,12 @@
       peer.on("connection", (connection) => {
         conn = connection;
 
-        statusEl.textContent = "iPhone connected.";
+        statusEl.textContent = "Phone connected.";
         modeHud.textContent = "Connected";
         clearError();
 
         conn.on("open", () => {
-          statusEl.textContent = "iPhone controller active.";
+          statusEl.textContent = "Phone controller active.";
           modeHud.textContent = "Connected";
         });
 
@@ -519,7 +519,7 @@
         });
 
         conn.on("close", () => {
-          statusEl.textContent = "iPhone disconnected.";
+          statusEl.textContent = "Phone disconnected.";
           modeHud.textContent = "Disconnected";
 
           inputX = 0;
@@ -564,7 +564,7 @@
         } else if (error.type === "network") {
           statusEl.textContent = "PeerJS network error.";
           showError(
-            "MacBook cannot reach the PeerJS server. Try Cmd + Shift + R, disable VPN/ad blockers, use another browser, or try another network/hotspot."
+            "Desktop cannot reach the PeerJS server. Try Cmd + Shift + R, disable VPN/ad blockers, use another browser, or try another network/hotspot."
           );
         } else if (error.type === "server-error") {
           statusEl.textContent = "PeerJS server error.";
@@ -574,7 +574,7 @@
           showError("This browser does not fully support WebRTC. Try Chrome, Safari, or Firefox.");
         } else if (error.type === "peer-unavailable") {
           statusEl.textContent = "Peer unavailable.";
-          showError("The phone could not find the Pair Code. Check the code and keep this page open.");
+          showError("The Phone could not find the Pair Code. Check the code and keep this page open.");
         } else {
           statusEl.textContent = "PeerJS error: " + (error.type || "unknown");
           showError("PeerJS error: " + (error.type || error.message || "unknown error"));
