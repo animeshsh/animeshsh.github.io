@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dr Animesh Sharma | Drones, Aerospace, Plasma and Engineering</title>
-  <meta name="description" content="Official website of Dr Animesh Sharma, PhD in Aeronautics and Astronautics from Purdue University. Explore work in drones, aerospace engineering, plasma physics, laser-plasma interaction, simulations, propulsion, and interactive engineering projects." />
+  <meta name="description" content="Official website of Dr Animesh Sharma, PhD in Aeronautics and Astronautics from Purdue University. Explore work in drones, aerospace engineering, plasma physics, laser-plasma interaction, simulations, propulsion, and interactive engineering projects, including a game-state-based neural-network drone demo." />
   <meta name="keywords" content="Dr Animesh Sharma, Animesh Sharma, aerospace, drones, drone engineering, plasma physics, laser plasma, Purdue, aeronautics, astronautics, UAV, propulsion, simulation, artificial intelligence, machine learning, computer vision, OpenCV, edge AI" />
   <meta name="author" content="Dr Animesh Sharma" />
   <meta name="robots" content="index, follow" />
 
   <meta property="og:title" content="Dr Animesh Sharma | Drones, Aerospace, Plasma and Engineering" />
-  <meta property="og:description" content="A personal website featuring drones, aerospace engineering, plasma physics, propulsion, laser-plasma research, and interactive drone pages." />
+  <meta property="og:description" content="A personal website featuring drones, aerospace engineering, plasma physics, propulsion, laser-plasma research, and interactive drone pages and a game-state-based neural-network drone demo." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://animeshsh.github.io/" />
 
@@ -423,11 +423,66 @@
       font-size: 0.82rem;
     }
 
+
+    .project-feature {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 1.2rem;
+      align-items: stretch;
+    }
+
+    .project-demo-card {
+      padding: 1.7rem;
+      background:
+        radial-gradient(circle at top right, rgba(98,176,255,0.14), transparent 34%),
+        linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012));
+    }
+
+    .project-flow {
+      display: grid;
+      gap: 0.75rem;
+      align-content: center;
+    }
+
+    .flow-node {
+      padding: 0.9rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.025);
+    }
+
+    .flow-node strong {
+      display: block;
+      color: var(--accent-2);
+      margin-bottom: 0.2rem;
+    }
+
+    .flow-arrow {
+      text-align: center;
+      color: var(--accent);
+      font-size: 1.35rem;
+      line-height: 1;
+    }
+
+    .project-points {
+      margin: 1rem 0 0;
+      padding-left: 1.15rem;
+      color: var(--muted);
+    }
+
+    .project-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 1.2rem;
+    }
+
     @media (max-width: 900px) {
       .hero-grid,
       .about-grid,
       .links-grid,
-      .focus-grid {
+      .focus-grid,
+      .project-feature {
         grid-template-columns: 1fr;
       }
 
@@ -472,7 +527,10 @@
       "Computer Vision",
       "OpenCV",
       "Edge AI",
-      "Autonomous Systems"
+      "Autonomous Systems",
+      "Neural Networks",
+      "Game AI",
+      "Interactive Drone Simulation"
     ]
   }
   </script>
@@ -527,7 +585,7 @@
               </div>
               <div class="mini-card">
                 <strong>Current Direction</strong>
-                <span>Engineering communication, drone systems, interactive web projects</span>
+                <span>Drone systems, AI-enabled simulations, and interactive engineering projects</span>
               </div>
             </div>
           </div>
@@ -622,6 +680,65 @@
               <span>Autonomous Systems</span>
             </div>
           </article>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="projects">
+      <div class="container">
+        <h2>Interactive AI and Drone Projects</h2>
+        <p class="section-intro">
+          Browser-based engineering demonstrations that combine simulation, control logic,
+          machine learning concepts, and interactive drone behaviour.
+        </p>
+
+        <div class="project-feature">
+          <article class="panel project-demo-card">
+            <span class="tag">Featured Interactive Demo</span>
+            <h3>Game-State Neural Network Drone</h3>
+            <p>
+              An interactive browser demonstration in which a drone reads the current game
+              state and uses a neural-network policy to select its next control action.
+              The demo connects game AI with UAV control by making the decision process
+              visible as the environment changes.
+            </p>
+
+            <ul class="project-points">
+              <li>Game-state inputs such as position, velocity, obstacle distance, and target direction</li>
+              <li>Neural-network inference for movement and avoidance decisions</li>
+              <li>Real-time visualization of inputs, hidden-layer activity, and selected action</li>
+              <li>Interactive comparison between manual, rule-based, and neural-network control</li>
+              <li>Designed as an educational bridge between game development, AI, and drone autonomy</li>
+            </ul>
+
+            <div class="project-actions">
+              <a class="btn btn-primary" href="neural-drone.html">Launch Neural Drone Demo</a>
+              <a class="btn btn-secondary" href="#drones">View Other Drone Projects</a>
+            </div>
+          </article>
+
+          <aside class="panel project-flow" aria-label="Neural drone decision pipeline">
+            <div class="flow-node">
+              <strong>1. Game State</strong>
+              Drone position, speed, target bearing, boundaries, and obstacle proximity
+            </div>
+            <div class="flow-arrow" aria-hidden="true">↓</div>
+            <div class="flow-node">
+              <strong>2. Neural Network</strong>
+              Normalized state values pass through a compact policy network
+            </div>
+            <div class="flow-arrow" aria-hidden="true">↓</div>
+            <div class="flow-node">
+              <strong>3. Control Action</strong>
+              The network selects thrust, climb, descend, or lateral movement
+            </div>
+            <div class="flow-arrow" aria-hidden="true">↓</div>
+            <div class="flow-node">
+              <strong>4. Updated Environment</strong>
+              The game advances and produces the next state for continuous decision-making
+            </div>
+          </aside>
         </div>
       </div>
     </section>
@@ -750,6 +867,16 @@
         </p>
 
         <div class="links-grid">
+
+          <a class="link-card" href="neural-drone.html">
+            <span class="tag">AI Drone Demo</span>
+            <h3>Game-State Neural Network Drone</h3>
+            <p>
+              An interactive demonstration of a neural-network policy selecting drone
+              actions from changing game-state inputs.
+            </p>
+          </a>
+
           <a class="link-card" href="index.html">
             <span class="tag">Drone Pilot Pro</span>
             <h3>Drone Pilot Pro</h3>
@@ -809,6 +936,7 @@
         <a href="#about">About</a>
         <a href="#focus">Work</a>
         <a href="#timeline">Timeline</a>
+        <a href="#projects">Projects</a>
         <a href="#drones">Drone Pages</a>
         <a href="https://scholar.google.com/citations?user=AnCBeHgAAAAJ&hl=en" target="_blank" rel="noopener">Google Scholar</a>
         <a href="https://orcid.org/0000-0003-4963-4648" target="_blank" rel="noopener">ORCID</a>
