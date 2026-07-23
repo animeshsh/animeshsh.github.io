@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dr Animesh Sharma | Drones, Aerospace, Plasma and Engineering</title>
   <meta name="description" content="Official website of Dr Animesh Sharma, PhD in Aeronautics and Astronautics from Purdue University. Explore work in drones, aerospace engineering, plasma physics, laser-plasma interaction, simulations, propulsion, and interactive engineering projects." />
-  <meta name="keywords" content="Dr Animesh Sharma, Animesh Sharma, aerospace, drones, drone engineering, plasma physics, laser plasma, Purdue, aeronautics, astronautics, UAV, propulsion, simulation" />
+  <meta name="keywords" content="Dr Animesh Sharma, Animesh Sharma, aerospace, drones, drone engineering, plasma physics, laser plasma, Purdue, aeronautics, astronautics, UAV, propulsion, simulation, artificial intelligence, machine learning, computer vision, OpenCV, edge AI" />
   <meta name="author" content="Dr Animesh Sharma" />
   <meta name="robots" content="index, follow" />
 
@@ -362,6 +362,67 @@
       color: var(--text);
     }
 
+    
+
+    .ai-focus-card {
+      grid-column: 1 / -1;
+      padding: 1.6rem;
+      background:
+        linear-gradient(135deg, rgba(98,176,255,0.12), rgba(126,240,199,0.07)),
+        linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      border-color: rgba(98,176,255,0.28);
+    }
+
+    .ai-focus-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .ai-focus-icon {
+      width: 52px;
+      height: 52px;
+      flex: 0 0 52px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #08101d;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      box-shadow: 0 10px 25px rgba(98,176,255,0.2);
+    }
+
+    .ai-focus-card h3 {
+      margin-bottom: 0.25rem;
+    }
+
+    .ai-focus-label {
+      margin: 0;
+      color: var(--accent-2) !important;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .skill-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin-top: 1rem;
+    }
+
+    .skill-tags span {
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      color: var(--accent-2);
+      background: rgba(126,240,199,0.08);
+      border: 1px solid rgba(126,240,199,0.2);
+      font-size: 0.82rem;
+    }
+
     @media (max-width: 900px) {
       .hero-grid,
       .about-grid,
@@ -405,7 +466,13 @@
       "UAV Systems",
       "Simulation",
       "Propulsion",
-      "Diagnostics"
+      "Diagnostics",
+      "Artificial Intelligence",
+      "Machine Learning",
+      "Computer Vision",
+      "OpenCV",
+      "Edge AI",
+      "Autonomous Systems"
     ]
   }
   </script>
@@ -418,7 +485,7 @@
         <a href="#about">About</a>
         <a href="#focus">Work</a>
         <a href="#timeline">Timeline</a>
-        <<a href="#projects">Projects</a>
+        <a href="#projects">Projects</a>
         <a href="#drones">Drone Pages</a>
         <a href="https://scholar.google.com/citations?user=AnCBeHgAAAAJ&hl=en" target="_blank" rel="noopener">Google Scholar</a>
         <a href="https://orcid.org/0000-0003-4963-4648" target="_blank" rel="noopener">ORCID</a>
@@ -525,6 +592,36 @@
             <h3>Plasma and Laser Science</h3>
             <p>Research interests including plasma physics, laser-plasma interaction, diagnostics, and numerical simulation.</p>
           </article>
+
+          <article class="panel ai-focus-card">
+            <div class="ai-focus-header">
+              <div class="ai-focus-icon" aria-hidden="true">AI</div>
+              <div>
+                <p class="ai-focus-label">Current and Emerging Interest</p>
+                <h3>Artificial Intelligence, Machine Learning and Computer Vision</h3>
+              </div>
+            </div>
+            <p>
+              Applying AI and computer vision to practical engineering systems, with interests spanning
+              visual detection and tracking, autonomous platforms, scientific data analysis, and edge
+              intelligence for drones and embedded devices.
+            </p>
+            <ul>
+              <li>Computer vision for object detection, tracking, and autonomous systems</li>
+              <li>Raspberry Pi face tracking using Haar cascades and SG90 servo control</li>
+              <li>Machine learning for scientific, experimental, and simulation data</li>
+              <li>Edge AI for UAVs, robotics, and embedded platforms</li>
+              <li>AI-assisted diagnostics, simulation, and engineering workflows</li>
+            </ul>
+            <div class="skill-tags" aria-label="AI and computer vision skills">
+              <span>Python</span>
+              <span>OpenCV</span>
+              <span>Computer Vision</span>
+              <span>Machine Learning</span>
+              <span>Edge AI</span>
+              <span>Autonomous Systems</span>
+            </div>
+          </article>
         </div>
       </div>
     </section>
@@ -557,8 +654,7 @@
                 Formal grounding in aerospace engineering with exposure to fluid mechanics, propulsion, structures, flight mechanics, and the physical thinking that underpins engineered systems.
               </p>
               <p>
-                Built the first FPV flying wing in India (2015)
-              </p>
+                Built the first FPV flying wing in India (2015).
               </p>
             </div>
           </div>
