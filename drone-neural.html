@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Drone Pilot Pro AI Trainer</title>
+    <style>
+        :root {
+            --neon-blue: #00d2ff;
+            --neon-blue-soft: rgba(0, 210, 255, 0.18);
+            --neon-red: #ff4757;
+            --bg-dark: #0a0a0a;
+            --panel-bg: rgba(255, 255, 255, 0.03);
+            --panel-border: rgba(0, 210, 255, 0.30);
+            --text-dim: #8ebfcb;
+            --text-soft: #cfefff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+            background: var(--bg-dark);
+            color: var(--neon-blue);
+            font-family: "Courier New", Courier, monospace;
+        }
+
+        body {
+            overflow-x: hidden;
+        }
+
+        .page-wrap {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 18px;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 1320px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .canvas-column {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .canvas-shell {
+            position: relative;
+            width: 100%;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            max-width: 860px;
+            height: auto;
+            background: #121225;
+            border: 2px solid var(--neon-blue);
+            border-radius: 8px;
+            box-shadow: 0 0 25px rgba(0, 210, 255, 0.15);
+        }
+
+        .ui {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 28px);
+            max-width: 860px;
+            pointer-events: none;
+            text-align: center;
+            z-index: 2;
+        }
+
+        #score {
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        #subtitle {
+            margin-top: 6px;
+            font-size: 12px;
+            color: var(--text-soft);
+            text-shadow: 0 0 8px rgba(0, 210, 255, 0.2);
+        }
+
+        .side-panel {
+            width: 360px;
+            flex: 0 0 360px;
+            background: var(--panel-bg);
+            padding: 18px;
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .section-title {
+            margin: 0;
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        button, select, input[type="number"], input[type="range"] {
+            font-family: inherit;
+        }
+
+        button {
+            border: 1px solid rgba(0, 210, 255, 0.35);
+            background: #0f1322;
+            color: var(--neon-blue);
+            padding: 10px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.15s ease;
+        }
+
+        button:hover {
+            box-shadow: 0 0 12px rgba(0, 210, 255, 0.18);
+            background: #131a2f;
+        }
+
+        button.active {
+            border-color: rgba(0, 210, 255, 0.8);
+            box-shadow: 0 0 14px rgba(0, 210, 255, 0.22);
+        }
+
+        .line {
+            border: 0;
+            border-top: 1px solid #2a2a2a;
+            margin: 0;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 12px;
+            font-size: 11px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(0,210,255,0.10);
+            border-radius: 6px;
+            padding: 8px;
+        }
+
+        .stat-label {
+            color: var(--text-dim);
+            font-size: 10px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            color: var(--text-soft);
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .control-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 11px;
+            color: var(--text-soft);
+        }
+
+        .control-wrap label {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        select, input[type="number"] {
+            background: #0f1322;
+            color: var(--neon-blue);
+            border: 1px solid rgba(0, 210, 255, 0.35);
+            border-radius: 4px;
+            padding: 7px 8px;
+            outline: none;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--neon-blue);
+        }
+
+        .small-copy {
+            font-size: 10px;
+            color: var(--text-dim);
+            line-height: 1.55;
+        }
+
+        .scoreboard {
+            font-size: 11px;
+            color: var(--text-soft);
+        }
+
+        .scoreboard ol {
+            margin: 0;
+            padding-left: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .footer-copy {
+            text-align: center;
+            font-size: 10px;
+            color: #7a7a7a;
+        }
+
+        .debug {
+            position: fixed;
+            left: 16px;
+            bottom: 16px;
+            background: rgba(0,0,0,0.62);
+            color: rgba(255,255,255,0.45);
+            font-size: 11px;
+            padding: 8px 10px;
+            border-radius: 5px;
+            z-index: 10;
+            max-width: calc(100vw - 32px);
+            word-break: break-word;
+        }
+
+        @media (max-width: 1120px) {
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .side-panel {
+                width: 100%;
+                max-width: 860px;
+                flex: 0 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrap">
+        <div class="game-container">
+            <div class="canvas-column">
+                <div class="canvas-shell">
+                    <div class="ui">
+                        <div id="score">DRONE PILOT PRO AI TRAINER</div>
+                        <div id="subtitle">MODE: TRAINING</div>
+                    </div>
+                    <canvas id="gameCanvas" width="860" height="520"></canvas>
+                </div>
+            </div>
+
+            <div class="side-panel">
+                <h3 class="section-title">AI Control</h3>
+                <div class="button-grid">
+                    <button id="trainBtn" class="active">Start Training</button>
+                    <button id="pauseBtn">Pause</button>
+                    <button id="watchBestBtn">Watch Best</button>
+                    <button id="manualBtn">Manual Play</button>
+                    <button id="resetTrainingBtn">Reset AI</button>
+                    <button id="saveBestBtn">Save Best</button>
+                    <button id="loadBestBtn">Load Best</button>
+                    <button id="stepGenBtn">Step 1 Generation</button>
+                </div>
+                <div class="footer">
+                  <a href="animesh.html">About Animesh</a>
+                  (c) Animesh Sharma 2026
+                </div>
+
+                <hr class="line" />
+
+                <h3 class="section-title">Training Stats</h3>
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Generation</div>
+                        <div class="stat-value" id="generationStat">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Population</div>
+                        <div class="stat-value" id="populationStat">60</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Alive Agents</div>
+                        <div class="stat-value" id="aliveStat">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Simulation Speed</div>
+                        <div class="stat-value" id="simSpeedText">12x</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Best This Gen</div>
+                        <div class="stat-value" id="bestGenStat">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Best Ever</div>
+                        <div class="stat-value" id="bestEverStat">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Rendered Agent</div>
+                        <div class="stat-value" id="renderedAgentStat">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Current Score</div>
+                        <div class="stat-value" id="renderScoreStat">0</div>
+                    </div>
+                </div>
+
+                <hr class="line" />
+
+                <h3 class="section-title">Settings</h3>
+                <div class="control-wrap">
+                    <label>
+                        Population Size
+                        <input type="number" id="populationInput" min="10" max="300" step="1" value="60" />
+                    </label>
+
+                    <label>
+                        Hidden Layer Size
+                        <input type="number" id="hiddenInput" min="4" max="64" step="1" value="12" />
+                    </label>
+
+                    <label>
+                        Simulation Speed
+                        <input type="range" id="simSpeedSlider" min="1" max="50" step="1" value="12" />
+                    </label>
+
+                    <label>
+                        Mutation Rate
+                        <input type="range" id="mutationRateSlider" min="0.01" max="0.50" step="0.01" value="0.12" />
+                        <span id="mutationRateText">0.12</span>
+                    </label>
+
+                    <label>
+                        Mutation Strength
+                        <input type="range" id="mutationStrengthSlider" min="0.01" max="1.00" step="0.01" value="0.22" />
+                        <span id="mutationStrengthText">0.22</span>
+                    </label>
+
+                    <label>
+                        Elite Count
+                        <input type="number" id="eliteInput" min="1" max="20" step="1" value="6" />
+                    </label>
+                </div>
+
+                <hr class="line" />
+
+                <h3 class="section-title">Input State Used By AI</h3>
+                <div class="small-copy">
+                    [ drone_y, drone_dy, obstacle_dx, gap_relative_y, speed ]<br /><br />
+                    The network architecture is:<br />
+                    5 → hidden → hidden → 1<br /><br />
+                    Output &gt; 0.5 = thrust<br />
+                    Output ≤ 0.5 = no thrust
+                </div>
+
+                <hr class="line" />
+
+                <h3 class="section-title">Manual Controls</h3>
+                <div class="small-copy">
+                    Press <b>Space</b>, <b>W</b>, or <b>Arrow Up</b> to thrust in Manual Play mode.<br /><br />
+                    Watch Best mode replays the strongest saved network.
+                </div>
+
+                <hr class="line" />
+
+                <h3 class="section-title">Top Saved Scores</h3>
+                <div class="scoreboard">
+                    <ol id="savedScoresList"></ol>
+                </div>
+
+                <div class="footer-copy">(c) Animesh Sharma 2026</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="debug" id="debugInfo">Initializing AI trainer...</div>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const scoreEl = document.getElementById("score");
+        const subtitleEl = document.getElementById("subtitle");
+        const debugEl = document.getElementById("debugInfo");
+
+        const generationStat = document.getElementById("generationStat");
+        const populationStat = document.getElementById("populationStat");
+        const aliveStat = document.getElementById("aliveStat");
+        const simSpeedText = document.getElementById("simSpeedText");
+        const bestGenStat = document.getElementById("bestGenStat");
+        const bestEverStat = document.getElementById("bestEverStat");
+        const renderedAgentStat = document.getElementById("renderedAgentStat");
+        const renderScoreStat = document.getElementById("renderScoreStat");
+
+        const trainBtn = document.getElementById("trainBtn");
+        const pauseBtn = document.getElementById("pauseBtn");
+        const watchBestBtn = document.getElementById("watchBestBtn");
+        const manualBtn = document.getElementById("manualBtn");
+        const resetTrainingBtn = document.getElementById("resetTrainingBtn");
+        const saveBestBtn = document.getElementById("saveBestBtn");
+        const loadBestBtn = document.getElementById("loadBestBtn");
+        const stepGenBtn = document.getElementById("stepGenBtn");
+
+        const populationInput = document.getElementById("populationInput");
+        const hiddenInput = document.getElementById("hiddenInput");
+        const simSpeedSlider = document.getElementById("simSpeedSlider");
+        const mutationRateSlider = document.getElementById("mutationRateSlider");
+        const mutationStrengthSlider = document.getElementById("mutationStrengthSlider");
+        const mutationRateText = document.getElementById("mutationRateText");
+        const mutationStrengthText = document.getElementById("mutationStrengthText");
+        const eliteInput = document.getElementById("eliteInput");
+        const savedScoresList = document.getElementById("savedScoresList");
+
+        const STORAGE_MODEL_KEY = "droneAI_bestModel_v1";
+        const STORAGE_SCORES_KEY = "droneAI_bestScores_v1";
+
+        const MODE = {
+            TRAIN: "TRAIN",
+            PAUSED: "PAUSED",
+            WATCH: "WATCH",
+            MANUAL: "MANUAL"
+        };
+
+        let appMode = MODE.TRAIN;
+        let stepOneGeneration = false;
+
+        let heldKeys = new Set();
+	const CONFIG = {
+    		width: canvas.width,
+    		height: canvas.height,
+    		droneX: 140,
+    		droneBaseWidth: 80,
+    		droneBaseHeight: 40,
+    		gravity: 0.20,
+    		thrust: -0.45,
+    		drag: 0.985,
+    		obstacleWidth: 54,
+    		obstacleGap: 180,
+    		minTop: 60,
+    		scrollSpeedBase: 6,
+   	 	maxFramesPerEpisode: 5000,
+    		spawnBaseFrames: 80,
+    		speedMin: 1.0,
+    		speedMax: 2.2,
+    		maxDyNorm: 8
+	};
+        class SeededRandom {
+            constructor(seed) {
+                this.seed = seed >>> 0;
+            }
+
+            next() {
+                this.seed = (1664525 * this.seed + 1013904223) >>> 0;
+                return this.seed / 4294967296;
+            }
+
+            range(min, max) {
+                return min + (max - min) * this.next();
+            }
+        }
+
+        function clamp(v, min, max) {
+            return Math.max(min, Math.min(max, v));
+        }
+
+        function lerp(a, b, t) {
+            return a + (b - a) * t;
+        }
+
+        function randSigned(scale = 1) {
+            return (Math.random() * 2 - 1) * scale;
+        }
+
+        class NeuralNetwork {
+            constructor(inputSize, hiddenA, hiddenB, outputSize) {
+                this.inputSize = inputSize;
+                this.hiddenA = hiddenA;
+                this.hiddenB = hiddenB;
+                this.outputSize = outputSize;
+
+                this.w1 = this.makeMatrix(hiddenA, inputSize);
+                this.b1 = this.makeVector(hiddenA);
+
+                this.w2 = this.makeMatrix(hiddenB, hiddenA);
+                this.b2 = this.makeVector(hiddenB);
+
+                this.w3 = this.makeMatrix(outputSize, hiddenB);
+                this.b3 = this.makeVector(outputSize);
+
+                this.randomize();
+            }
+
+            makeMatrix(rows, cols) {
+                return Array.from({ length: rows }, () => Array(cols).fill(0));
+            }
+
+            makeVector(size) {
+                return Array(size).fill(0);
+            }
+
+            randomize() {
+                const initScale = 0.8;
+
+                for (let r = 0; r < this.w1.length; r++) {
+                    for (let c = 0; c < this.w1[r].length; c++) {
+                        this.w1[r][c] = randSigned(initScale);
+                    }
+                    this.b1[r] = randSigned(initScale);
+                }
+
+                for (let r = 0; r < this.w2.length; r++) {
+                    for (let c = 0; c < this.w2[r].length; c++) {
+                        this.w2[r][c] = randSigned(initScale);
+                    }
+                    this.b2[r] = randSigned(initScale);
+                }
+
+                for (let r = 0; r < this.w3.length; r++) {
+                    for (let c = 0; c < this.w3[r].length; c++) {
+                        this.w3[r][c] = randSigned(initScale);
+                    }
+                    this.b3[r] = randSigned(initScale);
+                }
+            }
+
+            static tanh(x) {
+                return Math.tanh(x);
+            }
+
+            static sigmoid(x) {
+                return 1 / (1 + Math.exp(-x));
+            }
+
+            forward(input) {
+                const h1 = new Array(this.hiddenA);
+                for (let i = 0; i < this.hiddenA; i++) {
+                    let sum = this.b1[i];
+                    for (let j = 0; j < this.inputSize; j++) {
+                        sum += this.w1[i][j] * input[j];
+                    }
+                    h1[i] = NeuralNetwork.tanh(sum);
+                }
+
+                const h2 = new Array(this.hiddenB);
+                for (let i = 0; i < this.hiddenB; i++) {
+                    let sum = this.b2[i];
+                    for (let j = 0; j < this.hiddenA; j++) {
+                        sum += this.w2[i][j] * h1[j];
+                    }
+                    h2[i] = NeuralNetwork.tanh(sum);
+                }
+
+                const out = new Array(this.outputSize);
+                for (let i = 0; i < this.outputSize; i++) {
+                    let sum = this.b3[i];
+                    for (let j = 0; j < this.hiddenB; j++) {
+                        sum += this.w3[i][j] * h2[j];
+                    }
+                    out[i] = NeuralNetwork.sigmoid(sum);
+                }
+
+                return out;
+            }
+
+            clone() {
+                const nn = new NeuralNetwork(this.inputSize, this.hiddenA, this.hiddenB, this.outputSize);
+                nn.w1 = this.w1.map(row => [...row]);
+                nn.b1 = [...this.b1];
+                nn.w2 = this.w2.map(row => [...row]);
+                nn.b2 = [...this.b2];
+                nn.w3 = this.w3.map(row => [...row]);
+                nn.b3 = [...this.b3];
+                return nn;
+            }
+
+            mutate(rate, strength) {
+                const mutateValue = (v) => {
+                    if (Math.random() < rate) {
+                        return v + randSigned(strength);
+                    }
+                    return v;
+                };
+
+                for (let r = 0; r < this.w1.length; r++) {
+                    for (let c = 0; c < this.w1[r].length; c++) {
+                        this.w1[r][c] = mutateValue(this.w1[r][c]);
+                    }
+                    this.b1[r] = mutateValue(this.b1[r]);
+                }
+
+                for (let r = 0; r < this.w2.length; r++) {
+                    for (let c = 0; c < this.w2[r].length; c++) {
+                        this.w2[r][c] = mutateValue(this.w2[r][c]);
+                    }
+                    this.b2[r] = mutateValue(this.b2[r]);
+                }
+
+                for (let r = 0; r < this.w3.length; r++) {
+                    for (let c = 0; c < this.w3[r].length; c++) {
+                        this.w3[r][c] = mutateValue(this.w3[r][c]);
+                    }
+                    this.b3[r] = mutateValue(this.b3[r]);
+                }
+            }
+
+            toJSON() {
+                return {
+                    inputSize: this.inputSize,
+                    hiddenA: this.hiddenA,
+                    hiddenB: this.hiddenB,
+                    outputSize: this.outputSize,
+                    w1: this.w1,
+                    b1: this.b1,
+                    w2: this.w2,
+                    b2: this.b2,
+                    w3: this.w3,
+                    b3: this.b3
+                };
+            }
+
+            static fromJSON(data) {
+                const nn = new NeuralNetwork(data.inputSize, data.hiddenA, data.hiddenB, data.outputSize);
+                nn.w1 = data.w1.map(row => [...row]);
+                nn.b1 = [...data.b1];
+                nn.w2 = data.w2.map(row => [...row]);
+                nn.b2 = [...data.b2];
+                nn.w3 = data.w3.map(row => [...row]);
+                nn.b3 = [...data.b3];
+                return nn;
+            }
+        }
+
+        class DroneSim {
+            constructor(seed = 1) {
+                this.seed = seed;
+                this.rng = new SeededRandom(seed);
+                this.reset(seed);
+            }
+
+            reset(seed = this.seed) {
+                this.seed = seed;
+                this.rng = new SeededRandom(seed);
+                this.frames = 0;
+                this.score = 0;
+                this.alive = true;
+                this.speedFactor = 1.0;
+                this.player = {
+                    x: CONFIG.droneX,
+                    y: CONFIG.height / 2,
+                    dy: 0,
+                    scale: 1
+                };
+                this.obstacles = [];
+                this.spawnTicker = 0;
+                this.lastAction = 0;
+                this.spawnObstacle();
+                return this;
+            }
+
+            getScaledBounds() {
+                const w = CONFIG.droneBaseWidth * this.player.scale;
+                const h = CONFIG.droneBaseHeight * this.player.scale;
+                return {
+                    x: this.player.x + (CONFIG.droneBaseWidth - w) / 2,
+                    y: this.player.y + (CONFIG.droneBaseHeight - h) / 2,
+                    w,
+                    h
+                };
+            }
+
+            spawnObstacle() {
+                const maxTop = CONFIG.height - CONFIG.obstacleGap - 60;
+                const topH = this.rng.range(CONFIG.minTop, maxTop);
+                this.obstacles.push({
+                    x: CONFIG.width,
+                    topH,
+                    passed: false
+                });
+            }
+
+            getNextObstacle() {
+                for (const o of this.obstacles) {
+                    if (o.x + CONFIG.obstacleWidth >= this.player.x - 10) {
+                        return o;
+                    }
+                }
+                return this.obstacles[this.obstacles.length - 1];
+            }
+
+            getState() {
+                const next = this.getNextObstacle();
+                const gapCenter = next.topH + CONFIG.obstacleGap / 2;
+
+                return [
+                    clamp(this.player.y / CONFIG.height, 0, 1),
+                    clamp(this.player.dy / CONFIG.maxDyNorm, -1, 1),
+                    clamp((next.x - this.player.x) / CONFIG.width, -1, 1),
+                    clamp((gapCenter - this.player.y) / CONFIG.height, -1, 1),
+                    clamp((this.speedFactor - CONFIG.speedMin) / (CONFIG.speedMax - CONFIG.speedMin), 0, 1)
+                ];
+            }
+
+            step(thrustOn) {
+                if (!this.alive) return;
+
+                this.frames++;
+                this.lastAction = thrustOn ? 1 : 0;
+
+                this.speedFactor = clamp(
+                    CONFIG.speedMin + (this.frames / 1500) * 0.25,
+                    CONFIG.speedMin,
+                    CONFIG.speedMax
+                );
+
+                if (thrustOn) {
+                    this.player.dy += CONFIG.thrust;
+                }
+
+                this.player.dy += CONFIG.gravity;
+                this.player.dy *= CONFIG.drag;
+                this.player.y += this.player.dy;
+
+                const moveSpeed = CONFIG.scrollSpeedBase * this.speedFactor;
+
+                this.spawnTicker++;
+                const spawnEvery = Math.max(36, Math.floor(CONFIG.spawnBaseFrames / this.speedFactor));
+                if (this.spawnTicker >= spawnEvery) {
+                    this.spawnTicker = 0;
+                    this.spawnObstacle();
+                }
+
+                for (let i = this.obstacles.length - 1; i >= 0; i--) {
+                    const o = this.obstacles[i];
+                    o.x -= moveSpeed;
+
+                    if (!o.passed && o.x + CONFIG.obstacleWidth < this.player.x) {
+                        o.passed = true;
+                        this.score++;
+                    }
+
+                    if (o.x + CONFIG.obstacleWidth < -120) {
+                        this.obstacles.splice(i, 1);
+                    }
+                }
+
+                const bounds = this.getScaledBounds();
+
+                if (bounds.y < 0 || bounds.y + bounds.h > CONFIG.height) {
+                    this.alive = false;
+                    return;
+                }
+
+                for (const o of this.obstacles) {
+                    const collidesX =
+                        bounds.x + 15 < o.x + CONFIG.obstacleWidth &&
+                        bounds.x + bounds.w - 15 > o.x;
+
+                    if (!collidesX) continue;
+
+                    const gapTop = o.topH;
+                    const gapBottom = o.topH + CONFIG.obstacleGap;
+
+                    const collidesTop = bounds.y + 10 < gapTop;
+                    const collidesBottom = bounds.y + bounds.h - 10 > gapBottom;
+
+                    if (collidesTop || collidesBottom) {
+                        this.alive = false;
+                        return;
+                    }
+                }
+
+                if (this.frames >= CONFIG.maxFramesPerEpisode) {
+                    this.alive = false;
+                }
+            }
+
+            fitness() {
+                return this.score * 1000 + this.frames;
+            }
+        }
+
+        class Agent {
+            constructor(brain) {
+                this.brain = brain;
+                this.fitness = 0;
+                this.score = 0;
+                this.frames = 0;
+            }
+
+            clone() {
+                const a = new Agent(this.brain.clone());
+                a.fitness = this.fitness;
+                a.score = this.score;
+                a.frames = this.frames;
+                return a;
+            }
+        }
+
+        class Trainer {
+            constructor() {
+                this.populationSize = parseInt(populationInput.value, 10);
+                this.hiddenSize = parseInt(hiddenInput.value, 10);
+                this.eliteCount = parseInt(eliteInput.value, 10);
+                this.mutationRate = parseFloat(mutationRateSlider.value);
+                this.mutationStrength = parseFloat(mutationStrengthSlider.value);
+                this.generation = 0;
+                this.bestEver = null;
+                this.bestEverFitness = 0;
+                this.bestEverScore = 0;
+                this.bestThisGen = 0;
+                this.bestThisGenAgent = null;
+                this.renderSim = new DroneSim(9999);
+                this.population = [];
+                this.simulations = [];
+                this.resetPopulation();
+            }
+
+            readSettings() {
+                this.populationSize = clamp(parseInt(populationInput.value, 10) || 60, 10, 300);
+                this.hiddenSize = clamp(parseInt(hiddenInput.value, 10) || 12, 4, 64);
+                this.eliteCount = clamp(parseInt(eliteInput.value, 10) || 6, 1, 20);
+                this.eliteCount = Math.min(this.eliteCount, this.populationSize);
+                this.mutationRate = parseFloat(mutationRateSlider.value);
+                this.mutationStrength = parseFloat(mutationStrengthSlider.value);
+
+                populationStat.innerText = this.populationSize;
+                mutationRateText.innerText = this.mutationRate.toFixed(2);
+                mutationStrengthText.innerText = this.mutationStrength.toFixed(2);
+            }
+
+            resetPopulation() {
+                this.readSettings();
+                this.generation = 0;
+                this.bestEver = null;
+                this.bestEverFitness = 0;
+                this.bestEverScore = 0;
+                this.bestThisGen = 0;
+                this.bestThisGenAgent = null;
+
+                this.population = Array.from({ length: this.populationSize }, () =>
+                    new Agent(new NeuralNetwork(5, this.hiddenSize, this.hiddenSize, 1))
+                );
+
+                this.startGeneration();
+            }
+
+            loadBestAsPopulation(nn) {
+                this.readSettings();
+                this.population = [];
+                for (let i = 0; i < this.populationSize; i++) {
+                    const brain = nn.clone();
+                    if (i !== 0) {
+                        brain.mutate(this.mutationRate, this.mutationStrength);
+                    }
+                    this.population.push(new Agent(brain));
+                }
+                this.generation = 0;
+                this.bestThisGen = 0;
+                this.startGeneration();
+            }
+
+            startGeneration() {
+                this.simulations = this.population.map((_, idx) => new DroneSim(this.generation * 1000 + idx + 1));
+                this.bestThisGen = 0;
+                this.bestThisGenAgent = null;
+                generationStat.innerText = this.generation;
+                aliveStat.innerText = this.simulations.length;
+            }
+
+            stepGenerationFrame() {
+                let aliveCount = 0;
+
+                for (let i = 0; i < this.population.length; i++) {
+                    const agent = this.population[i];
+                    const sim = this.simulations[i];
+
+                    if (!sim.alive) continue;
+
+                    aliveCount++;
+
+                    const state = sim.getState();
+                    const output = agent.brain.forward(state)[0];
+                    const thrustOn = output > 0.5;
+                    sim.step(thrustOn);
+
+                    agent.score = sim.score;
+                    agent.frames = sim.frames;
+                    agent.fitness = sim.fitness();
+
+                    if (agent.fitness > this.bestThisGen) {
+                        this.bestThisGen = agent.fitness;
+                        this.bestThisGenAgent = agent.clone();
+                    }
+                }
+
+                aliveStat.innerText = aliveCount;
+                bestGenStat.innerText = this.bestThisGen;
+
+                if (aliveCount === 0) {
+                    this.finishGeneration();
+                    return true;
+                }
+
+                return false;
+            }
+
+            finishGeneration() {
+                this.population.sort((a, b) => b.fitness - a.fitness);
+
+                const genBest = this.population[0];
+                this.bestThisGen = genBest.fitness;
+
+                if (genBest.fitness > this.bestEverFitness) {
+                    this.bestEverFitness = genBest.fitness;
+                    this.bestEverScore = genBest.score;
+                    this.bestEver = genBest.brain.clone();
+                    pushSavedScore(genBest.score);
+                }
+
+                bestGenStat.innerText = genBest.fitness;
+                bestEverStat.innerText = this.bestEverFitness;
+
+                const nextPopulation = [];
+                const eliteCount = Math.min(this.eliteCount, this.population.length);
+
+                for (let i = 0; i < eliteCount; i++) {
+                    nextPopulation.push(new Agent(this.population[i].brain.clone()));
+                }
+
+                while (nextPopulation.length < this.populationSize) {
+                    const parentPool = Math.max(2, Math.floor(this.population.length * 0.2));
+                    const parentIndex = Math.floor(Math.random() * parentPool);
+                    const childBrain = this.population[parentIndex].brain.clone();
+                    childBrain.mutate(this.mutationRate, this.mutationStrength);
+                    nextPopulation.push(new Agent(childBrain));
+                }
+
+                this.population = nextPopulation;
+                this.generation++;
+                this.startGeneration();
+
+                if (stepOneGeneration) {
+                    stepOneGeneration = false;
+                    setMode(MODE.PAUSED);
+                }
+            }
+
+            prepareWatchBest() {
+                if (!this.bestEver) return false;
+                this.renderSim = new DroneSim(999001);
+                return true;
+            }
+
+            stepWatchBest() {
+                if (!this.bestEver) return;
+
+                if (!this.renderSim.alive) {
+                    this.renderSim.reset(999001);
+                }
+
+                const state = this.renderSim.getState();
+                const output = this.bestEver.forward(state)[0];
+                this.renderSim.step(output > 0.5);
+            }
+        }
+
+        const trainer = new Trainer();
+
+        function pushSavedScore(score) {
+            let scores = [];
+            try {
+                scores = JSON.parse(localStorage.getItem(STORAGE_SCORES_KEY) || "[]");
+                if (!Array.isArray(scores)) scores = [];
+            } catch {
+                scores = [];
+            }
+
+            scores.push(score);
+            scores = scores
+                .map(Number)
+                .filter(Number.isFinite)
+                .sort((a, b) => b - a)
+                .slice(0, 8);
+
+            localStorage.setItem(STORAGE_SCORES_KEY, JSON.stringify(scores));
+            renderSavedScores();
+        }
+
+        function renderSavedScores() {
+            let scores = [];
+            try {
+                scores = JSON.parse(localStorage.getItem(STORAGE_SCORES_KEY) || "[]");
+                if (!Array.isArray(scores)) scores = [];
+            } catch {
+                scores = [];
+            }
+
+            savedScoresList.innerHTML = "";
+
+            if (scores.length === 0) {
+                const li = document.createElement("li");
+                li.innerText = "No saved scores yet";
+                savedScoresList.appendChild(li);
+                return;
+            }
+
+            scores.forEach((score) => {
+                const li = document.createElement("li");
+                li.innerText = score;
+                savedScoresList.appendChild(li);
+            });
+        }
+
+        function saveBestModel() {
+            if (!trainer.bestEver) return;
+            localStorage.setItem(STORAGE_MODEL_KEY, JSON.stringify({
+                fitness: trainer.bestEverFitness,
+                score: trainer.bestEverScore,
+                brain: trainer.bestEver.toJSON()
+            }));
+            debugEl.innerText = "Best model saved locally.";
+        }
+
+        function loadBestModel() {
+            try {
+                const raw = localStorage.getItem(STORAGE_MODEL_KEY);
+                if (!raw) {
+                    debugEl.innerText = "No saved model found.";
+                    return;
+                }
+
+                const parsed = JSON.parse(raw);
+                const brain = NeuralNetwork.fromJSON(parsed.brain);
+
+                trainer.bestEver = brain.clone();
+                trainer.bestEverFitness = parsed.fitness || 0;
+                trainer.bestEverScore = parsed.score || 0;
+                trainer.loadBestAsPopulation(brain);
+
+                bestEverStat.innerText = trainer.bestEverFitness;
+                debugEl.innerText = "Saved model loaded into new population.";
+            } catch (err) {
+                debugEl.innerText = "Failed to load saved model.";
+            }
+        }
+
+        function setMode(mode) {
+            appMode = mode;
+
+            trainBtn.classList.toggle("active", mode === MODE.TRAIN);
+            pauseBtn.classList.toggle("active", mode === MODE.PAUSED);
+            watchBestBtn.classList.toggle("active", mode === MODE.WATCH);
+            manualBtn.classList.toggle("active", mode === MODE.MANUAL);
+
+            if (mode === MODE.TRAIN) {
+                subtitleEl.innerText = "MODE: TRAINING";
+                debugEl.innerText = "Training population with neuroevolution.";
+            } else if (mode === MODE.PAUSED) {
+                subtitleEl.innerText = "MODE: PAUSED";
+                debugEl.innerText = "Training paused.";
+            } else if (mode === MODE.WATCH) {
+                subtitleEl.innerText = "MODE: WATCH BEST";
+                debugEl.innerText = "Watching best saved network.";
+                if (!trainer.prepareWatchBest()) {
+                    debugEl.innerText = "No trained best network yet.";
+                    setMode(MODE.PAUSED);
+                }
+            } else if (mode === MODE.MANUAL) {
+                subtitleEl.innerText = "MODE: MANUAL PLAY";
+                debugEl.innerText = "Manual play enabled. Space / W / Arrow Up to thrust.";
+                trainer.renderSim.reset(777777);
+            }
+        }
+
+        function currentManualThrust() {
+            return heldKeys.has("Space") || heldKeys.has("ArrowUp") || heldKeys.has("KeyW");
+        }
+
+        function updateTopStats() {
+            generationStat.innerText = trainer.generation;
+            populationStat.innerText = trainer.populationSize;
+            simSpeedText.innerText = `${simSpeedSlider.value}x`;
+            bestEverStat.innerText = trainer.bestEverFitness;
+        }
+
+        function drawBackgroundGrid(renderCtx) {
+            renderCtx.strokeStyle = "rgba(0, 210, 255, 0.08)";
+            const shift = (trainer.renderSim.frames * 2 * trainer.renderSim.speedFactor) % 40;
+
+            for (let i = 0; i <= CONFIG.width + 40; i += 40) {
+                renderCtx.beginPath();
+                renderCtx.moveTo(i - shift, 0);
+                renderCtx.lineTo(i - shift, CONFIG.height);
+                renderCtx.stroke();
+            }
+        }
+
+        function drawObstacles(renderCtx, sim) {
+            for (const o of sim.obstacles) {
+                renderCtx.fillStyle = "#ff4757";
+                renderCtx.shadowBlur = 12;
+                renderCtx.shadowColor = "#ff4757";
+                renderCtx.fillRect(o.x, 0, CONFIG.obstacleWidth, o.topH);
+                renderCtx.fillRect(
+                    o.x,
+                    o.topH + CONFIG.obstacleGap,
+                    CONFIG.obstacleWidth,
+                    CONFIG.height - (o.topH + CONFIG.obstacleGap)
+                );
+                renderCtx.shadowBlur = 0;
+            }
+        }
+
+        function drawDrone(renderCtx, sim) {
+            const bounds = sim.getScaledBounds();
+            const cx = bounds.x + bounds.w / 2;
+            const cy = bounds.y + bounds.h / 2;
+            const angle = clamp(sim.player.dy * 0.04, -0.45, 0.55);
+
+            renderCtx.save();
+            renderCtx.translate(cx, cy);
+            renderCtx.rotate(angle);
+
+            renderCtx.shadowColor = "#00d2ff";
+            renderCtx.shadowBlur = 18;
+            renderCtx.strokeStyle = "#7feaff";
+            renderCtx.fillStyle = "#00d2ff";
+            renderCtx.lineWidth = 2;
+
+            renderCtx.beginPath();
+            renderCtx.rect(-bounds.w / 2, -8, bounds.w, 12);
+            renderCtx.fill();
+            renderCtx.stroke();
+
+            renderCtx.beginPath();
+            renderCtx.rect(-18, -2, 36, 18);
+            renderCtx.fill();
+            renderCtx.stroke();
+
+            const rotorY = -13;
+            const rotorX = [-bounds.w / 2 + 10, -bounds.w / 2 + 36, bounds.w / 2 - 36, bounds.w / 2 - 10];
+            for (const x of rotorX) {
+                renderCtx.beginPath();
+                renderCtx.moveTo(x - 14, rotorY);
+                renderCtx.lineTo(x + 14, rotorY);
+                renderCtx.stroke();
+                renderCtx.beginPath();
+                renderCtx.arc(x, rotorY, 3, 0, Math.PI * 2);
+                renderCtx.fill();
+            }
+
+            renderCtx.restore();
+        }
+
+        function drawHUDText(renderCtx, sim) {
+            renderCtx.fillStyle = "#dff8ff";
+            renderCtx.font = "bold 14px Courier New";
+            renderCtx.textAlign = "left";
+            renderCtx.fillText(`Render Score: ${sim.score}`, 18, CONFIG.height - 22);
+
+            if (!sim.alive && (appMode === MODE.WATCH || appMode === MODE.MANUAL)) {
+                renderCtx.textAlign = "center";
+                renderCtx.fillStyle = "#ff4757";
+                renderCtx.font = "bold 18px Courier New";
+                renderCtx.fillText("CRASH", CONFIG.width / 2, CONFIG.height / 2 - 12);
+                renderCtx.fillStyle = "#ffffff";
+                renderCtx.font = "12px Courier New";
+
+                if (appMode === MODE.WATCH) {
+                    renderCtx.fillText("Restarting best agent replay...", CONFIG.width / 2, CONFIG.height / 2 + 18);
+                } else {
+                    renderCtx.fillText("Press Space / W / Arrow Up to restart", CONFIG.width / 2, CONFIG.height / 2 + 18);
+                }
+            }
+        }
+
+        function renderCurrentSimulation() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const sim = trainer.renderSim;
+
+            drawBackgroundGrid(ctx);
+            drawObstacles(ctx, sim);
+            drawDrone(ctx, sim);
+            drawHUDText(ctx, sim);
+
+            renderScoreStat.innerText = sim.score;
+        }
+
+        function updateRenderedSimulation() {
+            if (appMode === MODE.TRAIN) {
+                const best = trainer.bestThisGenAgent || trainer.population[0];
+                if (best) {
+                    if (!trainer.renderSim.alive) {
+                        trainer.renderSim.reset(424242);
+                    }
+
+                    const state = trainer.renderSim.getState();
+                    const thrust = best.brain.forward(state)[0] > 0.5;
+                    trainer.renderSim.step(thrust);
+                    renderedAgentStat.innerText = "Best This Gen";
+                    updateScoreDisplays(simLabel(best));
+                }
+            } else if (appMode === MODE.WATCH) {
+                trainer.stepWatchBest();
+                renderedAgentStat.innerText = "Best Ever";
+                updateScoreDisplays("Best Ever Replay");
+            } else if (appMode === MODE.MANUAL) {
+                if (!trainer.renderSim.alive) {
+                    if (currentManualThrust()) {
+                        trainer.renderSim.reset(777777);
+                    }
+                } else {
+                    trainer.renderSim.step(currentManualThrust());
+                }
+                renderedAgentStat.innerText = "Manual";
+                updateScoreDisplays("Manual Play");
+            } else {
+                updateScoreDisplays("Paused");
+            }
+        }
+
+        function simLabel(agent) {
+            return `Score ${agent.score}`;
+        }
+
+        function updateScoreDisplays(label) {
+            if (appMode === MODE.TRAIN) {
+                scoreEl.innerText = `GEN ${trainer.generation} | BEST ${trainer.bestThisGen}`;
+            } else if (appMode === MODE.WATCH) {
+                scoreEl.innerText = `WATCH BEST | FITNESS ${trainer.bestEverFitness}`;
+            } else if (appMode === MODE.MANUAL) {
+                scoreEl.innerText = `MANUAL PLAY | SCORE ${trainer.renderSim.score}`;
+            } else {
+                scoreEl.innerText = `PAUSED | BEST EVER ${trainer.bestEverFitness}`;
+            }
+        }
+
+        function trainingLoop() {
+            if (appMode !== MODE.TRAIN) return;
+
+            trainer.readSettings();
+            updateTopStats();
+
+            const simSteps = parseInt(simSpeedSlider.value, 10);
+            for (let i = 0; i < simSteps; i++) {
+                const finishedGen = trainer.stepGenerationFrame();
+                if (finishedGen) break;
+            }
+
+            if (!trainer.bestThisGenAgent && trainer.population[0]) {
+                trainer.bestThisGenAgent = trainer.population[0].clone();
+            }
+        }
+
+        function mainLoop() {
+            trainingLoop();
+            updateRenderedSimulation();
+            renderCurrentSimulation();
+            updateTopStats();
+            requestAnimationFrame(mainLoop);
+        }
+
+        trainBtn.addEventListener("click", () => {
+            setMode(MODE.TRAIN);
+        });
+
+        pauseBtn.addEventListener("click", () => {
+            setMode(MODE.PAUSED);
+        });
+
+        watchBestBtn.addEventListener("click", () => {
+            setMode(MODE.WATCH);
+        });
+
+        manualBtn.addEventListener("click", () => {
+            setMode(MODE.MANUAL);
+        });
+
+        resetTrainingBtn.addEventListener("click", () => {
+            trainer.resetPopulation();
+            trainer.renderSim.reset(424242);
+            setMode(MODE.TRAIN);
+            debugEl.innerText = "Population reset.";
+        });
+
+        saveBestBtn.addEventListener("click", saveBestModel);
+        loadBestBtn.addEventListener("click", loadBestModel);
+
+        stepGenBtn.addEventListener("click", () => {
+            if (appMode !== MODE.TRAIN) {
+                setMode(MODE.TRAIN);
+            }
+            stepOneGeneration = true;
+            debugEl.innerText = "Stepping one full generation.";
+        });
+
+        simSpeedSlider.addEventListener("input", () => {
+            simSpeedText.innerText = `${simSpeedSlider.value}x`;
+        });
+
+        mutationRateSlider.addEventListener("input", () => {
+            mutationRateText.innerText = parseFloat(mutationRateSlider.value).toFixed(2);
+        });
+
+        mutationStrengthSlider.addEventListener("input", () => {
+            mutationStrengthText.innerText = parseFloat(mutationStrengthSlider.value).toFixed(2);
+        });
+
+        window.addEventListener("keydown", (e) => {
+            heldKeys.add(e.code);
+        });
+
+        window.addEventListener("keyup", (e) => {
+            heldKeys.delete(e.code);
+        });
+
+        renderSavedScores();
+        mutationRateText.innerText = parseFloat(mutationRateSlider.value).toFixed(2);
+        mutationStrengthText.innerText = parseFloat(mutationStrengthSlider.value).toFixed(2);
+        trainer.renderSim.reset(424242);
+        setMode(MODE.TRAIN);
+        mainLoop();
+    </script>
+</body>
+</html>
