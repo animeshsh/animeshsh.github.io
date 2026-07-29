@@ -427,7 +427,25 @@
         <div class="card-body controls">
           <div>
             <h2>Experiment controls</h2>
-            <p class="subtext">Change the prompt, seed, token focus, and diffusion parameters.</p>
+            <p class="subtext">Choose an example, then change its prompt, seed, token focus, and diffusion parameters.</p>
+          </div>
+
+          <div>
+            <label for="sceneSelect">Example scene</label>
+            <select id="sceneSelect">
+              <option value="rocket">Rocket above a planet</option>
+              <option value="cat">Cat by a window</option>
+              <option value="mountain">Mountain lake</option>
+              <option value="flower">Flower close-up</option>
+              <option value="city">Futuristic city</option>
+              <option value="upload">Your uploaded image</option>
+            </select>
+          </div>
+
+          <div id="uploadGroup" hidden>
+            <label for="imageUpload">Upload an image</label>
+            <input id="imageUpload" type="file" accept="image/*" />
+            <p class="tiny">The browser adds simulated diffusion noise to your image. No file is uploaded to a server.</p>
           </div>
 
           <div>
@@ -475,6 +493,12 @@
           </div>
         </div>
       </aside>
+    </section>
+
+    <section class="equations-section" aria-labelledby="examples-heading">
+      <div class="eyebrow">Multiple visual examples</div>
+      <h2 class="section-heading" id="examples-heading">One diffusion process, different image structures</h2>
+      <p class="lead">Use the example selector to compare a rocket, cat, landscape, flower, and city. Each preset has a different spatial layout and token-attention map, while the same noise and denoising controls are retained for comparison. The upload option demonstrates forward diffusion on any local image.</p>
     </section>
 
     <section class="explain-grid">
@@ -626,6 +650,10 @@
     const hctx = heatmapCanvas.getContext('2d');
 
     const promptInput = document.getElementById('prompt');
+    const sceneSelect = document.getElementById('sceneSelect');
+    const imageUpload = document.getElementById('imageUpload');
+    const uploadGroup = document.getElementById('uploadGroup');
+    let uploadedImage = null;
     const seedInput = document.getElementById('seed');
     const stepInput = document.getElementById('step');
     const guidanceInput = document.getElementById('guidance');
@@ -697,110 +725,71 @@
       ctx.imageSmoothingEnabled = true;
     }
 
+    const scenePrompts = {
+      rocket: 'a red rocket flying above a blue planet',
+      cat: 'a curious orange cat sitting beside a bright window',
+      mountain: 'snowy mountains reflected in a calm blue lake',
+      flower: 'a purple flower with green leaves in soft light',
+      city: 'a futuristic city skyline at night with glowing towers',
+      upload: 'an uploaded image passing through forward diffusion'
+    };
+
     function drawScene(progress, random, guidance) {
-      const w = imageCanvas.width;
-      const h = imageCanvas.height;
+      const w = imageCanvas.width, h = imageCanvas.height;
       const clarity = Math.min(1, progress * (0.75 + guidance / 30));
+      ctx.save(); ctx.globalAlpha = clarity;
+      const scene = sceneSelect.value;
 
-      const bg = ctx.createRadialGradient(w * 0.25, h * 0.2, 30, w * 0.5, h * 0.5, w * 0.7);
-      bg.addColorStop(0, `rgba(40,82,145,${0.45 * clarity})`);
-      bg.addColorStop(1, `rgba(4,8,20,${0.95 * clarity})`);
-      ctx.fillStyle = bg;
-      ctx.fillRect(0, 0, w, h);
-
-      // Stars
-      ctx.fillStyle = `rgba(235,248,255,${0.8 * clarity})`;
-      for (let i = 0; i < 70; i++) {
-        const x = random() * w;
-        const y = random() * h * 0.78;
-        const r = random() * 1.8 + 0.2;
-        ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.fill();
+      if (scene === 'upload' && uploadedImage) {
+        const scale = Math.max(w / uploadedImage.width, h / uploadedImage.height);
+        const dw = uploadedImage.width * scale, dh = uploadedImage.height * scale;
+        ctx.drawImage(uploadedImage, (w-dw)/2, (h-dh)/2, dw, dh);
+      } else if (scene === 'cat') {
+        ctx.fillStyle='#16263b'; ctx.fillRect(0,0,w,h);
+        ctx.fillStyle='#a9d9ff'; ctx.fillRect(w*.55,h*.08,w*.35,h*.52);
+        ctx.strokeStyle='rgba(255,255,255,.7)'; ctx.lineWidth=8; ctx.strokeRect(w*.55,h*.08,w*.35,h*.52);
+        ctx.fillStyle='#ca7437'; ctx.beginPath(); ctx.ellipse(w*.40,h*.62,w*.20,h*.25,0,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(w*.40,h*.38,w*.14,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(w*.30,h*.29);ctx.lineTo(w*.34,h*.15);ctx.lineTo(w*.40,h*.28);ctx.fill();
+        ctx.beginPath(); ctx.moveTo(w*.50,h*.29);ctx.lineTo(w*.46,h*.15);ctx.lineTo(w*.40,h*.28);ctx.fill();
+        ctx.fillStyle='#08111d'; ctx.beginPath();ctx.arc(w*.36,h*.37,8,0,Math.PI*2);ctx.arc(w*.44,h*.37,8,0,Math.PI*2);ctx.fill();
+        ctx.strokeStyle='#ca7437';ctx.lineWidth=28;ctx.beginPath();ctx.arc(w*.58,h*.68,w*.18,-1.5,1.3);ctx.stroke();
+      } else if (scene === 'mountain') {
+        const g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,'#62a7e8');g.addColorStop(.55,'#d8efff');g.addColorStop(.56,'#2b719b');g.addColorStop(1,'#092c47');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+        ctx.fillStyle='#52677c';ctx.beginPath();ctx.moveTo(0,h*.58);ctx.lineTo(w*.28,h*.18);ctx.lineTo(w*.48,h*.58);ctx.lineTo(w*.68,h*.12);ctx.lineTo(w,h*.58);ctx.fill();
+        ctx.fillStyle='#eef7ff';ctx.beginPath();ctx.moveTo(w*.18,h*.33);ctx.lineTo(w*.28,h*.18);ctx.lineTo(w*.36,h*.34);ctx.lineTo(w*.31,h*.31);ctx.lineTo(w*.27,h*.36);ctx.fill();ctx.beginPath();ctx.moveTo(w*.56,h*.30);ctx.lineTo(w*.68,h*.12);ctx.lineTo(w*.82,h*.33);ctx.lineTo(w*.72,h*.28);ctx.lineTo(w*.66,h*.35);ctx.fill();
+        ctx.globalAlpha*=.45;ctx.scale(1,-1);ctx.drawImage(imageCanvas,0,-h,w,h);ctx.setTransform(1,0,0,1,0,0);
+      } else if (scene === 'flower') {
+        ctx.fillStyle='#163329';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#62ad73';ctx.lineWidth=18;ctx.beginPath();ctx.moveTo(w*.5,h);ctx.quadraticCurveTo(w*.42,h*.65,w*.5,h*.48);ctx.stroke();
+        ctx.fillStyle='#45a468';ctx.beginPath();ctx.ellipse(w*.36,h*.70,65,28,-.5,0,Math.PI*2);ctx.ellipse(w*.62,h*.66,65,28,.5,0,Math.PI*2);ctx.fill();
+        ctx.translate(w*.5,h*.40);for(let i=0;i<10;i++){ctx.rotate(Math.PI/5);ctx.fillStyle=i%2?'#bb78e8':'#d99bf4';ctx.beginPath();ctx.ellipse(0,-92,44,95,0,0,Math.PI*2);ctx.fill();}ctx.fillStyle='#ffd36b';ctx.beginPath();ctx.arc(0,0,54,0,Math.PI*2);ctx.fill();ctx.setTransform(1,0,0,1,0,0);
+      } else if (scene === 'city') {
+        const g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,'#10152e');g.addColorStop(1,'#301349');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+        for(let i=0;i<45;i++){ctx.fillStyle='rgba(235,245,255,.8)';ctx.fillRect(random()*w,random()*h*.48,2,2)}
+        const xs=[.05,.18,.30,.43,.57,.70,.82]; const hs=[.45,.65,.38,.78,.52,.70,.43];
+        xs.forEach((x,i)=>{const bw=w*.12,bh=h*hs[i];ctx.fillStyle=i%2?'#172a4b':'#20204a';ctx.fillRect(w*x,h-bh,bw,bh);ctx.fillStyle=i%2?'#63e6ff':'#d47cff';for(let yy=h-bh+22;yy<h-18;yy+=30)for(let xx=w*x+14;xx<w*x+bw-8;xx+=24)ctx.fillRect(xx,yy,7,12);});
+      } else {
+        const bg=ctx.createRadialGradient(w*.25,h*.2,30,w*.5,h*.5,w*.7);bg.addColorStop(0,'#285291');bg.addColorStop(1,'#040814');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+        ctx.fillStyle='#eef8ff';for(let i=0;i<70;i++){ctx.beginPath();ctx.arc(random()*w,random()*h*.78,random()*1.8+.2,0,Math.PI*2);ctx.fill()}
+        const px=w*.52,py=h*.84,pr=w*.30;const pg=ctx.createRadialGradient(px-pr*.35,py-pr*.35,5,px,py,pr);pg.addColorStop(0,'#50c6ff');pg.addColorStop(.55,'#1e66be');pg.addColorStop(1,'#05194f');ctx.fillStyle=pg;ctx.beginPath();ctx.arc(px,py,pr,0,Math.PI*2);ctx.fill();
+        ctx.translate(w*.48,h*.40);ctx.rotate(-.55);ctx.fillStyle='#fff3a0';ctx.beginPath();ctx.moveTo(-18,30);ctx.quadraticCurveTo(-8,100,0,142);ctx.quadraticCurveTo(10,100,18,30);ctx.fill();ctx.fillStyle='#e1eef7';ctx.beginPath();ctx.moveTo(0,-105);ctx.quadraticCurveTo(38,-50,24,35);ctx.lineTo(-24,35);ctx.quadraticCurveTo(-38,-50,0,-105);ctx.fill();ctx.fillStyle='#eb3e4a';ctx.beginPath();ctx.moveTo(0,-105);ctx.quadraticCurveTo(20,-76,22,-50);ctx.lineTo(-22,-50);ctx.quadraticCurveTo(-20,-76,0,-105);ctx.fill();ctx.setTransform(1,0,0,1,0,0);
       }
-
-      // Planet
-      const px = w * 0.52;
-      const py = h * 0.84;
-      const pr = w * (0.29 + random() * 0.015);
-      const planet = ctx.createRadialGradient(px - pr * 0.35, py - pr * 0.35, 5, px, py, pr);
-      planet.addColorStop(0, `rgba(80,198,255,${clarity})`);
-      planet.addColorStop(0.55, `rgba(30,102,190,${clarity})`);
-      planet.addColorStop(1, `rgba(5,25,79,${clarity})`);
-      ctx.fillStyle = planet;
-      ctx.beginPath();
-      ctx.arc(px, py, pr, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Rocket glow
-      ctx.save();
-      ctx.translate(w * 0.48, h * 0.40);
-      ctx.rotate(-0.55);
-      ctx.globalAlpha = clarity;
-      const flame = ctx.createLinearGradient(0, 20, 0, 145);
-      flame.addColorStop(0, 'rgba(255,248,155,0.95)');
-      flame.addColorStop(0.45, 'rgba(255,116,47,0.85)');
-      flame.addColorStop(1, 'rgba(86,199,255,0)');
-      ctx.fillStyle = flame;
-      ctx.beginPath();
-      ctx.moveTo(-18, 30);
-      ctx.quadraticCurveTo(-8, 100, 0, 142);
-      ctx.quadraticCurveTo(10, 100, 18, 30);
-      ctx.closePath();
-      ctx.fill();
-
-      // Rocket body
-      ctx.fillStyle = `rgba(225,238,247,${clarity})`;
-      ctx.beginPath();
-      ctx.moveTo(0, -105);
-      ctx.quadraticCurveTo(38, -50, 24, 35);
-      ctx.lineTo(-24, 35);
-      ctx.quadraticCurveTo(-38, -50, 0, -105);
-      ctx.closePath();
-      ctx.fill();
-
-      // Red nose and fins
-      ctx.fillStyle = `rgba(235,62,74,${clarity})`;
-      ctx.beginPath();
-      ctx.moveTo(0, -105);
-      ctx.quadraticCurveTo(20, -76, 22, -50);
-      ctx.lineTo(-22, -50);
-      ctx.quadraticCurveTo(-20, -76, 0, -105);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(-24, 8); ctx.lineTo(-53, 45); ctx.lineTo(-18, 34); ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(24, 8); ctx.lineTo(53, 45); ctx.lineTo(18, 34); ctx.fill();
-
-      // Window
-      ctx.fillStyle = `rgba(62,205,255,${clarity})`;
-      ctx.beginPath();
-      ctx.arc(0, -20, 13, 0, Math.PI * 2);
-      ctx.fill();
       ctx.restore();
-
-      // Low-progress blur to mimic uncertain latent structure
-      if (progress < 0.78) {
-        ctx.save();
-        ctx.globalAlpha = 0.28 * (1 - progress);
-        ctx.filter = `blur(${Math.round((1 - progress) * 16)}px)`;
-        ctx.drawImage(imageCanvas, 0, 0);
-        ctx.restore();
-        ctx.filter = 'none';
-      }
+      if (progress < .78) { ctx.save(); ctx.globalAlpha=.25*(1-progress); ctx.filter=`blur(${Math.round((1-progress)*14)}px)`; ctx.drawImage(imageCanvas,0,0); ctx.restore(); ctx.filter='none'; }
     }
 
     function tokenRegion(token, index, random) {
-      const lower = token.toLowerCase();
-      if (/(rocket|ship|flying|red)/.test(lower)) return { x: 0.49, y: 0.39, sx: 0.17, sy: 0.25 };
-      if (/(planet|earth|blue|world)/.test(lower)) return { x: 0.53, y: 0.80, sx: 0.28, sy: 0.18 };
-      if (/(above|sky|space)/.test(lower)) return { x: 0.50, y: 0.24, sx: 0.42, sy: 0.25 };
-      return {
-        x: 0.2 + random() * 0.6,
-        y: 0.2 + random() * 0.6,
-        sx: 0.13 + random() * 0.15,
-        sy: 0.13 + random() * 0.15
+      const t=token.toLowerCase(), scene=sceneSelect.value;
+      const maps={
+        rocket:[[/rocket|ship|red/,{x:.49,y:.39,sx:.17,sy:.25}],[/planet|blue|world/,{x:.53,y:.80,sx:.28,sy:.18}],[/sky|space|above/,{x:.5,y:.23,sx:.42,sy:.25}]],
+        cat:[[/cat|orange|curious/,{x:.4,y:.48,sx:.24,sy:.30}],[/window|bright/,{x:.72,y:.32,sx:.22,sy:.28}]],
+        mountain:[[/mountain|snowy/,{x:.52,y:.34,sx:.42,sy:.25}],[/lake|reflected|calm|blue/,{x:.50,y:.77,sx:.45,sy:.20}]],
+        flower:[[/flower|purple/,{x:.50,y:.39,sx:.30,sy:.30}],[/leaves|green/,{x:.48,y:.70,sx:.34,sy:.22}]],
+        city:[[/city|skyline|towers/,{x:.52,y:.62,sx:.45,sy:.35}],[/night/,{x:.50,y:.20,sx:.45,sy:.22}],[/glowing/,{x:.55,y:.60,sx:.42,sy:.35}]],
+        upload:[[/image|uploaded/,{x:.5,y:.5,sx:.42,sy:.42}]]
       };
+      for(const [re,r] of (maps[scene]||[])) if(re.test(t)) return r;
+      return {x:.2+random()*.6,y:.2+random()*.6,sx:.13+random()*.15,sy:.13+random()*.15};
     }
 
     function drawAttention(progress, random) {
@@ -877,6 +866,28 @@
       }, 130);
     }
 
+    sceneSelect.addEventListener('change', () => {
+      stopAnimation();
+      uploadGroup.hidden = sceneSelect.value !== 'upload';
+      promptInput.value = scenePrompts[sceneSelect.value];
+      stepInput.value = 0;
+      selectedToken = 0;
+      renderTokens();
+      render();
+    });
+
+    imageUpload.addEventListener('change', () => {
+      const file = imageUpload.files && imageUpload.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => { uploadedImage = img; stepInput.value = 0; render(); };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
     [stepInput, guidanceInput, attentionStrength].forEach(el => el.addEventListener('input', render));
     seedInput.addEventListener('input', render);
     promptInput.addEventListener('input', () => {
@@ -891,6 +902,7 @@
       guidanceInput.value = 7.5;
       attentionStrength.value = 0.65;
       selectedToken = 0;
+      promptInput.value = scenePrompts[sceneSelect.value];
       renderTokens();
       render();
     });
